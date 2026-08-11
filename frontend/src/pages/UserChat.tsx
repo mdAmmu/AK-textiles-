@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useCurrentUser } from "../hooks/useCurrentUser";
+import { useChatSocket } from "../hooks/useChatSocket";
 import { fetchMyConversation, sendMyMessage } from "../services/chat";
 import type { Message } from "../types/message";
 import ChatHeader from "../components/chat/ChatHeader";
@@ -15,6 +16,14 @@ export default function UserChat() {
   useEffect(() => {
     fetchMyConversation().then((c) => setMessages(c.messages));
   }, []);
+
+  useChatSocket((event) => {
+    if (event.type !== "new_message") return;
+    setMessages((prev) => {
+      if (!prev || prev.some((m) => m.id === event.message.id)) return prev;
+      return [...prev, event.message];
+    });
+  }, !!user);
 
   async function handleSend(text: string) {
     const message = await sendMyMessage(text);

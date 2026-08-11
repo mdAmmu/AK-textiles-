@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
 from app.api import auth, groups, users, chats
+from app.websocket import chat as chat_ws
 
 app = FastAPI(title="AK Textiles API")
 
@@ -18,6 +19,7 @@ app.include_router(auth.router)
 app.include_router(groups.router)
 app.include_router(users.router)
 app.include_router(chats.router)
+app.include_router(chat_ws.router)
 
 
 @app.get("/health")

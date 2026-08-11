@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { fetchConversationMessages, sendAdminMessage } from "../services/chat";
 import { useCurrentUser } from "../hooks/useCurrentUser";
+import { useChatSocket } from "../hooks/useChatSocket";
 import type { Message } from "../types/message";
 import ChatHeader from "../components/chat/ChatHeader";
 import MessageList from "../components/chat/MessageList";
@@ -21,6 +22,15 @@ export default function AdminChat() {
       fetchConversationMessages(conversationId).then((c) => setMessages(c.messages));
     }
   }, [conversationId]);
+
+  useChatSocket((event) => {
+    if (event.type !== "new_message") return;
+    if (event.message.conversation_id !== conversationId) return;
+    setMessages((prev) => {
+      if (!prev || prev.some((m) => m.id === event.message.id)) return prev;
+      return [...prev, event.message];
+    });
+  }, !!user && !!conversationId);
 
   async function handleSend(text: string) {
     if (!conversationId) return;

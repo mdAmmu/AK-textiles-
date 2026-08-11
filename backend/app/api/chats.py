@@ -10,7 +10,7 @@ from app.models.message import Message
 from app.models.user import User
 from app.schemas.conversation import ConversationDetail, ConversationSummary
 from app.schemas.message import MessageOut, SendMessageRequest
-from app.services.chat_service import get_or_create_conversation, send_text_message
+from app.services.chat_service import get_or_create_conversation, send_text_message, serialize_message
 
 router = APIRouter(prefix="/chats", tags=["chats"])
 
@@ -25,14 +25,14 @@ def get_my_conversation(db: Session = Depends(get_db), user: User = Depends(get_
 
 
 @router.post("/me/messages", response_model=MessageOut)
-def send_my_message(
+async def send_my_message(
     body: SendMessageRequest,
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
 ):
     conversation = get_or_create_conversation(db, user)
-    message = send_text_message(db, conversation, user.id, body.text)
-    return _to_message_out(message)
+    message = await send_text_message(db, conversation, user.id, body.text)
+    return serialize_message(message)
 
 
 # ---------- Admin side: list all conversations, chat with any customer ----------
@@ -75,15 +75,15 @@ def get_conversation_messages(
 
 
 @router.post("/{conversation_id}/messages", response_model=MessageOut)
-def admin_send_message(
+async def admin_send_message(
     conversation_id: str,
     body: SendMessageRequest,
     db: Session = Depends(get_db),
     admin: User = Depends(require_admin),
 ):
     conversation = _get_conversation_or_404(db, conversation_id)
-    message = send_text_message(db, conversation, admin.id, body.text)
-    return _to_message_out(message)
+    message = await send_text_message(db, conversation, admin.id, body.text)
+    return serialize_message(message)
 
 
 def _get_conversation_or_404(db: Session, conversation_id: str) -> Conversation:
@@ -93,24 +93,10 @@ def _get_conversation_or_404(db: Session, conversation_id: str) -> Conversation:
     return conversation
 
 
-def _to_message_out(message: Message) -> MessageOut:
-    return MessageOut(
-        id=str(message.id),
-        conversation_id=str(message.conversation_id),
-        sender_id=str(message.sender_id),
-        message_type=message.message_type.value,
-        text=message.text,
-        product_id=str(message.product_id) if message.product_id else None,
-        price=float(message.price) if message.price is not None else None,
-        created_at=message.created_at,
-        read_at=message.read_at,
-    )
-
-
 def _to_conversation_detail(conversation: Conversation) -> ConversationDetail:
     return ConversationDetail(
         id=str(conversation.id),
         user_id=str(conversation.user_id),
         admin_id=str(conversation.admin_id),
-        messages=[_to_message_out(m) for m in conversation.messages],
+        messages=[serialize_message(m) for m in conversation.messages],
     )
