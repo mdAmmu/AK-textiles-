@@ -7,10 +7,16 @@ from app.api.deps import get_current_user, require_admin
 from app.core.database import get_db
 from app.models.conversation import Conversation
 from app.models.message import Message
+from app.models.product import Product
 from app.models.user import User
 from app.schemas.conversation import ConversationDetail, ConversationSummary
-from app.schemas.message import MessageOut, SendMessageRequest
-from app.services.chat_service import get_or_create_conversation, send_text_message, serialize_message
+from app.schemas.message import MessageOut, SendMessageRequest, SendProductMessageRequest
+from app.services.chat_service import (
+    get_or_create_conversation,
+    send_product_message,
+    send_text_message,
+    serialize_message,
+)
 
 router = APIRouter(prefix="/chats", tags=["chats"])
 
@@ -83,6 +89,22 @@ async def admin_send_message(
 ):
     conversation = _get_conversation_or_404(db, conversation_id)
     message = await send_text_message(db, conversation, admin.id, body.text)
+    return serialize_message(message)
+
+
+@router.post("/{conversation_id}/messages/product", response_model=MessageOut)
+async def admin_send_product_message(
+    conversation_id: str,
+    body: SendProductMessageRequest,
+    db: Session = Depends(get_db),
+    admin: User = Depends(require_admin),
+):
+    conversation = _get_conversation_or_404(db, conversation_id)
+    product = db.query(Product).filter(Product.id == body.product_id).first()
+    if product is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
+
+    message = await send_product_message(db, conversation, admin.id, product)
     return serialize_message(message)
 
 

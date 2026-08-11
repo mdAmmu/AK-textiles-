@@ -11,9 +11,16 @@ class MessageOut(BaseModel):
     text: str | None = None
     product_id: str | None = None
     price: float | None = None
+    product_name: str | None = None
+    product_image: str | None = None
+    product_description: str | None = None
     created_at: datetime
     read_at: datetime | None = None
 
 
 class SendMessageRequest(BaseModel):
     text: str
+
+
+class SendProductMessageRequest(BaseModel):
+    product_id: str

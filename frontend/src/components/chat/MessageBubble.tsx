@@ -1,4 +1,5 @@
 import type { Message } from "../../types/message";
+import ProductMessage from "./ProductMessage";
 import "./MessageBubble.css";
 
 interface Props {
@@ -15,7 +16,11 @@ export default function MessageBubble({ message, isOwn }: Props) {
   return (
     <div className={`message-bubble-row${isOwn ? " message-bubble-row--own" : ""}`}>
       <div className={`message-bubble${isOwn ? " message-bubble--own" : ""}`}>
-        <p className="message-bubble__text">{message.text}</p>
+        {message.message_type === "PRODUCT" ? (
+          <ProductMessage message={message} />
+        ) : (
+          <p className="message-bubble__text">{message.text}</p>
+        )}
         <span className="message-bubble__time">{time}</span>
       </div>
     </div>

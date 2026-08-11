@@ -46,3 +46,13 @@ export async function sendAdminMessage(conversationId: string, text: string): Pr
   const { data } = await api.post<Message>(`/chats/${conversationId}/messages`, { text });
   return data;
 }
+
+export async function sendAdminProductMessage(
+  conversationId: string,
+  productId: string,
+): Promise<Message> {
+  const { data } = await api.post<Message>(`/chats/${conversationId}/messages/product`, {
+    product_id: productId,
+  });
+  return data;
+}
