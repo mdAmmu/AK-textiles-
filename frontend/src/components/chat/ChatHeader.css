@@ -1,0 +1,24 @@
+.chat-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: #fff;
+  border-bottom: 1px solid #e9edef;
+}
+
+.chat-header__back {
+  border: none;
+  background: none;
+  font-size: 1.25rem;
+  cursor: pointer;
+}
+
+.chat-header__title {
+  font-weight: 600;
+}
+
+.chat-header__subtitle {
+  font-size: 0.8125rem;
+  color: #667781;
+}

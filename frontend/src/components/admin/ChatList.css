@@ -1,0 +1,8 @@
+.chat-list {
+  border-top: 1px solid #e9edef;
+}
+
+.chat-list__empty {
+  padding: 1rem;
+  color: #667781;
+}

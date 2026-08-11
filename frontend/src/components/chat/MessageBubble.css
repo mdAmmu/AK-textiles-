@@ -1,0 +1,34 @@
+.message-bubble-row {
+  display: flex;
+  padding: 0.125rem 0.75rem;
+}
+
+.message-bubble-row--own {
+  justify-content: flex-end;
+}
+
+.message-bubble {
+  max-width: 75%;
+  background: #fff;
+  border-radius: 8px;
+  padding: 0.5rem 0.625rem;
+  box-shadow: 0 1px 0.5px rgba(0, 0, 0, 0.1);
+}
+
+.message-bubble--own {
+  background: #d9fdd3;
+}
+
+.message-bubble__text {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.message-bubble__time {
+  display: block;
+  text-align: right;
+  font-size: 0.6875rem;
+  color: #667781;
+  margin-top: 0.125rem;
+}

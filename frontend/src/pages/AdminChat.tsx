@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { fetchConversationMessages, sendAdminMessage } from "../services/chat";
 import { useCurrentUser } from "../hooks/useCurrentUser";
-import { fetchMyConversation, sendMyMessage } from "../services/chat";
 import type { Message } from "../types/message";
 import ChatHeader from "../components/chat/ChatHeader";
 import MessageList from "../components/chat/MessageList";
@@ -8,16 +9,22 @@ import MessageInput from "../components/chat/MessageInput";
 import LoadingScreen from "../components/common/LoadingScreen";
 import "./UserChat.css";
 
-export default function UserChat() {
+export default function AdminChat() {
+  const { conversationId } = useParams<{ conversationId: string }>();
+  const navigate = useNavigate();
   const { user } = useCurrentUser();
+
   const [messages, setMessages] = useState<Message[] | null>(null);
 
   useEffect(() => {
-    fetchMyConversation().then((c) => setMessages(c.messages));
-  }, []);
+    if (conversationId) {
+      fetchConversationMessages(conversationId).then((c) => setMessages(c.messages));
+    }
+  }, [conversationId]);
 
   async function handleSend(text: string) {
-    const message = await sendMyMessage(text);
+    if (!conversationId) return;
+    const message = await sendAdminMessage(conversationId, text);
     setMessages((prev) => [...(prev ?? []), message]);
   }
 
@@ -25,7 +32,7 @@ export default function UserChat() {
 
   return (
     <div className="user-chat-page">
-      <ChatHeader title="Admin" subtitle="Online" />
+      <ChatHeader title="Customer" onBack={() => navigate("/admin")} />
       <MessageList messages={messages} currentUserId={user.id} />
       <MessageInput onSend={handleSend} />
     </div>

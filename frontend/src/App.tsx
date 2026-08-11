@@ -3,6 +3,7 @@ import Login from "./pages/Login";
 import RoleRedirect from "./pages/RoleRedirect";
 import UserChat from "./pages/UserChat";
 import AdminDashboard from "./pages/AdminDashboard";
+import AdminChat from "./pages/AdminChat";
 import Groups from "./pages/Groups";
 import GroupDetail from "./pages/GroupDetail";
 import ProtectedRoute from "./components/common/ProtectedRoute";
@@ -28,6 +29,14 @@ function App() {
           element={
             <ProtectedRoute role="ADMIN">
               <AdminDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/chats/:conversationId"
+          element={
+            <ProtectedRoute role="ADMIN">
+              <AdminChat />
             </ProtectedRoute>
           }
         />
