@@ -1,55 +1,64 @@
 import { useEffect, useState } from "react";
+import { MoreVertical } from "lucide-react";
 import { useCurrentUser } from "../hooks/useCurrentUser";
 import { useChatSocket } from "../hooks/useChatSocket";
-import { fetchMyConversation, markMyConversationRead, sendMyMessage } from "../services/chat";
+import { fetchMyGroup, fetchMyGroupMessages } from "../services/groups";
 import type { Message } from "../types/message";
-import ChatHeader from "../components/chat/ChatHeader";
+import type { Group } from "../types/group";
+import GroupIcon from "../components/admin/GroupIcon";
 import MessageList from "../components/chat/MessageList";
-import MessageInput from "../components/chat/MessageInput";
 import LoadingScreen from "../components/common/LoadingScreen";
 import "./UserChat.css";
+import "./GroupChat.css";
 
 export default function UserChat() {
   const { user } = useCurrentUser();
   const [messages, setMessages] = useState<Message[] | null>(null);
+  const [group, setGroup] = useState<Group | null>(null);
 
   useEffect(() => {
-    fetchMyConversation().then((c) => {
-      setMessages(c.messages);
-      markMyConversationRead();
-    });
+    fetchMyGroup().then(setGroup);
+    fetchMyGroupMessages().then(setMessages);
   }, []);
 
   useChatSocket((event) => {
-    if (event.type === "new_message") {
+    if (event.type === "new_group_message") {
+      if (group && event.group_id !== group.id) return;
       setMessages((prev) => {
         if (!prev || prev.some((m) => m.id === event.message.id)) return prev;
         return [...prev, event.message];
       });
-      markMyConversationRead();
-      return;
     }
-    if (event.type === "messages_read") {
-      setMessages((prev) =>
-        prev?.map((m) =>
-          event.message_ids.includes(m.id) ? { ...m, read_at: new Date().toISOString() } : m,
-        ) ?? prev,
-      );
+    if (event.type === "group_messages_deleted") {
+      if (group && event.group_id !== group.id) return;
+      setMessages((prev) => prev?.filter((m) => !event.message_ids.includes(m.id)) ?? prev);
     }
-  }, !!user);
-
-  async function handleSend(text: string) {
-    const message = await sendMyMessage(text);
-    setMessages((prev) => [...(prev ?? []), message]);
-  }
+  }, !!user && !!group);
 
   if (messages === null || !user) return <LoadingScreen />;
 
+  const groupName = group?.name ?? "Admin";
+  const memberCount = (group?.customer_count ?? 0) + 1;
+
   return (
     <div className="user-chat-page">
-      <ChatHeader title="Admin" subtitle="Online" />
-      <MessageList messages={messages} currentUserId={user.id} />
-      <MessageInput onSend={handleSend} />
+      <header className="group-chat-header">
+        <GroupIcon name={groupName} size={36} />
+        <div className="group-chat-header__info">
+          <div className="group-chat-header__title">{groupName}</div>
+          <div className="group-chat-header__subtitle">{memberCount} members</div>
+        </div>
+        <button className="group-chat-header__icon-btn" aria-label="More options">
+          <MoreVertical size={20} />
+        </button>
+      </header>
+      <div className="user-chat-page__messages">
+        <MessageList messages={messages} currentUserId={user.id} />
+      </div>
+      <div className="user-chat-page__readonly-bar">
+        Only <span className="user-chat-page__readonly-bar-highlight">admins</span> can send
+        messages
+      </div>
     </div>
   );
 }

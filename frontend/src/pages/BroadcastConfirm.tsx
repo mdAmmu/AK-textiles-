@@ -11,6 +11,7 @@ export default function BroadcastConfirm() {
   const navigate = useNavigate();
 
   const [preview, setPreview] = useState<BroadcastPreview | null>(null);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
   const [sending, setSending] = useState(false);
   const [result, setResult] = useState<BroadcastResult | null>(null);
 
@@ -18,7 +19,27 @@ export default function BroadcastConfirm() {
     if (productId) fetchBroadcastPreview(productId).then(setPreview);
   }, [productId]);
 
-  async function handleSend() {
+  function toggleGroup(groupId: string) {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(groupId)) next.delete(groupId);
+      else next.add(groupId);
+      return next;
+    });
+  }
+
+  async function handleSendSelected() {
+    if (!productId || selected.size === 0) return;
+    setSending(true);
+    try {
+      const res = await sendBroadcast(productId, Array.from(selected));
+      setResult(res);
+    } finally {
+      setSending(false);
+    }
+  }
+
+  async function handleSendEveryone() {
     if (!productId) return;
     setSending(true);
     try {
@@ -57,25 +78,38 @@ export default function BroadcastConfirm() {
 
       <div className="broadcast-confirm-page__body">
         <h2>{preview.product_name}</h2>
+        <p className="broadcast-confirm-page__hint">Select the groups to send this product to.</p>
 
-        {preview.groups.map((g) => (
-          <div key={g.group_id} className="broadcast-confirm-page__group">
-            <span className="broadcast-confirm-page__group-name">{g.group_name}</span>
-            <span>{g.customer_count} customers</span>
-            <span>{g.price != null ? `₹${g.price}` : "No price set"}</span>
-          </div>
-        ))}
+        {preview.groups.map((g) => {
+          const checked = selected.has(g.group_id);
+          return (
+            <label
+              key={g.group_id}
+              className={`broadcast-confirm-page__group${checked ? " broadcast-confirm-page__group--selected" : ""}`}
+            >
+              <input
+                type="checkbox"
+                checked={checked}
+                onChange={() => toggleGroup(g.group_id)}
+              />
+              <span className="broadcast-confirm-page__group-name">{g.group_name}</span>
+              <span>{g.customer_count} customers</span>
+              <span>{g.price != null ? `₹${g.price}` : "No price set"}</span>
+            </label>
+          );
+        })}
 
         <div className="broadcast-confirm-page__actions">
           <button
-            className="broadcast-confirm-page__cancel"
-            onClick={() => navigate("/admin/products")}
+            className="broadcast-confirm-page__send"
+            onClick={handleSendSelected}
+            disabled={sending || selected.size === 0}
           >
-            Cancel
+            {sending ? "Sending..." : `Send${selected.size ? ` (${selected.size})` : ""}`}
           </button>
           <button
-            className="broadcast-confirm-page__send"
-            onClick={handleSend}
+            className="broadcast-confirm-page__everyone"
+            onClick={handleSendEveryone}
             disabled={sending || preview.total_customers === 0}
           >
             {sending ? "Sending..." : "Send to Everyone"}

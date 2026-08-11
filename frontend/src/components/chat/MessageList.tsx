@@ -6,10 +6,20 @@ import "./MessageList.css";
 interface Props {
   messages: Message[];
   currentUserId: string;
+  selectedIds?: Set<string>;
+  onLongPressMessage?: (id: string) => void;
+  onToggleSelectMessage?: (id: string) => void;
 }
 
-export default function MessageList({ messages, currentUserId }: Props) {
+export default function MessageList({
+  messages,
+  currentUserId,
+  selectedIds,
+  onLongPressMessage,
+  onToggleSelectMessage,
+}: Props) {
   const bottomRef = useRef<HTMLDivElement>(null);
+  const selectionMode = !!selectedIds && selectedIds.size > 0;
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -24,7 +34,15 @@ export default function MessageList({ messages, currentUserId }: Props) {
         </div>
       )}
       {messages.map((m) => (
-        <MessageBubble key={m.id} message={m} isOwn={m.sender_id === currentUserId} />
+        <MessageBubble
+          key={m.id}
+          message={m}
+          isOwn={m.sender_id === currentUserId}
+          selectionMode={selectionMode}
+          selected={selectedIds?.has(m.id)}
+          onLongPress={onLongPressMessage ? () => onLongPressMessage(m.id) : undefined}
+          onToggleSelect={onToggleSelectMessage ? () => onToggleSelectMessage(m.id) : undefined}
+        />
       ))}
       <div ref={bottomRef} />
     </div>

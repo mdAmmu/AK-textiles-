@@ -1,0 +1,113 @@
+.group-chat-info-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: #fff;
+}
+
+.group-chat-info-page__header {
+  display: flex;
+  align-items: center;
+  padding: 0.875rem 1rem;
+  flex-shrink: 0;
+}
+
+.group-chat-info-page__header button {
+  display: flex;
+  border: none;
+  background: none;
+  color: var(--wa-text);
+  cursor: pointer;
+  padding: 0.25rem;
+}
+
+.group-chat-info-page__hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem 1.25rem;
+  text-align: center;
+}
+
+.group-chat-info-page__hero h1 {
+  margin: 0.25rem 0 0;
+  font-size: 1.375rem;
+}
+
+.group-chat-info-page__meta {
+  color: var(--wa-text-secondary);
+  font-size: 0.875rem;
+}
+
+.group-chat-info-page__search-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin: 0 auto 0.5rem;
+  padding: 0.625rem 1.25rem;
+  border: none;
+  border-radius: 20px;
+  background: var(--wa-panel-bg);
+  color: var(--wa-text);
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.group-chat-info-page__search-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 1rem 0.5rem;
+  padding: 0.5rem 0.875rem;
+  background: var(--wa-panel-bg);
+  border-radius: 10px;
+  color: var(--wa-text-secondary);
+}
+
+.group-chat-info-page__search-row input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: none;
+  font: inherit;
+  color: var(--wa-text);
+}
+
+.group-chat-info-page__members-header {
+  padding: 0.875rem 1rem 0.5rem;
+  border-top: 8px solid var(--wa-panel-bg);
+  color: var(--wa-text-secondary);
+  font-weight: 600;
+  font-size: 0.9375rem;
+}
+
+.group-chat-info-page__list {
+  flex: 1;
+  padding: 0 1rem;
+}
+
+.group-chat-info-page__member {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.625rem 0;
+  border-bottom: 1px solid var(--wa-border);
+}
+
+.group-chat-info-page__member-name {
+  font-weight: 500;
+}
+
+.group-chat-info-page__member-contact {
+  color: var(--wa-text-secondary);
+  font-size: 0.8125rem;
+  margin-top: 0.125rem;
+}
+
+.group-chat-info-page__empty {
+  padding: 1rem 0;
+  color: var(--wa-text-secondary);
+}

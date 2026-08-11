@@ -28,7 +28,11 @@ export default function ProductPicker({ onPick, onClose }: Props) {
         {products?.length === 0 && <p className="product-picker__empty">No products yet.</p>}
         {products?.map((p) => (
           <button key={p.id} className="product-picker__item" onClick={() => onPick(p.id)}>
-            {p.image_1 && <img src={p.image_1} alt={p.name} />}
+            {p.image_1 ? (
+              <img src={p.image_1} alt={p.name} />
+            ) : (
+              <div className="product-picker__item-placeholder" />
+            )}
             <span>{p.name}</span>
           </button>
         ))}

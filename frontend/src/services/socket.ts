@@ -9,7 +9,23 @@ export interface MessagesReadEvent {
   message_ids: string[];
 }
 
-export type ChatSocketEvent = NewMessageEvent | MessagesReadEvent;
+export interface NewGroupMessageEvent {
+  type: "new_group_message";
+  group_id: string;
+  message: import("../types/message").Message;
+}
+
+export interface GroupMessagesDeletedEvent {
+  type: "group_messages_deleted";
+  group_id: string;
+  message_ids: string[];
+}
+
+export type ChatSocketEvent =
+  | NewMessageEvent
+  | MessagesReadEvent
+  | NewGroupMessageEvent
+  | GroupMessagesDeletedEvent;
 
 export async function openChatSocket(
   onMessage: (event: ChatSocketEvent) => void,

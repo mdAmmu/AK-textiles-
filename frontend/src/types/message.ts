@@ -2,7 +2,8 @@ export type MessageType = "TEXT" | "PRODUCT" | "IMAGE";
 
 export interface Message {
   id: string;
-  conversation_id: string;
+  conversation_id?: string | null;
+  group_id?: string | null;
   sender_id: string;
   message_type: MessageType;
   text?: string | null;

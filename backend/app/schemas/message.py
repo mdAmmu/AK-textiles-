@@ -5,7 +5,8 @@ from pydantic import BaseModel
 
 class MessageOut(BaseModel):
     id: str
-    conversation_id: str
+    conversation_id: str | None = None
+    group_id: str | None = None
     sender_id: str
     message_type: str
     text: str | None = None
@@ -24,3 +25,12 @@ class SendMessageRequest(BaseModel):
 
 class SendProductMessageRequest(BaseModel):
     product_id: str
+
+
+class DeleteMessagesRequest(BaseModel):
+    message_ids: list[str]
+
+
+class ForwardMessagesRequest(BaseModel):
+    message_ids: list[str]
+    group_ids: list[str]

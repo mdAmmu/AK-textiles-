@@ -1,35 +1,29 @@
 import { useEffect, useMemo, useState } from "react";
 import { MoreVertical, Search } from "lucide-react";
-import { fetchConversations } from "../services/chat";
-import type { ConversationSummary } from "../services/chat";
+import { fetchGroups } from "../services/groups";
+import type { Group } from "../types/group";
 import { useCurrentUser } from "../hooks/useCurrentUser";
-import { useChatSocket } from "../hooks/useChatSocket";
 import Avatar from "../components/common/Avatar";
-import ChatList from "../components/admin/ChatList";
+import GroupChatListItem from "../components/admin/GroupChatListItem";
 import AdminNav from "../components/admin/AdminNav";
 import LoadingScreen from "../components/common/LoadingScreen";
 import "./AdminDashboard.css";
 
 export default function AdminDashboard() {
   const { user } = useCurrentUser();
-  const [conversations, setConversations] = useState<ConversationSummary[] | null>(null);
+  const [groups, setGroups] = useState<Group[] | null>(null);
   const [search, setSearch] = useState("");
 
   useEffect(() => {
-    fetchConversations().then(setConversations);
+    fetchGroups().then(setGroups);
   }, []);
 
-  useChatSocket(() => {
-    // A new message anywhere refreshes the list so previews/ordering stay current.
-    fetchConversations().then(setConversations);
-  }, !!user);
-
   const filtered = useMemo(() => {
-    if (!conversations) return conversations;
+    if (!groups) return groups;
     const term = search.trim().toLowerCase();
-    if (!term) return conversations;
-    return conversations.filter((c) => c.user_name.toLowerCase().includes(term));
-  }, [conversations, search]);
+    if (!term) return groups;
+    return groups.filter((g) => g.name.toLowerCase().includes(term));
+  }, [groups, search]);
 
   return (
     <div className="admin-dashboard-page">
@@ -49,13 +43,24 @@ export default function AdminDashboard() {
         </span>
         <input
           className="admin-dashboard-page__search"
-          placeholder="Search chats..."
+          placeholder="Search groups..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
       </div>
       <main className="admin-dashboard-page__content">
-        {filtered === null ? <LoadingScreen /> : <ChatList conversations={filtered} />}
+        {filtered === null ? (
+          <LoadingScreen />
+        ) : (
+          <>
+            <div className="admin-dashboard-page__section-label">Groups you're in</div>
+            {filtered.length === 0 ? (
+              <p className="admin-dashboard-page__empty">No groups yet.</p>
+            ) : (
+              filtered.map((g) => <GroupChatListItem key={g.id} group={g} />)
+            )}
+          </>
+        )}
       </main>
       <AdminNav />
     </div>

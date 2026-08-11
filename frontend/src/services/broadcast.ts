@@ -25,7 +25,12 @@ export async function fetchBroadcastPreview(productId: string): Promise<Broadcas
   return data;
 }
 
-export async function sendBroadcast(productId: string): Promise<BroadcastResult> {
-  const { data } = await api.post<BroadcastResult>(`/products/${productId}/broadcast`);
+export async function sendBroadcast(
+  productId: string,
+  groupIds?: string[],
+): Promise<BroadcastResult> {
+  const { data } = await api.post<BroadcastResult>(`/products/${productId}/broadcast`, {
+    group_ids: groupIds ?? null,
+  });
   return data;
 }

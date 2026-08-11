@@ -2,13 +2,57 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
-from app.api.deps import require_admin
+from app.api.deps import get_current_user, require_admin
 from app.core.database import get_db
 from app.models.group import Group
+from app.models.message import Message
+from app.models.product import Product
 from app.models.user import User, UserRole
 from app.schemas.group import AssignGroupRequest, GroupOut, GroupUserOut
+from app.schemas.message import (
+    DeleteMessagesRequest,
+    ForwardMessagesRequest,
+    MessageOut,
+    SendMessageRequest,
+    SendProductMessageRequest,
+)
+from app.services.chat_service import (
+    delete_group_messages,
+    forward_group_messages,
+    send_group_product_message,
+    send_group_text_message,
+    serialize_message,
+)
 
 router = APIRouter(prefix="/groups", tags=["groups"])
+
+
+@router.get("/mine", response_model=GroupOut | None)
+def get_my_group(db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+    if user.group_id is None:
+        return None
+    group = db.query(Group).filter(Group.id == user.group_id).first()
+    if group is None:
+        return None
+    count = (
+        db.query(func.count(User.id))
+        .filter(User.group_id == group.id, User.role == UserRole.USER)
+        .scalar()
+    )
+    return GroupOut(id=str(group.id), name=group.name, description=group.description, customer_count=count)
+
+
+@router.get("/mine/messages", response_model=list[MessageOut])
+def get_my_group_messages(db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+    if user.group_id is None:
+        return []
+    messages = (
+        db.query(Message)
+        .filter(Message.group_id == user.group_id)
+        .order_by(Message.created_at)
+        .all()
+    )
+    return [serialize_message(m) for m in messages]
 
 
 @router.get("", response_model=list[GroupOut])
@@ -45,6 +89,81 @@ def list_group_users(
     return [
         GroupUserOut(id=str(u.id), name=u.name, phone=u.phone, email=u.email) for u in users
     ]
+
+
+@router.get("/{group_id}/messages", response_model=list[MessageOut])
+def list_group_messages(
+    group_id: str, db: Session = Depends(get_db), _admin: User = Depends(require_admin)
+):
+    _get_group_or_404(db, group_id)
+    messages = (
+        db.query(Message).filter(Message.group_id == group_id).order_by(Message.created_at).all()
+    )
+    return [serialize_message(m) for m in messages]
+
+
+@router.post("/{group_id}/messages", response_model=MessageOut)
+async def admin_send_group_message(
+    group_id: str,
+    body: SendMessageRequest,
+    db: Session = Depends(get_db),
+    admin: User = Depends(require_admin),
+):
+    group = _get_group_or_404(db, group_id)
+    message = await send_group_text_message(db, group, admin.id, body.text)
+    return serialize_message(message)
+
+
+@router.post("/{group_id}/messages/product", response_model=list[MessageOut])
+async def admin_send_group_product_message(
+    group_id: str,
+    body: SendProductMessageRequest,
+    db: Session = Depends(get_db),
+    admin: User = Depends(require_admin),
+):
+    group = _get_group_or_404(db, group_id)
+    product = db.query(Product).filter(Product.id == body.product_id).first()
+    if product is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
+
+    messages = await send_group_product_message(db, group, admin.id, product)
+    return [serialize_message(m) for m in messages]
+
+
+@router.post("/{group_id}/messages/delete", response_model=list[str])
+async def admin_delete_group_messages(
+    group_id: str,
+    body: DeleteMessagesRequest,
+    db: Session = Depends(get_db),
+    _admin: User = Depends(require_admin),
+):
+    group = _get_group_or_404(db, group_id)
+    return await delete_group_messages(db, group, body.message_ids)
+
+
+@router.post("/{group_id}/messages/forward", response_model=list[MessageOut])
+async def admin_forward_group_messages(
+    group_id: str,
+    body: ForwardMessagesRequest,
+    db: Session = Depends(get_db),
+    admin: User = Depends(require_admin),
+):
+    _get_group_or_404(db, group_id)
+    source_messages = (
+        db.query(Message)
+        .filter(Message.group_id == group_id, Message.id.in_(body.message_ids))
+        .order_by(Message.created_at)
+        .all()
+    )
+    if not source_messages:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Messages not found")
+
+    target_groups = db.query(Group).filter(Group.id.in_(body.group_ids)).all()
+    if not target_groups:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No target groups found")
+
+    forwarded = await forward_group_messages(db, source_messages, target_groups, admin.id)
+    return [serialize_message(m) for m in forwarded]
 
 
 @router.patch("/users/{user_id}", response_model=GroupUserOut)

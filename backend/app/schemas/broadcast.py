@@ -1,6 +1,10 @@
 from pydantic import BaseModel
 
 
+class BroadcastRequest(BaseModel):
+    group_ids: list[str] | None = None
+
+
 class BroadcastGroupBreakdown(BaseModel):
     group_id: str
     group_name: str

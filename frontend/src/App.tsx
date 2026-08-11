@@ -6,6 +6,8 @@ import AdminDashboard from "./pages/AdminDashboard";
 import AdminChat from "./pages/AdminChat";
 import Groups from "./pages/Groups";
 import GroupDetail from "./pages/GroupDetail";
+import GroupChat from "./pages/GroupChat";
+import GroupChatInfo from "./pages/GroupChatInfo";
 import Products from "./pages/Products";
 import CreateProduct from "./pages/CreateProduct";
 import EditProduct from "./pages/EditProduct";
@@ -58,6 +60,22 @@ function App() {
           element={
             <ProtectedRoute role="ADMIN">
               <GroupDetail />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/groups/:groupId/chat"
+          element={
+            <ProtectedRoute role="ADMIN">
+              <GroupChat />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/groups/:groupId/chat/info"
+          element={
+            <ProtectedRoute role="ADMIN">
+              <GroupChatInfo />
             </ProtectedRoute>
           }
         />

@@ -70,3 +70,14 @@
   background: #fff;
   color: var(--wa-text-secondary);
 }
+
+.admin-dashboard-page__section-label {
+  padding: 0.625rem 1rem 0.375rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--wa-text-secondary);
+}
+
+.admin-dashboard-page__empty {
+  padding: 1rem;
+}

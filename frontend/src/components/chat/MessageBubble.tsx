@@ -1,3 +1,4 @@
+import { useRef } from "react";
 import { Check, CheckCheck } from "lucide-react";
 import type { Message } from "../../types/message";
 import ProductMessage from "./ProductMessage";
@@ -7,9 +8,25 @@ import "./MessageBubble.css";
 interface Props {
   message: Message;
   isOwn: boolean;
+  selectionMode?: boolean;
+  selected?: boolean;
+  onLongPress?: () => void;
+  onToggleSelect?: () => void;
 }
 
-export default function MessageBubble({ message, isOwn }: Props) {
+const LONG_PRESS_MS = 450;
+
+export default function MessageBubble({
+  message,
+  isOwn,
+  selectionMode,
+  selected,
+  onLongPress,
+  onToggleSelect,
+}: Props) {
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const firedRef = useRef(false);
+
   const time = new Date(message.created_at).toLocaleTimeString([], {
     hour: "2-digit",
     minute: "2-digit",
@@ -22,10 +39,42 @@ export default function MessageBubble({ message, isOwn }: Props) {
     </span>
   );
 
+  function startPress() {
+    if (!onLongPress) return;
+    firedRef.current = false;
+    timerRef.current = setTimeout(() => {
+      firedRef.current = true;
+      onLongPress();
+    }, LONG_PRESS_MS);
+  }
+
+  function cancelPress() {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+  }
+
+  function handleClick() {
+    if (firedRef.current) {
+      firedRef.current = false;
+      return;
+    }
+    if (selectionMode) onToggleSelect?.();
+  }
+
   return (
-    <div className={`message-bubble-row${isOwn ? " message-bubble-row--own" : ""}`}>
+    <div
+      className={`message-bubble-row${isOwn ? " message-bubble-row--own" : ""}${selected ? " message-bubble-row--selected" : ""}`}
+      onMouseDown={startPress}
+      onMouseUp={cancelPress}
+      onMouseLeave={cancelPress}
+      onTouchStart={startPress}
+      onTouchEnd={cancelPress}
+      onClick={handleClick}
+    >
       <div
-        className={`message-bubble${isOwn ? " message-bubble--own" : ""}${isImage ? " message-bubble--image" : ""}`}
+        className={`message-bubble${isOwn ? " message-bubble--own" : ""}${isImage ? " message-bubble--image" : ""}${selected ? " message-bubble--selected" : ""}`}
       >
         {isImage ? (
           <div className="message-bubble__image-wrap">

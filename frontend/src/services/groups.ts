@@ -1,9 +1,15 @@
 import { api } from "./api";
 import type { Group, GroupUser } from "../types/group";
 import type { User } from "../types/user";
+import type { Message } from "../types/message";
 
 export async function fetchGroups(): Promise<Group[]> {
   const { data } = await api.get<Group[]>("/groups");
+  return data;
+}
+
+export async function fetchMyGroup(): Promise<Group | null> {
+  const { data } = await api.get<Group | null>("/groups/mine");
   return data;
 }
 
@@ -20,6 +26,53 @@ export async function assignUserGroup(userId: string, groupId: string | null): P
 export async function fetchUnassignedUsers(search?: string): Promise<User[]> {
   const { data } = await api.get<User[]>("/users", {
     params: { unassigned_only: true, search },
+  });
+  return data;
+}
+
+export async function fetchMyGroupMessages(): Promise<Message[]> {
+  const { data } = await api.get<Message[]>("/groups/mine/messages");
+  return data;
+}
+
+export async function fetchGroupMessages(groupId: string): Promise<Message[]> {
+  const { data } = await api.get<Message[]>(`/groups/${groupId}/messages`);
+  return data;
+}
+
+export async function sendGroupMessage(groupId: string, text: string): Promise<Message> {
+  const { data } = await api.post<Message>(`/groups/${groupId}/messages`, { text });
+  return data;
+}
+
+export async function sendGroupProductMessage(
+  groupId: string,
+  productId: string,
+): Promise<Message[]> {
+  const { data } = await api.post<Message[]>(`/groups/${groupId}/messages/product`, {
+    product_id: productId,
+  });
+  return data;
+}
+
+export async function deleteGroupMessages(
+  groupId: string,
+  messageIds: string[],
+): Promise<string[]> {
+  const { data } = await api.post<string[]>(`/groups/${groupId}/messages/delete`, {
+    message_ids: messageIds,
+  });
+  return data;
+}
+
+export async function forwardGroupMessages(
+  groupId: string,
+  messageIds: string[],
+  targetGroupIds: string[],
+): Promise<Message[]> {
+  const { data } = await api.post<Message[]>(`/groups/${groupId}/messages/forward`, {
+    message_ids: messageIds,
+    group_ids: targetGroupIds,
   });
   return data;
 }

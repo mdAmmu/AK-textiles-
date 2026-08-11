@@ -18,7 +18,8 @@ class Message(Base):
     __tablename__ = "messages"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    conversation_id = Column(UUID(as_uuid=True), ForeignKey("conversations.id"), nullable=False, index=True)
+    conversation_id = Column(UUID(as_uuid=True), ForeignKey("conversations.id"), nullable=True, index=True)
+    group_id = Column(UUID(as_uuid=True), ForeignKey("groups.id"), nullable=True, index=True)
     sender_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
 
     message_type = Column(Enum(MessageType), nullable=False, default=MessageType.TEXT)

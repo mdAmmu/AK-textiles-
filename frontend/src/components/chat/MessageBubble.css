@@ -1,10 +1,16 @@
 .message-bubble-row {
   display: flex;
   padding: 0.125rem 0.75rem;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .message-bubble-row--own {
   justify-content: flex-end;
+}
+
+.message-bubble-row--selected {
+  background: rgba(11, 147, 121, 0.12);
 }
 
 .message-bubble {
@@ -18,6 +24,11 @@
 
 .message-bubble--own {
   background: var(--wa-bubble-own);
+}
+
+.message-bubble--selected {
+  outline: 2px solid var(--wa-accent);
+  outline-offset: 2px;
 }
 
 .message-bubble--image {
