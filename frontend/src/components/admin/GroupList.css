@@ -1,0 +1,8 @@
+.group-list {
+  border-top: 1px solid #e9edef;
+}
+
+.group-list__empty {
+  padding: 1rem;
+  color: #667781;
+}

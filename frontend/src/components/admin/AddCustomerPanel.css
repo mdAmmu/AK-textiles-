@@ -1,0 +1,59 @@
+.add-customer-panel {
+  position: fixed;
+  inset: 0;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  z-index: 10;
+}
+
+.add-customer-panel__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border-bottom: 1px solid #e9edef;
+  font-weight: 600;
+}
+
+.add-customer-panel__header button {
+  border: none;
+  background: none;
+  color: #128c7e;
+  cursor: pointer;
+}
+
+.add-customer-panel__search {
+  margin: 0.75rem 1rem;
+  padding: 0.625rem 0.75rem;
+  border: 1px solid #e9edef;
+  border-radius: 8px;
+}
+
+.add-customer-panel__list {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.add-customer-panel__item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: none;
+  border-bottom: 1px solid #e9edef;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+}
+
+.add-customer-panel__contact {
+  color: #667781;
+  font-size: 0.8125rem;
+}
+
+.add-customer-panel__empty {
+  padding: 1rem;
+  color: #667781;
+}

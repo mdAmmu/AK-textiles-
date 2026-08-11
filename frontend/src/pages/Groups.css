@@ -1,0 +1,22 @@
+.groups-page {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.groups-page__header {
+  padding: 1rem;
+  background: #fff;
+  border-bottom: 1px solid #e9edef;
+}
+
+.groups-page__header h1 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.groups-page__content {
+  flex: 1;
+  overflow-y: auto;
+  background: #f0f2f5;
+}

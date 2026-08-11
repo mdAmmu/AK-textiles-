@@ -3,6 +3,8 @@ import Login from "./pages/Login";
 import RoleRedirect from "./pages/RoleRedirect";
 import UserChat from "./pages/UserChat";
 import AdminDashboard from "./pages/AdminDashboard";
+import Groups from "./pages/Groups";
+import GroupDetail from "./pages/GroupDetail";
 import ProtectedRoute from "./components/common/ProtectedRoute";
 import "./App.css";
 
@@ -26,6 +28,22 @@ function App() {
           element={
             <ProtectedRoute role="ADMIN">
               <AdminDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/groups"
+          element={
+            <ProtectedRoute role="ADMIN">
+              <Groups />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/groups/:groupId"
+          element={
+            <ProtectedRoute role="ADMIN">
+              <GroupDetail />
             </ProtectedRoute>
           }
         />

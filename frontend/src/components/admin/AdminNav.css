@@ -1,0 +1,19 @@
+.admin-nav {
+  display: flex;
+  border-top: 1px solid #e9edef;
+  background: #fff;
+}
+
+.admin-nav__tab {
+  flex: 1;
+  text-align: center;
+  padding: 0.75rem 0;
+  color: #667781;
+  text-decoration: none;
+  font-size: 0.875rem;
+}
+
+.admin-nav__tab.is-active {
+  color: #128c7e;
+  font-weight: 600;
+}

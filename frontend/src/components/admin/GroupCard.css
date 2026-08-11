@@ -1,0 +1,23 @@
+.group-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  background: #fff;
+  border-bottom: 1px solid #e9edef;
+  text-decoration: none;
+  color: inherit;
+}
+
+.group-card__name {
+  font-weight: 600;
+}
+
+.group-card__count {
+  color: #667781;
+  font-size: 0.875rem;
+}
+
+.group-card__arrow {
+  color: #667781;
+}

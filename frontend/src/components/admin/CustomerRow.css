@@ -1,0 +1,25 @@
+.customer-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.875rem 1rem;
+  background: #fff;
+  border-bottom: 1px solid #e9edef;
+}
+
+.customer-row__name {
+  font-weight: 600;
+}
+
+.customer-row__contact {
+  color: #667781;
+  font-size: 0.875rem;
+}
+
+.customer-row__remove {
+  border: none;
+  background: none;
+  color: #e53935;
+  cursor: pointer;
+  font-size: 0.875rem;
+}

@@ -1,0 +1,40 @@
+.group-detail-page {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: #f0f2f5;
+}
+
+.group-detail-page__header {
+  padding: 1rem;
+  background: #fff;
+  border-bottom: 1px solid #e9edef;
+}
+
+.group-detail-page__header button {
+  border: none;
+  background: none;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.group-detail-page__list {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.group-detail-page__empty {
+  padding: 1rem;
+  color: #667781;
+}
+
+.group-detail-page__add {
+  margin: 1rem;
+  padding: 0.75rem;
+  background: #128c7e;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
