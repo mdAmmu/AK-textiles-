@@ -3,8 +3,16 @@ export interface NewMessageEvent {
   message: import("../types/message").Message;
 }
 
+export interface MessagesReadEvent {
+  type: "messages_read";
+  conversation_id: string;
+  message_ids: string[];
+}
+
+export type ChatSocketEvent = NewMessageEvent | MessagesReadEvent;
+
 export async function openChatSocket(
-  onMessage: (event: NewMessageEvent) => void,
+  onMessage: (event: ChatSocketEvent) => void,
 ): Promise<WebSocket | null> {
   const token = await window.Clerk?.session?.getToken();
   if (!token) return null;

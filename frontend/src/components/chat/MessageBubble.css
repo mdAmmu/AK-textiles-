@@ -9,18 +9,20 @@
 
 .message-bubble {
   max-width: 75%;
-  background: #fff;
+  background: var(--wa-bubble-other);
   border-radius: 8px;
-  padding: 0.5rem 0.625rem;
-  box-shadow: 0 1px 0.5px rgba(0, 0, 0, 0.1);
+  padding: 0.375rem 0.5rem;
+  box-shadow: 0 1px 0.5px rgba(0, 0, 0, 0.13);
+  position: relative;
 }
 
 .message-bubble--own {
-  background: #d9fdd3;
+  background: var(--wa-bubble-own);
 }
 
 .message-bubble__text {
   margin: 0;
+  padding: 0.125rem 0.25rem;
   white-space: pre-wrap;
   word-break: break-word;
 }
@@ -29,6 +31,15 @@
   display: block;
   text-align: right;
   font-size: 0.6875rem;
-  color: #667781;
+  color: var(--wa-text-secondary);
   margin-top: 0.125rem;
+  padding-right: 0.25rem;
+}
+
+.message-bubble__tick {
+  margin-left: 0.25rem;
+}
+
+.message-bubble__tick--read {
+  color: var(--wa-tick-read);
 }

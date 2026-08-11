@@ -5,18 +5,58 @@
 }
 
 .groups-page__header {
-  padding: 1rem;
-  background: #fff;
-  border-bottom: 1px solid #e9edef;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1rem;
+  background: var(--wa-header);
+  flex-shrink: 0;
 }
 
 .groups-page__header h1 {
   margin: 0;
-  font-size: 1.25rem;
+  font-size: 1.5rem;
+  color: #fff;
+}
+
+.groups-page__create {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.875rem;
+  padding: 0.5rem 0.875rem;
+  border-radius: 20px;
+  white-space: nowrap;
+  cursor: not-allowed;
+  opacity: 0.75;
+}
+
+.groups-page__search-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.875rem 1rem;
+  background: #fff;
+  border-bottom: 1px solid var(--wa-border);
+  flex-shrink: 0;
+}
+
+.groups-page__search-row input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: var(--wa-panel-bg);
+  padding: 0.625rem 0.875rem;
+  border-radius: 8px;
+  font: inherit;
 }
 
 .groups-page__content {
   flex: 1;
   overflow-y: auto;
-  background: #f0f2f5;
+  background: var(--wa-panel-bg);
 }

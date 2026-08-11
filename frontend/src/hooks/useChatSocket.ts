@@ -1,8 +1,8 @@
 import { useEffect, useRef } from "react";
 import { openChatSocket } from "../services/socket";
-import type { NewMessageEvent } from "../services/socket";
+import type { ChatSocketEvent } from "../services/socket";
 
-export function useChatSocket(onMessage: (event: NewMessageEvent) => void, enabled: boolean) {
+export function useChatSocket(onMessage: (event: ChatSocketEvent) => void, enabled: boolean) {
   const handlerRef = useRef(onMessage);
   handlerRef.current = onMessage;
 

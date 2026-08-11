@@ -9,6 +9,7 @@ import GroupDetail from "./pages/GroupDetail";
 import Products from "./pages/Products";
 import CreateProduct from "./pages/CreateProduct";
 import EditProduct from "./pages/EditProduct";
+import ProductDetail from "./pages/ProductDetail";
 import BroadcastConfirm from "./pages/BroadcastConfirm";
 import ProtectedRoute from "./components/common/ProtectedRoute";
 import "./App.css";
@@ -73,6 +74,14 @@ function App() {
           element={
             <ProtectedRoute role="ADMIN">
               <CreateProduct />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/products/:productId"
+          element={
+            <ProtectedRoute role="ADMIN">
+              <ProductDetail />
             </ProtectedRoute>
           }
         />

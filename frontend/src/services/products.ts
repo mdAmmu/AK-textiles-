@@ -6,6 +6,11 @@ export async function fetchProducts(): Promise<Product[]> {
   return data;
 }
 
+export async function fetchProduct(id: string): Promise<Product> {
+  const { data } = await api.get<Product>(`/products/${id}`);
+  return data;
+}
+
 export async function createProduct(input: ProductInput): Promise<Product> {
   const { data } = await api.post<Product>("/products", input);
   return data;

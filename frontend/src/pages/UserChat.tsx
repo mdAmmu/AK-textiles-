@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useCurrentUser } from "../hooks/useCurrentUser";
 import { useChatSocket } from "../hooks/useChatSocket";
-import { fetchMyConversation, sendMyMessage } from "../services/chat";
+import { fetchMyConversation, markMyConversationRead, sendMyMessage } from "../services/chat";
 import type { Message } from "../types/message";
 import ChatHeader from "../components/chat/ChatHeader";
 import MessageList from "../components/chat/MessageList";
@@ -14,15 +14,28 @@ export default function UserChat() {
   const [messages, setMessages] = useState<Message[] | null>(null);
 
   useEffect(() => {
-    fetchMyConversation().then((c) => setMessages(c.messages));
+    fetchMyConversation().then((c) => {
+      setMessages(c.messages);
+      markMyConversationRead();
+    });
   }, []);
 
   useChatSocket((event) => {
-    if (event.type !== "new_message") return;
-    setMessages((prev) => {
-      if (!prev || prev.some((m) => m.id === event.message.id)) return prev;
-      return [...prev, event.message];
-    });
+    if (event.type === "new_message") {
+      setMessages((prev) => {
+        if (!prev || prev.some((m) => m.id === event.message.id)) return prev;
+        return [...prev, event.message];
+      });
+      markMyConversationRead();
+      return;
+    }
+    if (event.type === "messages_read") {
+      setMessages((prev) =>
+        prev?.map((m) =>
+          event.message_ids.includes(m.id) ? { ...m, read_at: new Date().toISOString() } : m,
+        ) ?? prev,
+      );
+    }
   }, !!user);
 
   async function handleSend(text: string) {

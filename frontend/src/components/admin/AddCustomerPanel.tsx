@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { User } from "../../types/user";
+import Avatar from "../common/Avatar";
 import "./AddCustomerPanel.css";
 
 interface Props {
@@ -15,28 +16,54 @@ export default function AddCustomerPanel({ candidates, onSearch, onAdd, onClose 
   return (
     <div className="add-customer-panel">
       <div className="add-customer-panel__header">
-        <span>Add Customer</span>
-        <button onClick={onClose}>Close</button>
+        <button className="add-customer-panel__back" onClick={onClose} aria-label="Back">
+          ←
+        </button>
+        <span className="add-customer-panel__title">Add Customer</span>
+        <button className="add-customer-panel__close" onClick={onClose}>
+          Close
+        </button>
       </div>
-      <input
-        className="add-customer-panel__search"
-        placeholder="Search by name or email..."
-        value={term}
-        onChange={(e) => {
-          setTerm(e.target.value);
-          onSearch(e.target.value);
-        }}
-      />
+
+      <div className="add-customer-panel__search-row">
+        <span>🔍</span>
+        <input
+          placeholder="Search by name or email..."
+          value={term}
+          onChange={(e) => {
+            setTerm(e.target.value);
+            onSearch(e.target.value);
+          }}
+        />
+      </div>
+
       <div className="add-customer-panel__list">
+        <p className="add-customer-panel__section-label">All Customers</p>
         {candidates.length === 0 && (
           <p className="add-customer-panel__empty">No unassigned customers found.</p>
         )}
         {candidates.map((c) => (
-          <button key={c.id} className="add-customer-panel__item" onClick={() => onAdd(c.id)}>
-            <span>{c.name}</span>
-            <span className="add-customer-panel__contact">{c.phone ?? c.email}</span>
-          </button>
+          <div key={c.id} className="add-customer-panel__item">
+            <Avatar name={c.name} size={40} />
+            <div className="add-customer-panel__item-info">
+              <span className="add-customer-panel__item-name">{c.name}</span>
+              <span className="add-customer-panel__item-contact">{c.email ?? c.phone}</span>
+            </div>
+            <button className="add-customer-panel__add-btn" onClick={() => onAdd(c.id)}>
+              Add
+            </button>
+          </div>
         ))}
+
+        <div className="add-customer-panel__hint">
+          <span className="add-customer-panel__hint-icon">👥</span>
+          <div>
+            <div className="add-customer-panel__hint-title">Can't find a customer?</div>
+            <div className="add-customer-panel__hint-text">
+              Ask them to start a chat with you first.
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

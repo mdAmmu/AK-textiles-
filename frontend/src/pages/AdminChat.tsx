@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   fetchConversationMessages,
+  markConversationRead,
   sendAdminMessage,
   sendAdminProductMessage,
 } from "../services/chat";
@@ -13,7 +14,6 @@ import MessageList from "../components/chat/MessageList";
 import MessageInput from "../components/chat/MessageInput";
 import ProductPicker from "../components/chat/ProductPicker";
 import LoadingScreen from "../components/common/LoadingScreen";
-import "./AdminChat.css";
 import "./UserChat.css";
 
 export default function AdminChat() {
@@ -22,21 +22,37 @@ export default function AdminChat() {
   const { user } = useCurrentUser();
 
   const [messages, setMessages] = useState<Message[] | null>(null);
+  const [customerName, setCustomerName] = useState("Customer");
   const [showPicker, setShowPicker] = useState(false);
 
   useEffect(() => {
     if (conversationId) {
-      fetchConversationMessages(conversationId).then((c) => setMessages(c.messages));
+      fetchConversationMessages(conversationId).then((c) => {
+        setMessages(c.messages);
+        setCustomerName(c.user_name);
+        markConversationRead(conversationId);
+      });
     }
   }, [conversationId]);
 
   useChatSocket((event) => {
-    if (event.type !== "new_message") return;
-    if (event.message.conversation_id !== conversationId) return;
-    setMessages((prev) => {
-      if (!prev || prev.some((m) => m.id === event.message.id)) return prev;
-      return [...prev, event.message];
-    });
+    if (event.type === "new_message") {
+      if (event.message.conversation_id !== conversationId) return;
+      setMessages((prev) => {
+        if (!prev || prev.some((m) => m.id === event.message.id)) return prev;
+        return [...prev, event.message];
+      });
+      if (conversationId) markConversationRead(conversationId);
+      return;
+    }
+    if (event.type === "messages_read") {
+      if (event.conversation_id !== conversationId) return;
+      setMessages((prev) =>
+        prev?.map((m) =>
+          event.message_ids.includes(m.id) ? { ...m, read_at: new Date().toISOString() } : m,
+        ) ?? prev,
+      );
+    }
   }, !!user && !!conversationId);
 
   async function handleSend(text: string) {
@@ -56,14 +72,21 @@ export default function AdminChat() {
 
   return (
     <div className="user-chat-page">
-      <ChatHeader title="Customer" onBack={() => navigate("/admin")} />
+      <ChatHeader title={customerName} subtitle="Online" onBack={() => navigate("/admin")} />
       <MessageList messages={messages} currentUserId={user.id} />
-      <div className="admin-chat__composer">
-        <button className="admin-chat__product-button" onClick={() => setShowPicker(true)}>
-          📦
-        </button>
-        <MessageInput onSend={handleSend} />
-      </div>
+      <MessageInput
+        onSend={handleSend}
+        extraAction={
+          <span
+            className="message-input__icon"
+            onClick={() => setShowPicker(true)}
+            role="button"
+            aria-label="Send a product"
+          >
+            📦
+          </span>
+        }
+      />
 
       {showPicker && (
         <ProductPicker onPick={handlePickProduct} onClose={() => setShowPicker(false)} />

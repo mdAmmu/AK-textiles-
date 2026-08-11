@@ -18,6 +18,11 @@ export default function MessageList({ messages, currentUserId }: Props) {
   return (
     <div className="message-list">
       {messages.length === 0 && <p className="message-list__empty">No messages yet.</p>}
+      {messages.length > 0 && (
+        <div className="message-list__date-divider">
+          <span>Today</span>
+        </div>
+      )}
       {messages.map((m) => (
         <MessageBubble key={m.id} message={m} isOwn={m.sender_id === currentUserId} />
       ))}

@@ -7,14 +7,14 @@
 
 .image-upload-grid__slot {
   aspect-ratio: 1;
-  border: 2px dashed #d1d7db;
+  border: 2px dashed var(--wa-border);
   border-radius: 8px;
-  background: #fff;
+  background: var(--wa-panel-bg);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  color: #667781;
+  color: var(--wa-text-secondary);
   font-size: 1.5rem;
   cursor: pointer;
   overflow: hidden;

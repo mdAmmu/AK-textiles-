@@ -1,3 +1,5 @@
+from datetime import datetime, timezone
+
 from sqlalchemy.orm import Session
 
 from app.models.conversation import Conversation
@@ -67,6 +69,38 @@ async def send_product_message(
 
     await _notify_other_party(conversation, sender_id, message)
     return message
+
+
+async def mark_conversation_read(db: Session, conversation: Conversation, reader_id) -> list[Message]:
+    unread = (
+        db.query(Message)
+        .filter(
+            Message.conversation_id == conversation.id,
+            Message.sender_id != reader_id,
+            Message.read_at.is_(None),
+        )
+        .all()
+    )
+    if not unread:
+        return []
+
+    now = datetime.now(timezone.utc)
+    for message in unread:
+        message.read_at = now
+    db.commit()
+
+    sender_ids = {str(m.sender_id) for m in unread}
+    for sender_id in sender_ids:
+        await manager.send_to_user(
+            sender_id,
+            {
+                "type": "messages_read",
+                "conversation_id": str(conversation.id),
+                "message_ids": [str(m.id) for m in unread if str(m.sender_id) == sender_id],
+            },
+        )
+
+    return unread
 
 
 async def _notify_other_party(conversation: Conversation, sender_id, message: Message) -> None:

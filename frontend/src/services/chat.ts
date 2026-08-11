@@ -5,6 +5,7 @@ export interface ConversationDetail {
   id: string;
   user_id: string;
   admin_id: string;
+  user_name: string;
   messages: Message[];
 }
 
@@ -14,6 +15,7 @@ export interface ConversationSummary {
   user_name: string;
   last_message_text?: string | null;
   last_message_at?: string | null;
+  unread_count: number;
 }
 
 // User side
@@ -26,6 +28,10 @@ export async function fetchMyConversation(): Promise<ConversationDetail> {
 export async function sendMyMessage(text: string): Promise<Message> {
   const { data } = await api.post<Message>("/chats/me/messages", { text });
   return data;
+}
+
+export async function markMyConversationRead(): Promise<void> {
+  await api.post("/chats/me/read");
 }
 
 // Admin side
@@ -55,4 +61,8 @@ export async function sendAdminProductMessage(
     product_id: productId,
   });
   return data;
+}
+
+export async function markConversationRead(conversationId: string): Promise<void> {
+  await api.post(`/chats/${conversationId}/read`);
 }

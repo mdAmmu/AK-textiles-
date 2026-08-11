@@ -1,0 +1,23 @@
+.avatar {
+  position: relative;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  color: #2b2b2b;
+  flex-shrink: 0;
+}
+
+.avatar__online {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 28%;
+  height: 28%;
+  min-width: 8px;
+  min-height: 8px;
+  background: #25d366;
+  border: 2px solid #fff;
+  border-radius: 50%;
+}

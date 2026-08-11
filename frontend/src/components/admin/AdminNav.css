@@ -1,19 +1,28 @@
 .admin-nav {
   display: flex;
-  border-top: 1px solid #e9edef;
+  border-top: 1px solid var(--wa-border);
   background: #fff;
+  flex-shrink: 0;
 }
 
 .admin-nav__tab {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.125rem;
   text-align: center;
-  padding: 0.75rem 0;
-  color: #667781;
+  padding: 0.625rem 0 0.75rem;
+  color: var(--wa-text-secondary);
   text-decoration: none;
-  font-size: 0.875rem;
+  font-size: 0.75rem;
+}
+
+.admin-nav__icon {
+  font-size: 1.25rem;
 }
 
 .admin-nav__tab.is-active {
-  color: #128c7e;
+  color: var(--wa-accent);
   font-weight: 600;
 }

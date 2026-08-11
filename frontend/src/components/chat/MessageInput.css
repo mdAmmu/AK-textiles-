@@ -1,27 +1,50 @@
 .message-input {
   display: flex;
+  align-items: center;
   gap: 0.5rem;
-  padding: 0.625rem;
-  background: #f0f2f5;
-  border-top: 1px solid #e9edef;
+  padding: 0.5rem 0.625rem;
+  background: var(--wa-panel-bg);
+  border-top: 1px solid var(--wa-border);
+  flex-shrink: 0;
+}
+
+.message-input__pill {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #fff;
+  border-radius: 24px;
+  padding: 0.5rem 0.75rem;
+  min-width: 0;
+}
+
+.message-input__icon {
+  font-size: 1.125rem;
+  flex-shrink: 0;
+  opacity: 0.75;
+  cursor: pointer;
 }
 
 .message-input__field {
   flex: 1;
-  padding: 0.625rem 0.875rem;
+  min-width: 0;
   border: none;
-  border-radius: 20px;
   outline: none;
+  font: inherit;
+  background: none;
 }
 
 .message-input__send {
   border: none;
-  background: #128c7e;
+  background: var(--wa-accent);
   color: #fff;
-  width: 40px;
-  height: 40px;
+  width: 42px;
+  height: 42px;
   border-radius: 50%;
+  font-size: 1.125rem;
   cursor: pointer;
+  flex-shrink: 0;
 }
 
 .message-input__send:disabled {
