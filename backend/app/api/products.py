@@ -8,7 +8,9 @@ from app.core.database import get_db
 from app.core.supabase_client import upload_product_image
 from app.models.product import Product
 from app.models.user import User
+from app.schemas.broadcast import BroadcastPreview, BroadcastResult
 from app.schemas.product import ProductCreate, ProductOut, ProductUpdate
+from app.services.broadcast_service import broadcast_product, get_broadcast_preview
 
 router = APIRouter(prefix="/products", tags=["products"])
 
@@ -87,6 +89,22 @@ async def upload_image(
     db.commit()
     db.refresh(product)
     return _to_out(product)
+
+
+@router.get("/{product_id}/broadcast/preview", response_model=BroadcastPreview)
+def preview_broadcast(
+    product_id: str, db: Session = Depends(get_db), _admin: User = Depends(require_admin)
+):
+    product = _get_product_or_404(db, product_id)
+    return get_broadcast_preview(db, product)
+
+
+@router.post("/{product_id}/broadcast", response_model=BroadcastResult)
+async def send_broadcast(
+    product_id: str, db: Session = Depends(get_db), admin: User = Depends(require_admin)
+):
+    product = _get_product_or_404(db, product_id)
+    return await broadcast_product(db, product, admin)
 
 
 def _get_product_or_404(db: Session, product_id: str) -> Product:
