@@ -1,3 +1,12 @@
+export interface ProductInput {
+  name: string;
+  description?: string;
+  dubai_price?: number;
+  south_africa_price?: number;
+  india_price?: number;
+  local_price?: number;
+}
+
 export interface Product {
   id: string;
   name: string;

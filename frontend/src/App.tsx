@@ -6,6 +6,9 @@ import AdminDashboard from "./pages/AdminDashboard";
 import AdminChat from "./pages/AdminChat";
 import Groups from "./pages/Groups";
 import GroupDetail from "./pages/GroupDetail";
+import Products from "./pages/Products";
+import CreateProduct from "./pages/CreateProduct";
+import EditProduct from "./pages/EditProduct";
 import ProtectedRoute from "./components/common/ProtectedRoute";
 import "./App.css";
 
@@ -53,6 +56,30 @@ function App() {
           element={
             <ProtectedRoute role="ADMIN">
               <GroupDetail />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/products"
+          element={
+            <ProtectedRoute role="ADMIN">
+              <Products />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/products/new"
+          element={
+            <ProtectedRoute role="ADMIN">
+              <CreateProduct />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/products/:productId/edit"
+          element={
+            <ProtectedRoute role="ADMIN">
+              <EditProduct />
             </ProtectedRoute>
           }
         />
