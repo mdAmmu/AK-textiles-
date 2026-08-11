@@ -64,8 +64,8 @@ export default function AdminChat() {
 
   async function handlePickProduct(productId: string) {
     if (!conversationId) return;
-    const message = await sendAdminProductMessage(conversationId, productId);
-    setMessages((prev) => [...(prev ?? []), message]);
+    const newMessages = await sendAdminProductMessage(conversationId, productId);
+    setMessages((prev) => [...(prev ?? []), ...newMessages]);
     setShowPicker(false);
   }
 

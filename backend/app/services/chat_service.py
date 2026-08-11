@@ -46,14 +46,37 @@ async def send_text_message(
 
 async def send_product_message(
     db: Session, conversation: Conversation, sender_id, product: Product
-) -> Message:
-    """Price is always resolved server-side from the customer's group —
-    never trust a client-supplied price."""
+) -> list[Message]:
+    """Sends all of the product's images one by one, followed by a final
+    product detail card (name/description/price).
+
+    Price is always resolved server-side from the customer's group —
+    never trust a client-supplied price.
+    """
     customer = db.query(User).filter(User.id == conversation.user_id).first()
     group = db.query(Group).filter(Group.id == customer.group_id).first() if customer else None
     price = product.price_for_group(group.name) if group else None
 
-    message = Message(
+    messages: list[Message] = []
+
+    image_urls = [product.image_1, product.image_2, product.image_3, product.image_4]
+    for url in image_urls:
+        if not url:
+            continue
+        image_message = Message(
+            conversation_id=conversation.id,
+            sender_id=sender_id,
+            message_type=MessageType.IMAGE,
+            product_id=product.id,
+            product_image=url,
+        )
+        db.add(image_message)
+        db.commit()
+        db.refresh(image_message)
+        await _notify_other_party(conversation, sender_id, image_message)
+        messages.append(image_message)
+
+    detail_message = Message(
         conversation_id=conversation.id,
         sender_id=sender_id,
         message_type=MessageType.PRODUCT,
@@ -63,12 +86,13 @@ async def send_product_message(
         product_image=product.image_1,
         product_description=product.description,
     )
-    db.add(message)
+    db.add(detail_message)
     db.commit()
-    db.refresh(message)
+    db.refresh(detail_message)
+    await _notify_other_party(conversation, sender_id, detail_message)
+    messages.append(detail_message)
 
-    await _notify_other_party(conversation, sender_id, message)
-    return message
+    return messages
 
 
 async def mark_conversation_read(db: Session, conversation: Conversation, reader_id) -> list[Message]:

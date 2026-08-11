@@ -20,6 +20,36 @@
   background: var(--wa-bubble-own);
 }
 
+.message-bubble--image {
+  padding: 3px;
+  overflow: hidden;
+}
+
+.message-bubble__image-wrap {
+  position: relative;
+  line-height: 0;
+}
+
+.message-bubble__image-time {
+  position: absolute;
+  bottom: 0.375rem;
+  right: 0.375rem;
+  display: flex;
+  align-items: center;
+  gap: 0.125rem;
+  background: rgba(0, 0, 0, 0.45);
+  color: #fff;
+  font-size: 0.6875rem;
+  padding: 0.0625rem 0.375rem;
+  border-radius: 8px;
+  line-height: normal;
+}
+
+.message-bubble__image-time .message-bubble__tick,
+.message-bubble__image-time .message-bubble__tick--read {
+  color: #fff;
+}
+
 .message-bubble__text {
   margin: 0;
   padding: 0.125rem 0.25rem;

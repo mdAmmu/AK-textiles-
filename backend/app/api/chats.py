@@ -111,7 +111,7 @@ async def admin_send_message(
     return serialize_message(message)
 
 
-@router.post("/{conversation_id}/messages/product", response_model=MessageOut)
+@router.post("/{conversation_id}/messages/product", response_model=list[MessageOut])
 async def admin_send_product_message(
     conversation_id: str,
     body: SendProductMessageRequest,
@@ -123,8 +123,8 @@ async def admin_send_product_message(
     if product is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
 
-    message = await send_product_message(db, conversation, admin.id, product)
-    return serialize_message(message)
+    messages = await send_product_message(db, conversation, admin.id, product)
+    return [serialize_message(m) for m in messages]
 
 
 @router.post("/{conversation_id}/read", status_code=status.HTTP_204_NO_CONTENT)
