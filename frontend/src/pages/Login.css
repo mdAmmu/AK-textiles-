@@ -1,0 +1,18 @@
+.login-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 2rem;
+}
+
+.login-page__logo {
+  margin: 0;
+}
+
+.login-page__subtitle {
+  margin: 0 0 1rem;
+  color: #667781;
+}
