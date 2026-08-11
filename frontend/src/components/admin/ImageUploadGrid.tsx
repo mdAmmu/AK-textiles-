@@ -1,4 +1,5 @@
 import { useRef } from "react";
+import { ImagePlus } from "lucide-react";
 import "./ImageUploadGrid.css";
 
 interface Props {
@@ -33,7 +34,8 @@ export default function ImageUploadGrid({ images, onUpload, uploading }: Props) 
             disabled={uploading || filledCount >= 4}
             onClick={() => inputRef.current?.click()}
           >
-            +<span>Image</span>
+            <ImagePlus size={22} />
+            <span>Image</span>
           </button>
         ),
       )}

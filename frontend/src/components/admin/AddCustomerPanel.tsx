@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { ArrowLeft, Search, Users } from "lucide-react";
 import type { User } from "../../types/user";
 import Avatar from "../common/Avatar";
 import "./AddCustomerPanel.css";
@@ -17,7 +18,7 @@ export default function AddCustomerPanel({ candidates, onSearch, onAdd, onClose 
     <div className="add-customer-panel">
       <div className="add-customer-panel__header">
         <button className="add-customer-panel__back" onClick={onClose} aria-label="Back">
-          ←
+          <ArrowLeft size={20} />
         </button>
         <span className="add-customer-panel__title">Add Customer</span>
         <button className="add-customer-panel__close" onClick={onClose}>
@@ -26,7 +27,7 @@ export default function AddCustomerPanel({ candidates, onSearch, onAdd, onClose 
       </div>
 
       <div className="add-customer-panel__search-row">
-        <span>🔍</span>
+        <Search size={18} />
         <input
           placeholder="Search by name or email..."
           value={term}
@@ -56,7 +57,9 @@ export default function AddCustomerPanel({ candidates, onSearch, onAdd, onClose 
         ))}
 
         <div className="add-customer-panel__hint">
-          <span className="add-customer-panel__hint-icon">👥</span>
+          <span className="add-customer-panel__hint-icon">
+            <Users size={18} color="#0f9d58" />
+          </span>
           <div>
             <div className="add-customer-panel__hint-title">Can't find a customer?</div>
             <div className="add-customer-panel__hint-text">

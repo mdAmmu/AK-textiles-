@@ -18,10 +18,6 @@
   font-size: 0.75rem;
 }
 
-.admin-nav__icon {
-  font-size: 1.25rem;
-}
-
 .admin-nav__tab.is-active {
   color: var(--wa-accent);
   font-weight: 600;

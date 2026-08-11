@@ -17,10 +17,10 @@
 }
 
 .add-customer-panel__back {
+  display: flex;
   border: none;
   background: none;
   color: #fff;
-  font-size: 1.125rem;
   cursor: pointer;
 }
 
@@ -46,6 +46,7 @@
   padding: 0.875rem 1rem;
   background: #fff;
   border-bottom: 1px solid var(--wa-border);
+  color: var(--wa-text-secondary);
   flex-shrink: 0;
 }
 

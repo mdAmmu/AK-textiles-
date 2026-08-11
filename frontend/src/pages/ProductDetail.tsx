@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { ArrowLeft, Pencil, Send, Trash2 } from "lucide-react";
 import { deleteProduct, fetchProduct } from "../services/products";
 import type { Product } from "../types/product";
 import LoadingScreen from "../components/common/LoadingScreen";
@@ -31,7 +32,7 @@ export default function ProductDetail() {
     <div className="product-detail-page">
       <header className="product-detail-page__header">
         <button onClick={() => navigate("/admin/products")} aria-label="Back">
-          ←
+          <ArrowLeft size={20} />
         </button>
         <h1>Product</h1>
       </header>
@@ -84,19 +85,19 @@ export default function ProductDetail() {
           className="product-detail-page__action product-detail-page__action--send"
           onClick={() => navigate(`/admin/products/${product.id}/send`)}
         >
-          ➤ Send
+          <Send size={16} /> Send
         </button>
         <button
           className="product-detail-page__action product-detail-page__action--edit"
           onClick={() => navigate(`/admin/products/${product.id}/edit`)}
         >
-          ✎ Edit
+          <Pencil size={16} /> Edit
         </button>
         <button
           className="product-detail-page__action product-detail-page__action--delete"
           onClick={handleDelete}
         >
-          🗑 Delete
+          <Trash2 size={16} /> Delete
         </button>
       </div>
     </div>

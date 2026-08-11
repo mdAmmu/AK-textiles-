@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { Plus, Search } from "lucide-react";
 import { fetchGroups } from "../services/groups";
 import type { Group } from "../types/group";
 import GroupList from "../components/admin/GroupList";
@@ -26,11 +27,11 @@ export default function Groups() {
       <header className="groups-page__header">
         <h1>Groups</h1>
         <button className="groups-page__create" title="Custom groups coming soon" disabled>
-          + Create Group
+          <Plus size={16} /> Create Group
         </button>
       </header>
       <div className="groups-page__search-row">
-        <span>🔍</span>
+        <Search size={18} />
         <input
           placeholder="Search groups..."
           value={search}

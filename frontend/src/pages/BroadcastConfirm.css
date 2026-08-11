@@ -1,27 +1,28 @@
 .broadcast-confirm-page {
   min-height: 100vh;
-  background: #f0f2f5;
+  background: var(--wa-panel-bg);
 }
 
 .broadcast-confirm-page__header {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  padding: 1rem;
-  background: #fff;
-  border-bottom: 1px solid #e9edef;
+  padding: 1.125rem 1rem;
+  background: var(--wa-header);
 }
 
 .broadcast-confirm-page__header button {
+  display: flex;
   border: none;
   background: none;
-  font-size: 1rem;
+  color: #fff;
   cursor: pointer;
 }
 
 .broadcast-confirm-page__header h1 {
   margin: 0;
-  font-size: 1.125rem;
+  font-size: 1.25rem;
+  color: #fff;
 }
 
 .broadcast-confirm-page__body {
@@ -70,7 +71,7 @@
 }
 
 .broadcast-confirm-page__send {
-  background: #128c7e;
+  background: var(--wa-accent);
   color: #fff;
 }
 
@@ -94,9 +95,9 @@
 }
 
 .broadcast-confirm-page__success button {
-  margin-top: 1.5rem;
+  margin-top: 1rem;
   padding: 0.625rem 2rem;
-  background: #128c7e;
+  background: var(--wa-accent);
   color: #fff;
   border: none;
   border-radius: 8px;

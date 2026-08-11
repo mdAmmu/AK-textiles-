@@ -12,14 +12,15 @@
   justify-content: space-between;
   align-items: center;
   padding: 1rem;
-  border-bottom: 1px solid #e9edef;
+  border-bottom: 1px solid var(--wa-border);
   font-weight: 600;
 }
 
 .product-picker__header button {
+  display: flex;
   border: none;
   background: none;
-  color: #128c7e;
+  color: var(--wa-accent);
   cursor: pointer;
 }
 
@@ -37,7 +38,7 @@
   flex-direction: column;
   align-items: center;
   gap: 0.5rem;
-  border: 1px solid #e9edef;
+  border: 1px solid var(--wa-border);
   border-radius: 8px;
   background: #fff;
   padding: 0.75rem;
@@ -53,5 +54,5 @@
 
 .product-picker__empty {
   padding: 1rem;
-  color: #667781;
+  color: var(--wa-text-secondary);
 }

@@ -1,3 +1,4 @@
+import { Trash2 } from "lucide-react";
 import type { GroupUser } from "../../types/group";
 import Avatar from "../common/Avatar";
 import "./CustomerRow.css";
@@ -16,7 +17,7 @@ export default function CustomerRow({ customer, onRemove }: Props) {
         <div className="customer-row__contact">{customer.email ?? customer.phone}</div>
       </div>
       <button className="customer-row__remove" onClick={() => onRemove(customer.id)}>
-        🗑 Remove
+        <Trash2 size={14} /> Remove
       </button>
     </div>
   );

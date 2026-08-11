@@ -1,3 +1,4 @@
+import { Check, CheckCheck } from "lucide-react";
 import type { Message } from "../../types/message";
 import ProductMessage from "./ProductMessage";
 import "./MessageBubble.css";
@@ -25,7 +26,7 @@ export default function MessageBubble({ message, isOwn }: Props) {
           {time}
           {isOwn && (
             <span className={`message-bubble__tick${message.read_at ? " message-bubble__tick--read" : ""}`}>
-              {message.read_at ? "✓✓" : "✓"}
+              {message.read_at ? <CheckCheck size={14} /> : <Check size={14} />}
             </span>
           )}
         </span>

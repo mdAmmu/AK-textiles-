@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { FormEvent, ReactNode } from "react";
+import { Mic, Send, Smile } from "lucide-react";
 import "./MessageInput.css";
 
 interface Props {
@@ -22,7 +23,9 @@ export default function MessageInput({ onSend, disabled, extraAction }: Props) {
   return (
     <form className="message-input" onSubmit={handleSubmit}>
       <div className="message-input__pill">
-        <span className="message-input__icon">😊</span>
+        <span className="message-input__icon">
+          <Smile size={20} />
+        </span>
         <input
           className="message-input__field"
           placeholder="Type a message..."
@@ -31,11 +34,15 @@ export default function MessageInput({ onSend, disabled, extraAction }: Props) {
           disabled={disabled}
         />
         {extraAction}
-        <span className="message-input__icon">📎</span>
-        <span className="message-input__icon">📷</span>
+        {/* <span className="message-input__icon">
+          <Paperclip size={20} />
+        </span>
+        <span className="message-input__icon">
+          <Camera size={20} />
+        </span> */}
       </div>
       <button className="message-input__send" type="submit" disabled={disabled}>
-        {text.trim() ? "➤" : "🎤"}
+        {text.trim() ? <Send size={18} /> : <Mic size={18} />}
       </button>
     </form>
   );

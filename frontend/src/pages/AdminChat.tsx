@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { Package } from "lucide-react";
 import {
   fetchConversationMessages,
   markConversationRead,
@@ -83,7 +84,7 @@ export default function AdminChat() {
             role="button"
             aria-label="Send a product"
           >
-            📦
+            <Package size={20} />
           </span>
         }
       />

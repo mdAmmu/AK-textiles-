@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { MoreVertical, Search } from "lucide-react";
 import { fetchConversations } from "../services/chat";
 import type { ConversationSummary } from "../services/chat";
 import { useCurrentUser } from "../hooks/useCurrentUser";
@@ -39,11 +40,13 @@ export default function AdminDashboard() {
           <span>Online</span>
         </div>
         <button className="admin-dashboard-page__icon-btn" aria-label="More options">
-          ⋮
+          <MoreVertical size={20} />
         </button>
       </header>
       <div className="admin-dashboard-page__search-row">
-        <span className="admin-dashboard-page__search-icon">🔍</span>
+        <span className="admin-dashboard-page__search-icon">
+          <Search size={18} />
+        </span>
         <input
           className="admin-dashboard-page__search"
           placeholder="Search chats..."

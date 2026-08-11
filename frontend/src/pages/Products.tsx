@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import { Plus, Search, SlidersHorizontal } from "lucide-react";
 import { fetchProducts } from "../services/products";
 import type { Product } from "../types/product";
 import ProductCard from "../components/admin/ProductCard";
@@ -27,12 +28,12 @@ export default function Products() {
       <header className="products-page__header">
         <h1>Products</h1>
         <Link to="/admin/products/new" className="products-page__create">
-          + Create Product
+          <Plus size={16} /> Create Product
         </Link>
       </header>
       <div className="products-page__toolbar">
         <div className="products-page__search-box">
-          <span>🔍</span>
+          <Search size={18} />
           <input
             placeholder="Search products..."
             value={search}
@@ -40,7 +41,7 @@ export default function Products() {
           />
         </div>
         <button className="products-page__filter">
-          <span>☰</span> Filter
+          <SlidersHorizontal size={16} /> Filter
         </button>
       </div>
       <main className="products-page__content">

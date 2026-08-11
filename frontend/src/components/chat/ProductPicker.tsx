@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { X } from "lucide-react";
 import { fetchProducts } from "../../services/products";
 import type { Product } from "../../types/product";
 import "./ProductPicker.css";
@@ -19,7 +20,9 @@ export default function ProductPicker({ onPick, onClose }: Props) {
     <div className="product-picker">
       <div className="product-picker__header">
         <span>Send a Product</span>
-        <button onClick={onClose}>Close</button>
+        <button onClick={onClose} aria-label="Close">
+          <X size={20} />
+        </button>
       </div>
       <div className="product-picker__list">
         {products?.length === 0 && <p className="product-picker__empty">No products yet.</p>}

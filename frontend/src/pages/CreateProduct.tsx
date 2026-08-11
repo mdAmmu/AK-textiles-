@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 import { createProduct, uploadProductImage } from "../services/products";
 import type { Product, ProductInput } from "../types/product";
 import ProductForm from "../components/admin/ProductForm";
@@ -30,7 +31,9 @@ export default function CreateProduct() {
   return (
     <div className="create-product-page">
       <header className="create-product-page__header">
-        <button onClick={() => navigate("/admin/products")}>← Products</button>
+        <button onClick={() => navigate("/admin/products")}>
+          <ArrowLeft size={20} />
+        </button>
         <h1>Create Product</h1>
       </header>
 

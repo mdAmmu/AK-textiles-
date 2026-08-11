@@ -12,10 +12,10 @@
 }
 
 .create-product-page__header button {
+  display: flex;
   border: none;
   background: none;
   color: #fff;
-  font-size: 1.125rem;
   cursor: pointer;
 }
 

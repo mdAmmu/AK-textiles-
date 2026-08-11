@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 import { fetchProducts, updateProduct, uploadProductImage } from "../services/products";
 import type { Product, ProductInput } from "../types/product";
 import ProductForm from "../components/admin/ProductForm";
@@ -42,7 +43,9 @@ export default function EditProduct() {
   return (
     <div className="create-product-page">
       <header className="create-product-page__header">
-        <button onClick={() => navigate("/admin/products")}>← Products</button>
+        <button onClick={() => navigate("/admin/products")}>
+          <ArrowLeft size={20} />
+        </button>
         <h1>Edit Product</h1>
       </header>
 

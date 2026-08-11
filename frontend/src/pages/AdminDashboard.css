@@ -31,10 +31,10 @@
 }
 
 .admin-dashboard-page__icon-btn {
+  display: flex;
   border: none;
   background: none;
   color: #fff;
-  font-size: 1.25rem;
   cursor: pointer;
 }
 
@@ -49,6 +49,7 @@
 }
 
 .admin-dashboard-page__search-icon {
+  display: flex;
   color: var(--wa-text-secondary);
   padding-left: 0.375rem;
 }

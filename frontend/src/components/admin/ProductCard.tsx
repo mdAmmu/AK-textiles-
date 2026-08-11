@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { Send } from "lucide-react";
 import type { Product } from "../../types/product";
 import "./ProductCard.css";
 
@@ -24,7 +25,7 @@ export default function ProductCard({ product }: Props) {
           navigate(`/admin/products/${product.id}/send`);
         }}
       >
-        ➤ Send
+        <Send size={14} /> Send
       </button>
     </div>
   );

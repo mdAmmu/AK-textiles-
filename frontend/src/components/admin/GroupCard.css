@@ -50,6 +50,6 @@
 }
 
 .group-card__arrow {
-  font-size: 1.5rem;
   color: var(--wa-text-secondary);
+  flex-shrink: 0;
 }

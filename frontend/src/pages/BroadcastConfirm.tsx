@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { ArrowLeft, CheckCircle2 } from "lucide-react";
 import { fetchBroadcastPreview, sendBroadcast } from "../services/broadcast";
 import type { BroadcastPreview, BroadcastResult } from "../services/broadcast";
 import LoadingScreen from "../components/common/LoadingScreen";
@@ -34,7 +35,8 @@ export default function BroadcastConfirm() {
     return (
       <div className="broadcast-confirm-page">
         <div className="broadcast-confirm-page__success">
-          <p>✓ Product sent successfully</p>
+          <CheckCircle2 size={48} color="#0f9d58" />
+          <p>Product sent successfully</p>
           <p className="broadcast-confirm-page__success-count">
             {result.total_sent} customers received the product.
           </p>
@@ -47,7 +49,9 @@ export default function BroadcastConfirm() {
   return (
     <div className="broadcast-confirm-page">
       <header className="broadcast-confirm-page__header">
-        <button onClick={() => navigate("/admin/products")}>← Products</button>
+        <button onClick={() => navigate("/admin/products")}>
+          <ArrowLeft size={20} />
+        </button>
         <h1>Send Product</h1>
       </header>
 

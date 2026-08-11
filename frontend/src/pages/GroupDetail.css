@@ -15,11 +15,12 @@
 }
 
 .group-detail-page__header button {
+  display: flex;
   border: none;
   background: none;
   color: #fff;
-  font-size: 1.125rem;
   cursor: pointer;
+  padding: 0.25rem;
 }
 
 .group-detail-page__header-info {
@@ -100,6 +101,9 @@
 }
 
 .group-detail-page__add-link {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
   border: none;
   background: none;
   color: var(--wa-accent);

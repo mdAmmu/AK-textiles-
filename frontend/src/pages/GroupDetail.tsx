@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { ArrowLeft, MoreVertical, Pencil, User as UserIcon, UserPlus } from "lucide-react";
 import {
   assignUserGroup,
   fetchGroups,
@@ -56,14 +57,18 @@ export default function GroupDetail() {
     <div className="group-detail-page">
       <header className="group-detail-page__header">
         <button onClick={() => navigate("/admin/groups")} aria-label="Back">
-          ←
+          <ArrowLeft size={20} />
         </button>
         <div className="group-detail-page__header-info">
           <h1>{group.name}</h1>
           <span>{group.customer_count} Customers</span>
         </div>
-        <button aria-label="Edit">✎</button>
-        <button aria-label="More options">⋮</button>
+        <button aria-label="Edit">
+          <Pencil size={18} />
+        </button>
+        <button aria-label="More options">
+          <MoreVertical size={20} />
+        </button>
       </header>
 
       <div className="group-detail-page__hero">
@@ -78,7 +83,7 @@ export default function GroupDetail() {
             </span>
           </div>
           <div className="group-detail-page__hero-count">
-            <span>👤</span> {group.customer_count} Customers
+            <UserIcon size={14} /> {group.customer_count} Customers
           </div>
         </div>
       </div>
@@ -92,7 +97,7 @@ export default function GroupDetail() {
             handleSearch("");
           }}
         >
-          +👤 Add Customer
+          <UserPlus size={16} /> Add Customer
         </button>
       </div>
 
@@ -110,7 +115,7 @@ export default function GroupDetail() {
           handleSearch("");
         }}
       >
-        +👤 Add Customer
+        <UserPlus size={18} /> Add Customer
       </button>
 
       {showAddPanel && (

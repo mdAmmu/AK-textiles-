@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { ChevronRight, User } from "lucide-react";
 import type { Group } from "../../types/group";
 import GroupIcon from "./GroupIcon";
 import "./GroupCard.css";
@@ -21,10 +22,10 @@ export default function GroupCard({ group }: Props) {
           </span>
         </div>
         <div className="group-card__count">
-          <span>👤</span> {group.customer_count} Customers
+          <User size={14} /> {group.customer_count} Customers
         </div>
       </div>
-      <span className="group-card__arrow">›</span>
+      <ChevronRight size={20} className="group-card__arrow" />
     </Link>
   );
 }

@@ -20,9 +20,9 @@
 }
 
 .message-input__icon {
-  font-size: 1.125rem;
+  display: flex;
   flex-shrink: 0;
-  opacity: 0.75;
+  color: var(--wa-text-secondary);
   cursor: pointer;
 }
 
@@ -36,13 +36,15 @@
 }
 
 .message-input__send {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border: none;
   background: var(--wa-accent);
   color: #fff;
   width: 42px;
   height: 42px;
   border-radius: 50%;
-  font-size: 1.125rem;
   cursor: pointer;
   flex-shrink: 0;
 }

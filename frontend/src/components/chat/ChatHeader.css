@@ -9,17 +9,13 @@
 }
 
 .chat-header__icon-btn {
+  display: flex;
   border: none;
   background: none;
   color: #fff;
-  font-size: 1.125rem;
   cursor: pointer;
   padding: 0.25rem;
   line-height: 1;
-}
-
-.chat-header__back {
-  font-size: 1.375rem;
 }
 
 .chat-header__info {
