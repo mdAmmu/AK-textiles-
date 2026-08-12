@@ -16,6 +16,7 @@ import MessageInput from "../components/chat/MessageInput";
 import ProductPicker from "../components/chat/ProductPicker";
 import LoadingScreen from "../components/common/LoadingScreen";
 import "./UserChat.css";
+import "./AdminChat.css";
 
 export default function AdminChat() {
   const { conversationId } = useParams<{ conversationId: string }>();
@@ -72,7 +73,7 @@ export default function AdminChat() {
   if (messages === null || !user) return <LoadingScreen />;
 
   return (
-    <div className="user-chat-page">
+    <div className="user-chat-page admin-chat-page">
       <ChatHeader title={customerName} subtitle="Online" onBack={() => navigate("/admin")} />
       <MessageList messages={messages} currentUserId={user.id} />
       <MessageInput

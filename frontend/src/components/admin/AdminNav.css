@@ -1,24 +1,30 @@
 .admin-nav {
   display: flex;
-  border-top: 1px solid var(--wa-border);
-  background: #fff;
+  align-items: center;
+  justify-content: space-around;
+  margin: 0 1.125rem 1rem;
+  padding: 0.625rem 0.75rem;
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 8px 24px rgba(108, 92, 231, 0.14);
   flex-shrink: 0;
 }
 
 .admin-nav__tab {
-  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 0.125rem;
   text-align: center;
-  padding: 0.625rem 0 0.75rem;
-  color: var(--wa-text-secondary);
+  padding: 0.375rem 0.75rem;
+  border-radius: 14px;
+  color: #a8a4b8;
   text-decoration: none;
-  font-size: 0.75rem;
+  font-size: 0.6875rem;
 }
 
 .admin-nav__tab.is-active {
-  color: var(--wa-accent);
+  color: #ffffff;
   font-weight: 600;
+  background: #6c5ce7;
 }

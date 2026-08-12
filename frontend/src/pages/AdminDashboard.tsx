@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { MoreVertical, Search } from "lucide-react";
+import { SquarePen, Search, Plus } from "lucide-react";
 import { fetchGroups } from "../services/groups";
 import type { Group } from "../types/group";
 import { useCurrentUser } from "../hooks/useCurrentUser";
@@ -34,7 +34,7 @@ export default function AdminDashboard() {
           <span>Online</span>
         </div>
         <button className="admin-dashboard-page__icon-btn" aria-label="More options">
-          <MoreVertical size={20} />
+          <SquarePen size={20} />
         </button>
       </header>
       <div className="admin-dashboard-page__search-row">
@@ -57,11 +57,18 @@ export default function AdminDashboard() {
             {filtered.length === 0 ? (
               <p className="admin-dashboard-page__empty">No groups yet.</p>
             ) : (
-              filtered.map((g) => <GroupChatListItem key={g.id} group={g} />)
+              <div className="admin-dashboard-page__list">
+                {filtered.map((g) => (
+                  <GroupChatListItem key={g.id} group={g} />
+                ))}
+              </div>
             )}
           </>
         )}
       </main>
+      <button className="admin-dashboard-page__fab" aria-label="New chat">
+        <Plus size={24} />
+      </button>
       <AdminNav />
     </div>
   );

@@ -1,0 +1,141 @@
+.admin-chat-page {
+  background: #f2f0f7;
+}
+
+.admin-chat-page .chat-header {
+  background: #ffffff;
+  color: #1f1b2e;
+  box-shadow: 0 2px 10px rgba(108, 92, 231, 0.08);
+}
+
+.admin-chat-page .chat-header__icon-btn {
+  color: #fff;
+}
+
+.admin-chat-page .chat-header__subtitle {
+  color: #6c5ce7;
+  opacity: 1;
+  font-weight: 600;
+}
+
+.admin-chat-page .group-chat-header,
+.admin-chat-page .group-chat-header--selection {
+  background: #ffffff;
+  color: #1f1b2e;
+  box-shadow: 0 2px 10px rgba(108, 92, 231, 0.08);
+}
+
+.admin-chat-page .group-chat-header__icon-btn,
+.admin-chat-page .group-chat-header__identity,
+.admin-chat-page .group-chat-header__selection-count {
+  color: #1f1b2e;
+}
+
+.admin-chat-page .group-chat-header__icon-btn {
+  color: #6c5ce7;
+}
+
+.admin-chat-page .group-chat-header__subtitle {
+  color: #6c5ce7;
+  opacity: 1;
+  font-weight: 600;
+}
+
+.admin-chat-page .group-chat__body {
+  background: #f2f0f7;
+}
+
+.admin-chat-page .group-chat__encryption-note {
+  background: #ffffff;
+  color: #6c5ce7;
+  box-shadow: 0 2px 8px rgba(108, 92, 231, 0.1);
+}
+
+.admin-chat-page .message-list {
+  background-color: #f2f0f7;
+  background-image: none;
+  padding: 0.75rem 0.25rem;
+}
+
+.admin-chat-page .message-list__date-divider span {
+  background: #ffffff;
+  color: #8b8798;
+  box-shadow: 0 2px 8px rgba(108, 92, 231, 0.1);
+}
+
+.admin-chat-page .message-bubble {
+  background: #ffffff;
+  color: #1f1b2e;
+  border-radius: 18px;
+  border: 2px solid #ffffff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+}
+
+.admin-chat-page .message-bubble--image {
+  border: 2px solid #ffffff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
+}
+
+.admin-chat-page .message-bubble--own {
+  background: #ffffff;
+  color: #1f1b2e;
+  border-color: #ffffff;
+}
+
+.admin-chat-page .message-bubble--own .message-bubble__text {
+  color: #1f1b2e;
+}
+
+.admin-chat-page .message-bubble--own .message-bubble__time {
+  color: #a8a4b8;
+}
+
+.admin-chat-page .message-bubble--own .message-bubble__tick {
+  color: #a8a4b8;
+}
+
+.admin-chat-page .message-bubble--own .message-bubble__tick--read {
+  color: #6c5ce7;
+}
+
+.admin-chat-page .message-bubble__time {
+  color: #a8a4b8;
+}
+
+.admin-chat-page .product-message__name,
+.admin-chat-page .message-bubble--own .product-message__name {
+  color: inherit;
+}
+
+.admin-chat-page .product-message__description {
+  color: #8b8798;
+}
+
+.admin-chat-page .message-bubble--own .product-message__description {
+  color: #8b8798;
+}
+
+.admin-chat-page .product-message__price {
+  color: #6c5ce7;
+}
+
+.admin-chat-page .message-input {
+  background: #f2f0f7;
+  border-top: none;
+  padding: 0.625rem 0.875rem 0.875rem;
+}
+
+.admin-chat-page .message-input__pill {
+  background: #ffffff;
+  border-radius: 22px;
+  box-shadow: 0 2px 10px rgba(108, 92, 231, 0.08);
+}
+
+.admin-chat-page .message-input__icon {
+  color: #a8a4b8;
+}
+
+.admin-chat-page .message-input__send {
+  background: #6c5ce7;
+  box-shadow: 0 6px 14px rgba(108, 92, 231, 0.35);
+}

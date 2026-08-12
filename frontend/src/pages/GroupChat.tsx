@@ -21,6 +21,7 @@ import ForwardPicker from "../components/chat/ForwardPicker";
 import LoadingScreen from "../components/common/LoadingScreen";
 import "./UserChat.css";
 import "./GroupChat.css";
+import "./AdminChat.css";
 
 export default function GroupChat() {
   const { groupId } = useParams<{ groupId: string }>();
@@ -99,7 +100,7 @@ export default function GroupChat() {
   if (group === null || messages === null || !user) return <LoadingScreen />;
 
   return (
-    <div className="user-chat-page">
+    <div className="user-chat-page admin-chat-page">
       {selectionMode ? (
         <header className="group-chat-header group-chat-header--selection">
           <button
