@@ -5,6 +5,7 @@ from supabase import create_client, Client
 from app.core.config import settings
 
 PRODUCT_IMAGES_BUCKET = "product-images"
+CHAT_IMAGES_BUCKET = "chat-images"
 
 
 @lru_cache
@@ -26,3 +27,19 @@ def upload_product_image(filename: str, content: bytes, content_type: str) -> st
         filename, content, {"content-type": content_type, "upsert": "true"}
     )
     return client.storage.from_(PRODUCT_IMAGES_BUCKET).get_public_url(filename)
+
+
+def ensure_chat_images_bucket() -> None:
+    client = get_supabase()
+    buckets = {b.name for b in client.storage.list_buckets()}
+    if CHAT_IMAGES_BUCKET not in buckets:
+        client.storage.create_bucket(CHAT_IMAGES_BUCKET, options={"public": True})
+
+
+def upload_chat_image(filename: str, content: bytes, content_type: str) -> str:
+    ensure_chat_images_bucket()
+    client = get_supabase()
+    client.storage.from_(CHAT_IMAGES_BUCKET).upload(
+        filename, content, {"content-type": content_type, "upsert": "true"}
+    )
+    return client.storage.from_(CHAT_IMAGES_BUCKET).get_public_url(filename)

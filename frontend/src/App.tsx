@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/Login";
 import RoleRedirect from "./pages/RoleRedirect";
 import UserChat from "./pages/UserChat";
+import UserProfile from "./pages/UserProfile";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminChat from "./pages/AdminChat";
 import Groups from "./pages/Groups";
@@ -28,6 +29,14 @@ function App() {
           element={
             <ProtectedRoute role="USER">
               <UserChat />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/chat/profile"
+          element={
+            <ProtectedRoute role="USER">
+              <UserProfile />
             </ProtectedRoute>
           }
         />

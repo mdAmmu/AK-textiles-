@@ -55,6 +55,15 @@ export async function sendGroupProductMessage(
   return data;
 }
 
+export async function sendGroupImageMessage(groupId: string, file: File): Promise<Message> {
+  const formData = new FormData();
+  formData.append("file", file);
+  const { data } = await api.post<Message>(`/groups/${groupId}/messages/image`, formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return data;
+}
+
 export async function deleteGroupMessages(
   groupId: string,
   messageIds: string[],

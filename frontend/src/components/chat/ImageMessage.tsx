@@ -8,6 +8,6 @@ interface Props {
 export default function ImageMessage({ message }: Props) {
   if (!message.product_image) return null;
   return (
-    <img className="image-message" src={message.product_image} alt="Product" />
+    <img className="image-message" src={message.product_image} alt="Product" draggable={false} />
   );
 }

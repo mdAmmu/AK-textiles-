@@ -1,10 +1,12 @@
+import uuid
 from datetime import datetime, timezone
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, status
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user, require_admin
 from app.core.database import get_db
+from app.core.supabase_client import upload_chat_image
 from app.models.conversation import Conversation
 from app.models.message import Message
 from app.models.product import Product
@@ -14,6 +16,7 @@ from app.schemas.message import MessageOut, SendMessageRequest, SendProductMessa
 from app.services.chat_service import (
     get_or_create_conversation,
     mark_conversation_read,
+    send_image_message,
     send_product_message,
     send_text_message,
     serialize_message,
@@ -125,6 +128,24 @@ async def admin_send_product_message(
 
     messages = await send_product_message(db, conversation, admin.id, product)
     return [serialize_message(m) for m in messages]
+
+
+@router.post("/{conversation_id}/messages/image", response_model=MessageOut)
+async def admin_send_image_message(
+    conversation_id: str,
+    file: UploadFile,
+    db: Session = Depends(get_db),
+    admin: User = Depends(require_admin),
+):
+    conversation = _get_conversation_or_404(db, conversation_id)
+
+    content = await file.read()
+    extension = (file.filename or "").rsplit(".", 1)[-1] if "." in (file.filename or "") else "jpg"
+    filename = f"{conversation_id}/{uuid.uuid4()}.{extension}"
+    url = upload_chat_image(filename, content, file.content_type or "image/jpeg")
+
+    message = await send_image_message(db, conversation, admin.id, url)
+    return serialize_message(message)
 
 
 @router.post("/{conversation_id}/read", status_code=status.HTTP_204_NO_CONTENT)

@@ -55,7 +55,8 @@ export default function MessageBubble({
     }
   }
 
-  function handleClick() {
+  function endPress() {
+    cancelPress();
     if (firedRef.current) {
       firedRef.current = false;
       return;
@@ -63,15 +64,21 @@ export default function MessageBubble({
     if (selectionMode) onToggleSelect?.();
   }
 
+  function handleTouchEnd(e: React.TouchEvent) {
+    // Prevent the browser's synthetic mouse/click events from firing a
+    // second (conflicting) endPress() right after this one.
+    e.preventDefault();
+    endPress();
+  }
+
   return (
     <div
       className={`message-bubble-row${isOwn ? " message-bubble-row--own" : ""}${selected ? " message-bubble-row--selected" : ""}`}
       onMouseDown={startPress}
-      onMouseUp={cancelPress}
+      onMouseUp={endPress}
       onMouseLeave={cancelPress}
       onTouchStart={startPress}
-      onTouchEnd={cancelPress}
-      onClick={handleClick}
+      onTouchEnd={handleTouchEnd}
     >
       <div
         className={`message-bubble${isOwn ? " message-bubble--own" : ""}${isImage ? " message-bubble--image" : ""}${selected ? " message-bubble--selected" : ""}`}

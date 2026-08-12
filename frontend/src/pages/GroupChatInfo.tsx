@@ -1,10 +1,17 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, Search } from "lucide-react";
-import { fetchGroups, fetchGroupUsers } from "../services/groups";
+import { ArrowLeft, Search, UserPlus } from "lucide-react";
+import {
+  assignUserGroup,
+  fetchGroups,
+  fetchGroupUsers,
+  fetchUnassignedUsers,
+} from "../services/groups";
 import type { Group, GroupUser } from "../types/group";
+import type { User } from "../types/user";
 import GroupIcon from "../components/admin/GroupIcon";
 import Avatar from "../components/common/Avatar";
+import AddCustomerPanel from "../components/admin/AddCustomerPanel";
 import LoadingScreen from "../components/common/LoadingScreen";
 import "./GroupChatInfo.css";
 
@@ -16,6 +23,8 @@ export default function GroupChatInfo() {
   const [members, setMembers] = useState<GroupUser[] | null>(null);
   const [showSearch, setShowSearch] = useState(false);
   const [search, setSearch] = useState("");
+  const [showAddPanel, setShowAddPanel] = useState(false);
+  const [candidates, setCandidates] = useState<User[]>([]);
 
   useEffect(() => {
     if (!groupId) return;
@@ -29,6 +38,19 @@ export default function GroupChatInfo() {
     if (!term) return members;
     return members.filter((m) => m.name.toLowerCase().includes(term));
   }, [members, search]);
+
+  async function handleAddSearch(term: string) {
+    const results = await fetchUnassignedUsers(term || undefined);
+    setCandidates(results);
+  }
+
+  async function handleAdd(userId: string) {
+    if (!groupId) return;
+    const added = await assignUserGroup(userId, groupId);
+    setMembers((prev) => [...(prev ?? []), added]);
+    setGroup((prev) => (prev ? { ...prev, customer_count: prev.customer_count + 1 } : prev));
+    setShowAddPanel(false);
+  }
 
   if (group === null || members === null) return <LoadingScreen />;
 
@@ -67,6 +89,15 @@ export default function GroupChatInfo() {
 
       <div className="group-chat-info-page__members-header">
         <span>{members.length} members</span>
+        <button
+          className="group-chat-info-page__add-link"
+          onClick={() => {
+            setShowAddPanel(true);
+            handleAddSearch("");
+          }}
+        >
+          <UserPlus size={16} /> Add Member
+        </button>
       </div>
 
       <div className="group-chat-info-page__list">
@@ -87,6 +118,15 @@ export default function GroupChatInfo() {
           </div>
         ))}
       </div>
+
+      {showAddPanel && (
+        <AddCustomerPanel
+          candidates={candidates}
+          onSearch={handleAddSearch}
+          onAdd={handleAdd}
+          onClose={() => setShowAddPanel(false)}
+        />
+      )}
     </div>
   );
 }

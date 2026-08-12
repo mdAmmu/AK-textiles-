@@ -4,7 +4,6 @@ import { fetchGroups } from "../services/groups";
 import type { Group } from "../types/group";
 import GroupList from "../components/admin/GroupList";
 import LoadingScreen from "../components/common/LoadingScreen";
-import AdminNav from "../components/admin/AdminNav";
 import "./Groups.css";
 
 export default function Groups() {
@@ -41,7 +40,6 @@ export default function Groups() {
       <main className="groups-page__content">
         {filtered === null ? <LoadingScreen /> : <GroupList groups={filtered} />}
       </main>
-      <AdminNav />
     </div>
   );
 }

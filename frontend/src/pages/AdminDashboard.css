@@ -106,22 +106,3 @@
 .admin-dashboard-page__empty {
   padding: 1rem 0.25rem;
 }
-
-.admin-dashboard-page__fab {
-  position: absolute;
-  left: 50%;
-  bottom: 4.75rem;
-  transform: translateX(-50%);
-  width: 54px;
-  height: 54px;
-  border-radius: 50%;
-  border: none;
-  background: var(--acc);
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 8px 18px rgba(108, 92, 231, 0.45);
-  cursor: pointer;
-  z-index: 5;
-}

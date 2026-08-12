@@ -1,11 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
-import { SquarePen, Search, Plus } from "lucide-react";
+import { SquarePen, Search } from "lucide-react";
 import { fetchGroups } from "../services/groups";
 import type { Group } from "../types/group";
 import { useCurrentUser } from "../hooks/useCurrentUser";
 import Avatar from "../components/common/Avatar";
 import GroupChatListItem from "../components/admin/GroupChatListItem";
-import AdminNav from "../components/admin/AdminNav";
 import LoadingScreen from "../components/common/LoadingScreen";
 import "./AdminDashboard.css";
 
@@ -66,10 +65,6 @@ export default function AdminDashboard() {
           </>
         )}
       </main>
-      <button className="admin-dashboard-page__fab" aria-label="New chat">
-        <Plus size={24} />
-      </button>
-      <AdminNav />
     </div>
   );
 }

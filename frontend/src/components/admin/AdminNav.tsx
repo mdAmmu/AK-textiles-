@@ -1,10 +1,9 @@
 import { NavLink } from "react-router-dom";
-import { MessageCircle, Package, Users } from "lucide-react";
+import { MessageCircle, Users } from "lucide-react";
 import "./AdminNav.css";
 
 const TABS = [
   { to: "/admin", label: "Chats", end: true, Icon: MessageCircle },
-  { to: "/admin/products", label: "Products", Icon: Package },
   { to: "/admin/groups", label: "Groups", Icon: Users },
 ];
 

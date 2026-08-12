@@ -1,11 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, Forward, MoreVertical, Package, Trash2, X } from "lucide-react";
+import { ArrowLeft, Camera, Forward, MoreVertical, Package, Trash2, X } from "lucide-react";
 import {
   deleteGroupMessages,
   fetchGroupMessages,
   fetchGroups,
   forwardGroupMessages,
+  sendGroupImageMessage,
   sendGroupMessage,
   sendGroupProductMessage,
 } from "../services/groups";
@@ -16,7 +17,7 @@ import { useChatSocket } from "../hooks/useChatSocket";
 import GroupIcon from "../components/admin/GroupIcon";
 import MessageList from "../components/chat/MessageList";
 import MessageInput from "../components/chat/MessageInput";
-import ProductPicker from "../components/chat/ProductPicker";
+import GroupProductComposer from "../components/chat/GroupProductComposer";
 import ForwardPicker from "../components/chat/ForwardPicker";
 import LoadingScreen from "../components/common/LoadingScreen";
 import "./UserChat.css";
@@ -33,6 +34,7 @@ export default function GroupChat() {
   const [showPicker, setShowPicker] = useState(false);
   const [showForward, setShowForward] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const cameraInputRef = useRef<HTMLInputElement>(null);
 
   const selectionMode = selectedIds.size > 0;
 
@@ -62,11 +64,17 @@ export default function GroupChat() {
     setMessages((prev) => [...(prev ?? []), message]);
   }
 
-  async function handlePickProduct(productId: string) {
-    if (!groupId) return;
-    const newMessages = await sendGroupProductMessage(groupId, productId);
+  function handleProductSent(newMessages: Message[]) {
     setMessages((prev) => [...(prev ?? []), ...newMessages]);
     setShowPicker(false);
+  }
+
+  async function handleCameraCapture(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file || !groupId) return;
+    const message = await sendGroupImageMessage(groupId, file);
+    setMessages((prev) => [...(prev ?? []), message]);
   }
 
   function handleLongPress(id: string) {
@@ -161,19 +169,41 @@ export default function GroupChat() {
       <MessageInput
         onSend={handleSend}
         extraAction={
-          <span
-            className="message-input__icon"
-            onClick={() => setShowPicker(true)}
-            role="button"
-            aria-label="Send a product"
-          >
-            <Package size={20} />
-          </span>
+          <>
+            <span
+              className="message-input__icon"
+              onClick={() => setShowPicker(true)}
+              role="button"
+              aria-label="Send a product"
+            >
+              <Package size={20} />
+            </span>
+            <span
+              className="message-input__icon"
+              onClick={() => cameraInputRef.current?.click()}
+              role="button"
+              aria-label="Take a photo"
+            >
+              <Camera size={20} />
+            </span>
+            <input
+              ref={cameraInputRef}
+              type="file"
+              accept="image/*"
+              hidden
+              onChange={handleCameraCapture}
+            />
+          </>
         }
       />
 
-      {showPicker && (
-        <ProductPicker onPick={handlePickProduct} onClose={() => setShowPicker(false)} />
+      {showPicker && groupId && (
+        <GroupProductComposer
+          groupName={group.name}
+          onSent={handleProductSent}
+          onClose={() => setShowPicker(false)}
+          sendProduct={(productId) => sendGroupProductMessage(groupId, productId)}
+        />
       )}
 
       {showForward && (

@@ -4,7 +4,6 @@ import { Plus, Search, SlidersHorizontal } from "lucide-react";
 import { fetchProducts } from "../services/products";
 import type { Product } from "../types/product";
 import ProductCard from "../components/admin/ProductCard";
-import AdminNav from "../components/admin/AdminNav";
 import LoadingScreen from "../components/common/LoadingScreen";
 import "./Products.css";
 
@@ -57,7 +56,6 @@ export default function Products() {
           </div>
         )}
       </main>
-      <AdminNav />
     </div>
   );
 }

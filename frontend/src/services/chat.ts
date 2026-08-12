@@ -63,6 +63,20 @@ export async function sendAdminProductMessage(
   return data;
 }
 
+export async function sendAdminImageMessage(
+  conversationId: string,
+  file: File,
+): Promise<Message> {
+  const formData = new FormData();
+  formData.append("file", file);
+  const { data } = await api.post<Message>(
+    `/chats/${conversationId}/messages/image`,
+    formData,
+    { headers: { "Content-Type": "multipart/form-data" } },
+  );
+  return data;
+}
+
 export async function markConversationRead(conversationId: string): Promise<void> {
   await api.post(`/chats/${conversationId}/read`);
 }

@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Package } from "lucide-react";
+import { Camera, Package } from "lucide-react";
 import {
   fetchConversationMessages,
   markConversationRead,
+  sendAdminImageMessage,
   sendAdminMessage,
   sendAdminProductMessage,
 } from "../services/chat";
@@ -26,6 +27,7 @@ export default function AdminChat() {
   const [messages, setMessages] = useState<Message[] | null>(null);
   const [customerName, setCustomerName] = useState("Customer");
   const [showPicker, setShowPicker] = useState(false);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (conversationId) {
@@ -70,6 +72,14 @@ export default function AdminChat() {
     setShowPicker(false);
   }
 
+  async function handleCameraCapture(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file || !conversationId) return;
+    const message = await sendAdminImageMessage(conversationId, file);
+    setMessages((prev) => [...(prev ?? []), message]);
+  }
+
   if (messages === null || !user) return <LoadingScreen />;
 
   return (
@@ -79,14 +89,31 @@ export default function AdminChat() {
       <MessageInput
         onSend={handleSend}
         extraAction={
-          <span
-            className="message-input__icon"
-            onClick={() => setShowPicker(true)}
-            role="button"
-            aria-label="Send a product"
-          >
-            <Package size={20} />
-          </span>
+          <>
+            <span
+              className="message-input__icon"
+              onClick={() => setShowPicker(true)}
+              role="button"
+              aria-label="Send a product"
+            >
+              <Package size={20} />
+            </span>
+            <span
+              className="message-input__icon"
+              onClick={() => cameraInputRef.current?.click()}
+              role="button"
+              aria-label="Take a photo"
+            >
+              <Camera size={20} />
+            </span>
+            <input
+              ref={cameraInputRef}
+              type="file"
+              accept="image/*"
+              hidden
+              onChange={handleCameraCapture}
+            />
+          </>
         }
       />
 

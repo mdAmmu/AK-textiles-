@@ -95,6 +95,23 @@ async def send_product_message(
     return messages
 
 
+async def send_image_message(
+    db: Session, conversation: Conversation, sender_id, image_url: str
+) -> Message:
+    message = Message(
+        conversation_id=conversation.id,
+        sender_id=sender_id,
+        message_type=MessageType.IMAGE,
+        product_image=image_url,
+    )
+    db.add(message)
+    db.commit()
+    db.refresh(message)
+
+    await _notify_other_party(conversation, sender_id, message)
+    return message
+
+
 async def send_group_text_message(db: Session, group: Group, sender_id, text: str) -> Message:
     message = Message(
         group_id=group.id,
@@ -154,6 +171,21 @@ async def send_group_product_message(
     messages.append(detail_message)
 
     return messages
+
+
+async def send_group_image_message(db: Session, group: Group, sender_id, image_url: str) -> Message:
+    message = Message(
+        group_id=group.id,
+        sender_id=sender_id,
+        message_type=MessageType.IMAGE,
+        product_image=image_url,
+    )
+    db.add(message)
+    db.commit()
+    db.refresh(message)
+
+    await _notify_group_members(db, group, message)
+    return message
 
 
 async def delete_group_messages(db: Session, group: Group, message_ids: list[str]) -> list[str]:

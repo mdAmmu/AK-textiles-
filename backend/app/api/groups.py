@@ -1,9 +1,12 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+import uuid
+
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, status
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user, require_admin
 from app.core.database import get_db
+from app.core.supabase_client import upload_chat_image
 from app.models.group import Group
 from app.models.message import Message
 from app.models.product import Product
@@ -19,6 +22,7 @@ from app.schemas.message import (
 from app.services.chat_service import (
     delete_group_messages,
     forward_group_messages,
+    send_group_image_message,
     send_group_product_message,
     send_group_text_message,
     serialize_message,
@@ -128,6 +132,24 @@ async def admin_send_group_product_message(
 
     messages = await send_group_product_message(db, group, admin.id, product)
     return [serialize_message(m) for m in messages]
+
+
+@router.post("/{group_id}/messages/image", response_model=MessageOut)
+async def admin_send_group_image_message(
+    group_id: str,
+    file: UploadFile,
+    db: Session = Depends(get_db),
+    admin: User = Depends(require_admin),
+):
+    group = _get_group_or_404(db, group_id)
+
+    content = await file.read()
+    extension = (file.filename or "").rsplit(".", 1)[-1] if "." in (file.filename or "") else "jpg"
+    filename = f"{group_id}/{uuid.uuid4()}.{extension}"
+    url = upload_chat_image(filename, content, file.content_type or "image/jpeg")
+
+    message = await send_group_image_message(db, group, admin.id, url)
+    return serialize_message(message)
 
 
 @router.post("/{group_id}/messages/delete", response_model=list[str])

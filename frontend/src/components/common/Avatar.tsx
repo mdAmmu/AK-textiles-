@@ -6,6 +6,7 @@ interface Props {
   name: string;
   online?: boolean;
   size?: number;
+  imageUrl?: string | null;
 }
 
 function initialsFor(name: string): string {
@@ -21,13 +22,24 @@ function colorFor(name: string): string {
   return PALETTE[Math.abs(hash) % PALETTE.length];
 }
 
-export default function Avatar({ name, online, size = 40 }: Props) {
+export default function Avatar({ name, online, size = 40, imageUrl }: Props) {
   return (
     <div
       className="avatar"
-      style={{ width: size, height: size, background: colorFor(name), fontSize: size * 0.4 }}
+      style={{
+        width: size,
+        height: size,
+        background: imageUrl ? undefined : colorFor(name),
+        fontSize: size * 0.4,
+        padding: 0,
+        overflow: "hidden",
+      }}
     >
-      {initialsFor(name)}
+      {imageUrl ? (
+        <img src={imageUrl} alt={name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+      ) : (
+        initialsFor(name)
+      )}
       {online && <span className="avatar__online" />}
     </div>
   );

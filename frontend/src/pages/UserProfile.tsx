@@ -1,0 +1,73 @@
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { ArrowLeft, LogOut } from "lucide-react";
+import { useClerk, useUser } from "@clerk/clerk-react";
+import { useCurrentUser } from "../hooks/useCurrentUser";
+import { fetchMyGroupMessages } from "../services/groups";
+import type { Message } from "../types/message";
+import Avatar from "../components/common/Avatar";
+import LoadingScreen from "../components/common/LoadingScreen";
+import "./UserProfile.css";
+
+export default function UserProfile() {
+  const navigate = useNavigate();
+  const { user } = useCurrentUser();
+  const { user: clerkUser } = useUser();
+  const { signOut } = useClerk();
+
+  const [media, setMedia] = useState<Message[] | null>(null);
+
+  useEffect(() => {
+    fetchMyGroupMessages().then((messages) =>
+      setMedia(messages.filter((m) => m.message_type === "IMAGE" && m.product_image)),
+    );
+  }, []);
+
+  async function handleLogout() {
+    await signOut();
+    navigate("/login", { replace: true });
+  }
+
+  if (!user) return <LoadingScreen />;
+
+  return (
+    <div className="user-profile-page">
+      <header className="user-profile-page__header">
+        <button onClick={() => navigate(-1)} aria-label="Back">
+          <ArrowLeft size={20} />
+        </button>
+      </header>
+
+      <div className="user-profile-page__hero">
+        <Avatar name={user.name} imageUrl={clerkUser?.imageUrl} size={112} />
+        <h1>{user.name} (You)</h1>
+        {(user.phone || user.email) && (
+          <span className="user-profile-page__meta">{user.phone ?? user.email}</span>
+        )}
+      </div>
+
+      <div className="user-profile-page__section">
+        <div className="user-profile-page__section-header">
+          <span>Media</span>
+          {media && <span className="user-profile-page__section-count">{media.length}</span>}
+        </div>
+
+        {media === null ? (
+          <LoadingScreen />
+        ) : media.length === 0 ? (
+          <p className="user-profile-page__empty">No media shared yet.</p>
+        ) : (
+          <div className="user-profile-page__media-grid">
+            {media.map((m) => (
+              <img key={m.id} src={m.product_image!} alt="" />
+            ))}
+          </div>
+        )}
+      </div>
+
+      <button className="user-profile-page__logout" onClick={handleLogout}>
+        <LogOut size={18} /> Logout
+      </button>
+    </div>
+  );
+}

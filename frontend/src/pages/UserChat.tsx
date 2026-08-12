@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { MoreVertical } from "lucide-react";
 import { useCurrentUser } from "../hooks/useCurrentUser";
 import { useChatSocket } from "../hooks/useChatSocket";
@@ -12,6 +13,7 @@ import "./UserChat.css";
 import "./GroupChat.css";
 
 export default function UserChat() {
+  const navigate = useNavigate();
   const { user } = useCurrentUser();
   const [messages, setMessages] = useState<Message[] | null>(null);
   const [group, setGroup] = useState<Group | null>(null);
@@ -48,7 +50,11 @@ export default function UserChat() {
           <div className="group-chat-header__title">{groupName}</div>
           <div className="group-chat-header__subtitle">{memberCount} members</div>
         </div>
-        <button className="group-chat-header__icon-btn" aria-label="More options">
+        <button
+          className="group-chat-header__icon-btn"
+          aria-label="More options"
+          onClick={() => navigate("/chat/profile")}
+        >
           <MoreVertical size={20} />
         </button>
       </header>
