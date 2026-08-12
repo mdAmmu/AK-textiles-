@@ -15,6 +15,7 @@ interface Props {
 }
 
 const LONG_PRESS_MS = 450;
+const MOVE_CANCEL_PX = 10;
 
 export default function MessageBubble({
   message,
@@ -26,6 +27,8 @@ export default function MessageBubble({
 }: Props) {
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const firedRef = useRef(false);
+  const movedRef = useRef(false);
+  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
 
   const time = new Date(message.created_at).toLocaleTimeString([], {
     hour: "2-digit",
@@ -42,6 +45,7 @@ export default function MessageBubble({
   function startPress() {
     if (!onLongPress) return;
     firedRef.current = false;
+    movedRef.current = false;
     timerRef.current = setTimeout(() => {
       firedRef.current = true;
       onLongPress();
@@ -61,13 +65,37 @@ export default function MessageBubble({
       firedRef.current = false;
       return;
     }
+    // A scroll/drag gesture, not a tap — don't treat it as a selection toggle.
+    if (movedRef.current) {
+      movedRef.current = false;
+      return;
+    }
     if (selectionMode) onToggleSelect?.();
+  }
+
+  function handleTouchStart(e: React.TouchEvent) {
+    const touch = e.touches[0];
+    touchStartRef.current = { x: touch.clientX, y: touch.clientY };
+    startPress();
+  }
+
+  function handleTouchMove(e: React.TouchEvent) {
+    const start = touchStartRef.current;
+    if (!start) return;
+    const touch = e.touches[0];
+    const dx = Math.abs(touch.clientX - start.x);
+    const dy = Math.abs(touch.clientY - start.y);
+    if (dx > MOVE_CANCEL_PX || dy > MOVE_CANCEL_PX) {
+      movedRef.current = true;
+      cancelPress();
+    }
   }
 
   function handleTouchEnd(e: React.TouchEvent) {
     // Prevent the browser's synthetic mouse/click events from firing a
     // second (conflicting) endPress() right after this one.
     e.preventDefault();
+    touchStartRef.current = null;
     endPress();
   }
 
@@ -77,7 +105,8 @@ export default function MessageBubble({
       onMouseDown={startPress}
       onMouseUp={endPress}
       onMouseLeave={cancelPress}
-      onTouchStart={startPress}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
       <div

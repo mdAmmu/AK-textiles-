@@ -11,7 +11,7 @@ from app.models.group import Group
 from app.models.message import Message
 from app.models.product import Product
 from app.models.user import User, UserRole
-from app.schemas.group import AssignGroupRequest, GroupOut, GroupUserOut
+from app.schemas.group import AssignGroupRequest, CreateGroupRequest, GroupOut, GroupUserOut
 from app.schemas.message import (
     DeleteMessagesRequest,
     ForwardMessagesRequest,
@@ -20,6 +20,7 @@ from app.schemas.message import (
     SendProductMessageRequest,
 )
 from app.services.chat_service import (
+    delete_group,
     delete_group_messages,
     forward_group_messages,
     send_group_image_message,
@@ -77,6 +78,31 @@ def list_groups(db: Session = Depends(get_db), _admin: User = Depends(require_ad
         )
         for g in groups
     ]
+
+
+@router.post("", response_model=GroupOut)
+def create_group(
+    body: CreateGroupRequest, db: Session = Depends(get_db), _admin: User = Depends(require_admin)
+):
+    name = body.name.strip()
+    if not name:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Group name is required")
+    if db.query(Group).filter(func.lower(Group.name) == name.lower()).first() is not None:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Group already exists")
+
+    group = Group(name=name, description=body.description)
+    db.add(group)
+    db.commit()
+    db.refresh(group)
+    return GroupOut(id=str(group.id), name=group.name, description=group.description, customer_count=0)
+
+
+@router.delete("/{group_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def admin_delete_group(
+    group_id: str, db: Session = Depends(get_db), _admin: User = Depends(require_admin)
+):
+    group = _get_group_or_404(db, group_id)
+    await delete_group(db, group)
 
 
 @router.get("/{group_id}/users", response_model=list[GroupUserOut])

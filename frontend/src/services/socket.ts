@@ -21,11 +21,17 @@ export interface GroupMessagesDeletedEvent {
   message_ids: string[];
 }
 
+export interface GroupDeletedEvent {
+  type: "group_deleted";
+  group_id: string;
+}
+
 export type ChatSocketEvent =
   | NewMessageEvent
   | MessagesReadEvent
   | NewGroupMessageEvent
-  | GroupMessagesDeletedEvent;
+  | GroupMessagesDeletedEvent
+  | GroupDeletedEvent;
 
 export async function openChatSocket(
   onMessage: (event: ChatSocketEvent) => void,

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, Camera, Forward, MoreVertical, Package, Trash2, X } from "lucide-react";
+import { ArrowLeft, Camera, Forward, MoreVertical, Trash2, X } from "lucide-react";
 import {
   deleteGroupMessages,
   fetchGroupMessages,
@@ -170,14 +170,14 @@ export default function GroupChat() {
         onSend={handleSend}
         extraAction={
           <>
-            <span
+            {/* <span
               className="message-input__icon"
               onClick={() => setShowPicker(true)}
               role="button"
               aria-label="Send a product"
             >
               <Package size={20} />
-            </span>
+            </span> */}
             <span
               className="message-input__icon"
               onClick={() => cameraInputRef.current?.click()}

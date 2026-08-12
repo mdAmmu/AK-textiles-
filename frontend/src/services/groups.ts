@@ -8,6 +8,15 @@ export async function fetchGroups(): Promise<Group[]> {
   return data;
 }
 
+export async function createGroup(name: string, description?: string): Promise<Group> {
+  const { data } = await api.post<Group>("/groups", { name, description });
+  return data;
+}
+
+export async function deleteGroup(groupId: string): Promise<void> {
+  await api.delete(`/groups/${groupId}`);
+}
+
 export async function fetchMyGroup(): Promise<Group | null> {
   const { data } = await api.get<Group | null>("/groups/mine");
   return data;

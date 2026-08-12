@@ -17,3 +17,8 @@ class GroupUserOut(BaseModel):
 
 class AssignGroupRequest(BaseModel):
     group_id: str | None = None
+
+
+class CreateGroupRequest(BaseModel):
+    name: str
+    description: str | None = None

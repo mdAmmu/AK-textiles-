@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
-import { SquarePen, Search } from "lucide-react";
+import { CircleUserRound, Search } from "lucide-react";
 import { fetchGroups } from "../services/groups";
 import type { Group } from "../types/group";
 import { useCurrentUser } from "../hooks/useCurrentUser";
 import Avatar from "../components/common/Avatar";
 import GroupChatListItem from "../components/admin/GroupChatListItem";
+import AdminAccountPanel from "../components/admin/AdminAccountPanel";
 import LoadingScreen from "../components/common/LoadingScreen";
 import "./AdminDashboard.css";
 
@@ -12,6 +13,7 @@ export default function AdminDashboard() {
   const { user } = useCurrentUser();
   const [groups, setGroups] = useState<Group[] | null>(null);
   const [search, setSearch] = useState("");
+  const [showAccount, setShowAccount] = useState(false);
 
   useEffect(() => {
     fetchGroups().then(setGroups);
@@ -32,8 +34,12 @@ export default function AdminDashboard() {
           <h1>Admin</h1>
           <span>Online</span>
         </div>
-        <button className="admin-dashboard-page__icon-btn" aria-label="More options">
-          <SquarePen size={20} />
+        <button
+          className="admin-dashboard-page__icon-btn"
+          aria-label="Account"
+          onClick={() => setShowAccount(true)}
+        >
+          <CircleUserRound size={22} />
         </button>
       </header>
       <div className="admin-dashboard-page__search-row">
@@ -65,6 +71,17 @@ export default function AdminDashboard() {
           </>
         )}
       </main>
+
+      {showAccount && user && (
+        <AdminAccountPanel
+          admin={user}
+          onClose={() => setShowAccount(false)}
+          onGroupCreated={(group) => setGroups((prev) => [group, ...(prev ?? [])])}
+          onGroupDeleted={(groupId) =>
+            setGroups((prev) => prev?.filter((g) => g.id !== groupId) ?? prev)
+          }
+        />
+      )}
     </div>
   );
 }

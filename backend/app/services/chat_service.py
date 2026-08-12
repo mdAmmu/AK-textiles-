@@ -188,6 +188,26 @@ async def send_group_image_message(db: Session, group: Group, sender_id, image_u
     return message
 
 
+async def delete_group(db: Session, group: Group) -> list[str]:
+    """Deletes a group along with its messages, and unassigns + kicks out its members."""
+    members = db.query(User).filter(User.group_id == group.id, User.role == UserRole.USER).all()
+    member_ids = [str(m.id) for m in members]
+
+    db.query(Message).filter(Message.group_id == group.id).delete(synchronize_session=False)
+    db.query(User).filter(User.group_id == group.id).update(
+        {User.group_id: None}, synchronize_session=False
+    )
+    db.delete(group)
+    db.commit()
+
+    for member_id in member_ids:
+        await manager.send_to_user(
+            member_id, {"type": "group_deleted", "group_id": str(group.id)}
+        )
+
+    return member_ids
+
+
 async def delete_group_messages(db: Session, group: Group, message_ids: list[str]) -> list[str]:
     messages = (
         db.query(Message)
