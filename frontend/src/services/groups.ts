@@ -91,6 +91,13 @@ export async function sendGroupImageMessage(
   return data;
 }
 
+export async function deleteMyGroupMessages(messageIds: string[]): Promise<string[]> {
+  const { data } = await api.post<string[]>("/groups/mine/messages/delete", {
+    message_ids: messageIds,
+  });
+  return data;
+}
+
 export async function deleteGroupMessages(
   groupId: string,
   messageIds: string[],

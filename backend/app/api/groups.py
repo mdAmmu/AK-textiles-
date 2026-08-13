@@ -63,6 +63,18 @@ def get_my_group_messages(db: Session = Depends(get_db), user: User = Depends(ge
     return [serialize_message(m) for m in messages]
 
 
+@router.post("/mine/messages/delete", response_model=list[str])
+async def delete_my_group_messages(
+    body: DeleteMessagesRequest,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    if user.group_id is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Group not found")
+    group = _get_group_or_404(db, str(user.group_id))
+    return await delete_group_messages(db, group, body.message_ids)
+
+
 @router.get("", response_model=list[GroupOut])
 def list_groups(db: Session = Depends(get_db), admin: User = Depends(require_admin)):
     counts = dict(
