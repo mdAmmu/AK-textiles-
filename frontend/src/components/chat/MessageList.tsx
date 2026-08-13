@@ -3,6 +3,7 @@ import type { Message } from "../../types/message";
 import MessageBubble from "./MessageBubble";
 import ImageGroupBubble from "./ImageGroupBubble";
 import DeletedMessageBubble from "./DeletedMessageBubble";
+import EmptyMessages from "./EmptyMessages";
 import "./MessageList.css";
 
 interface Props {
@@ -11,6 +12,7 @@ interface Props {
   selectedIds?: Set<string>;
   onLongPressMessage?: (id: string) => void;
   onToggleSelectMessage?: (id: string) => void;
+  onEmptySendClick?: () => void;
 }
 
 type ListItem =
@@ -50,6 +52,7 @@ export default function MessageList({
   selectedIds,
   onLongPressMessage,
   onToggleSelectMessage,
+  onEmptySendClick,
 }: Props) {
   const bottomRef = useRef<HTMLDivElement>(null);
   const selectionMode = !!selectedIds && selectedIds.size > 0;
@@ -59,9 +62,16 @@ export default function MessageList({
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages.length]);
 
+  if (messages.length === 0) {
+    return (
+      <div className="message-list message-list--empty">
+        <EmptyMessages onSendClick={onEmptySendClick} />
+      </div>
+    );
+  }
+
   return (
     <div className="message-list">
-      {messages.length === 0 && <p className="message-list__empty">No messages yet.</p>}
       {messages.length > 0 && (
         <div className="message-list__date-divider">
           <span>Today</span>

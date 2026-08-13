@@ -22,17 +22,17 @@
 
 .product-message__name {
   font-weight: 700;
-  color: var(--wa-text);
+  color: var(--chat-text);
 }
 
 .product-message__description {
   font-size: 0.8125rem;
-  color: var(--wa-text-secondary);
+  color: var(--chat-text-secondary);
   margin-top: 0.25rem;
 }
 
 .product-message__price {
   font-weight: 700;
-  color: var(--wa-accent);
+  color: var(--chat-accent);
   margin-top: 0.5rem;
 }

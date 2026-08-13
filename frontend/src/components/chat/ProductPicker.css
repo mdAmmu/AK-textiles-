@@ -1,7 +1,7 @@
 .product-picker {
   position: fixed;
   inset: 0;
-  background: #fff;
+  background: var(--chat-bubble-other);
   display: flex;
   flex-direction: column;
   z-index: 10;
@@ -12,7 +12,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 1rem 1.125rem;
-  border-bottom: 1px solid var(--wa-border);
+  border-bottom: 1px solid var(--chat-border);
   font-weight: 600;
   font-size: 1.0625rem;
   flex-shrink: 0;
@@ -22,7 +22,7 @@
   display: flex;
   border: none;
   background: none;
-  color: var(--wa-accent);
+  color: var(--chat-accent);
   cursor: pointer;
 }
 
@@ -41,9 +41,9 @@
   flex-direction: column;
   align-items: flex-start;
   gap: 0;
-  border: 1px solid var(--wa-border);
+  border: 1px solid var(--chat-border);
   border-radius: 12px;
-  background: #fff;
+  background: var(--chat-bubble-other);
   padding: 0.75rem;
   min-height: 220px;
   cursor: pointer;
@@ -61,16 +61,16 @@
   width: 100%;
   aspect-ratio: 1;
   border-radius: 8px;
-  background: var(--wa-panel-bg);
+  background: var(--chat-panel-bg);
 }
 
 .product-picker__item span {
   margin-top: 0.625rem;
   font-size: 0.9375rem;
-  color: var(--wa-text);
+  color: var(--chat-text);
 }
 
 .product-picker__empty {
   padding: 1rem;
-  color: var(--wa-text-secondary);
+  color: var(--chat-text-secondary);
 }

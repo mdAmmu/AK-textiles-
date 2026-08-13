@@ -3,6 +3,8 @@ export interface Group {
   name: string;
   description?: string | null;
   customer_count: number;
+  last_message_at?: string | null;
+  unread_count?: number;
 }
 
 export interface GroupUser {

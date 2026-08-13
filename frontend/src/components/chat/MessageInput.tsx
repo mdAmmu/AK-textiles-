@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { Mic, Send, Smile } from "lucide-react";
 import "./MessageInput.css";
@@ -12,18 +12,22 @@ interface Props {
   canSubmitEmpty?: boolean;
 }
 
-export default function MessageInput({
-  onSend,
-  disabled,
-  extraAction,
-  value,
-  onChange,
-  canSubmitEmpty,
-}: Props) {
+export interface MessageInputHandle {
+  focus: () => void;
+}
+
+function MessageInput(
+  { onSend, disabled, extraAction, value, onChange, canSubmitEmpty }: Props,
+  ref: React.Ref<MessageInputHandle>,
+) {
   const [internalText, setInternalText] = useState("");
   const isControlled = value !== undefined;
   const text = isControlled ? value : internalText;
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useImperativeHandle(ref, () => ({
+    focus: () => textareaRef.current?.focus(),
+  }));
 
   function setText(next: string) {
     if (isControlled) onChange?.(next);
@@ -78,3 +82,5 @@ export default function MessageInput({
     </form>
   );
 }
+
+export default forwardRef(MessageInput);

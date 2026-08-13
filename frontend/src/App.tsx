@@ -15,12 +15,14 @@ import EditProduct from "./pages/EditProduct";
 import ProductDetail from "./pages/ProductDetail";
 import BroadcastConfirm from "./pages/BroadcastConfirm";
 import ProtectedRoute from "./components/common/ProtectedRoute";
+import { ThemeProvider } from "./contexts/ThemeContext";
 import "./App.css";
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
+    <ThemeProvider>
+      <BrowserRouter>
+        <Routes>
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/login/*" element={<Login />} />
         <Route path="/redirect" element={<RoleRedirect />} />
@@ -129,7 +131,8 @@ function App() {
           }
         />
       </Routes>
-    </BrowserRouter>
+      </BrowserRouter>
+    </ThemeProvider>
   );
 }
 

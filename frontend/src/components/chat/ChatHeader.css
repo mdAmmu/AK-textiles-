@@ -3,8 +3,9 @@
   align-items: center;
   gap: 0.75rem;
   padding: 0.625rem 1rem;
-  background: var(--wa-header);
-  color: #fff;
+  background: var(--chat-header-bg);
+  color: var(--chat-text);
+  border-bottom: 1px solid var(--chat-border);
   flex-shrink: 0;
 }
 
@@ -12,7 +13,7 @@
   display: flex;
   border: none;
   background: none;
-  color: #fff;
+  color: var(--chat-accent);
   cursor: pointer;
   padding: 0.25rem;
   line-height: 1;
@@ -33,7 +34,8 @@
 
 .chat-header__subtitle {
   font-size: 0.75rem;
-  opacity: 0.85;
+  color: var(--chat-accent);
+  font-weight: 600;
 }
 
 .chat-header__actions {

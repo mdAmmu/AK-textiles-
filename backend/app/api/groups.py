@@ -8,6 +8,7 @@ from app.api.deps import get_current_user, require_admin
 from app.core.database import get_db
 from app.core.supabase_client import upload_chat_image
 from app.models.group import Group
+from app.models.group_read import GroupRead
 from app.models.message import Message
 from app.models.product import Product
 from app.models.user import User, UserRole
@@ -63,13 +64,47 @@ def get_my_group_messages(db: Session = Depends(get_db), user: User = Depends(ge
 
 
 @router.get("", response_model=list[GroupOut])
-def list_groups(db: Session = Depends(get_db), _admin: User = Depends(require_admin)):
+def list_groups(db: Session = Depends(get_db), admin: User = Depends(require_admin)):
     counts = dict(
         db.query(User.group_id, func.count(User.id))
         .filter(User.group_id.isnot(None))
         .group_by(User.group_id)
         .all()
     )
+    last_message_at = dict(
+        db.query(Message.group_id, func.max(Message.created_at))
+        .filter(Message.group_id.isnot(None))
+        .group_by(Message.group_id)
+        .all()
+    )
+    last_read_at = dict(
+        db.query(GroupRead.group_id, GroupRead.last_read_at)
+        .filter(GroupRead.admin_id == admin.id)
+        .all()
+    )
+    unread_counts = dict(
+        db.query(Message.group_id, func.count(Message.id))
+        .filter(
+            Message.group_id.isnot(None),
+            Message.is_deleted.is_(False),
+        )
+        .group_by(Message.group_id)
+        .all()
+    )
+    # Recompute per-group unread against that admin's own last-read timestamp
+    # (the aggregate above is only a fallback for groups never opened yet).
+    for group_id, read_at in last_read_at.items():
+        count = (
+            db.query(func.count(Message.id))
+            .filter(
+                Message.group_id == group_id,
+                Message.is_deleted.is_(False),
+                Message.created_at > read_at,
+            )
+            .scalar()
+        )
+        unread_counts[group_id] = count
+
     groups = db.query(Group).order_by(Group.name).all()
     return [
         GroupOut(
@@ -77,9 +112,28 @@ def list_groups(db: Session = Depends(get_db), _admin: User = Depends(require_ad
             name=g.name,
             description=g.description,
             customer_count=counts.get(g.id, 0),
+            last_message_at=last_message_at.get(g.id),
+            unread_count=unread_counts.get(g.id, 0),
         )
         for g in groups
     ]
+
+
+@router.post("/{group_id}/read", status_code=status.HTTP_204_NO_CONTENT)
+def mark_group_read(
+    group_id: str, db: Session = Depends(get_db), admin: User = Depends(require_admin)
+):
+    _get_group_or_404(db, group_id)
+    existing = (
+        db.query(GroupRead)
+        .filter(GroupRead.admin_id == admin.id, GroupRead.group_id == group_id)
+        .first()
+    )
+    if existing is None:
+        db.add(GroupRead(admin_id=admin.id, group_id=group_id))
+    else:
+        existing.last_read_at = func.now()
+    db.commit()
 
 
 @router.post("", response_model=GroupOut)

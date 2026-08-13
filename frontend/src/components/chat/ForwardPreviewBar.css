@@ -1,6 +1,6 @@
 .forward-preview-bar {
   padding: 0.5rem 0.75rem 0;
-  background: var(--wa-bg, transparent);
+  background: var(--chat-panel-bg);
 }
 
 .forward-preview-bar__list {

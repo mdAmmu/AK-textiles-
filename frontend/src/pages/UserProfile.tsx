@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, LogOut } from "lucide-react";
+import { ArrowLeft, LogOut, Moon } from "lucide-react";
 import { useClerk, useUser } from "@clerk/clerk-react";
 import { useCurrentUser } from "../hooks/useCurrentUser";
+import { useTheme } from "../contexts/ThemeContext";
 import { fetchMyGroupMessages } from "../services/groups";
 import type { Message } from "../types/message";
 import Avatar from "../components/common/Avatar";
+import ThemeToggle from "../components/common/ThemeToggle";
 import LoadingScreen from "../components/common/LoadingScreen";
 import "./UserProfile.css";
 
@@ -14,6 +16,7 @@ export default function UserProfile() {
   const { user } = useCurrentUser();
   const { user: clerkUser } = useUser();
   const { signOut } = useClerk();
+  const { theme } = useTheme();
 
   const [media, setMedia] = useState<Message[] | null>(null);
 
@@ -44,6 +47,19 @@ export default function UserProfile() {
         {(user.phone || user.email) && (
           <span className="user-profile-page__meta">{user.phone ?? user.email}</span>
         )}
+      </div>
+
+      <div className="user-profile-page__section">
+        <div className="user-profile-page__row">
+          <Moon size={19} className="user-profile-page__row-icon" />
+          <span className="user-profile-page__row-label">
+            Theme
+            <span className="user-profile-page__row-sublabel">
+              {theme === "dark" ? "Dark" : "Light"}
+            </span>
+          </span>
+          <ThemeToggle />
+        </div>
       </div>
 
       <div className="user-profile-page__section">

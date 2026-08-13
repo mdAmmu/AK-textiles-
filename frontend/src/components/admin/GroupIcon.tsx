@@ -13,13 +13,18 @@ const DEFAULT_STYLE = { Icon: Users, bg: "#e9edef", color: "#667781" };
 interface Props {
   name: string;
   size?: number;
+  variant?: "default" | "hero";
 }
 
-export default function GroupIcon({ name, size = 48 }: Props) {
+export default function GroupIcon({ name, size = 48, variant = "default" }: Props) {
   const { Icon, bg, color } = STYLE_BY_GROUP[name.toLowerCase()] ?? DEFAULT_STYLE;
+  const isHero = variant === "hero";
   return (
-    <div className="group-icon" style={{ width: size, height: size, background: bg }}>
-      <Icon size={size * 0.5} color={color} strokeWidth={2} />
+    <div
+      className={`group-icon${isHero ? " group-icon--hero" : ""}`}
+      style={{ width: size, height: size, background: isHero ? undefined : bg }}
+    >
+      <Icon size={size * 0.5} color={isHero ? "#fff" : color} strokeWidth={2} />
     </div>
   );
 }

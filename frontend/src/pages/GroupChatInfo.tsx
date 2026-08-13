@@ -1,6 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, Search, UserPlus } from "lucide-react";
+import {
+  ArrowLeft,
+  ChevronDown,
+  ChevronRight,
+  Images,
+  Phone,
+  Search,
+  UserPlus,
+  Users,
+  Video,
+} from "lucide-react";
 import {
   assignUserGroup,
   fetchGroups,
@@ -23,6 +33,7 @@ export default function GroupChatInfo() {
   const [members, setMembers] = useState<GroupUser[] | null>(null);
   const [showSearch, setShowSearch] = useState(false);
   const [search, setSearch] = useState("");
+  const [showMembers, setShowMembers] = useState(false);
   const [showAddPanel, setShowAddPanel] = useState(false);
   const [candidates, setCandidates] = useState<User[]>([]);
 
@@ -56,24 +67,44 @@ export default function GroupChatInfo() {
 
   return (
     <div className="group-chat-info-page">
-      <header className="group-chat-info-page__header">
-        <button onClick={() => navigate(-1)} aria-label="Back">
+      <div className="group-chat-info-page__hero">
+        <button className="group-chat-info-page__back" onClick={() => navigate(-1)} aria-label="Back">
           <ArrowLeft size={20} />
         </button>
-      </header>
-
-      <div className="group-chat-info-page__hero">
-        <GroupIcon name={group.name} size={112} />
+        <GroupIcon name={group.name} size={80} variant="hero" />
         <h1>{group.name}</h1>
-        <span className="group-chat-info-page__meta">Group · {members.length} members</span>
+        <span className="group-chat-info-page__meta">{members.length} members</span>
       </div>
 
-      <button
-        className="group-chat-info-page__search-btn"
-        onClick={() => setShowSearch((s) => !s)}
-      >
-        <Search size={18} /> Search
-      </button>
+      <div className="group-chat-info-page__actions">
+        <button className="group-chat-info-page__action" type="button">
+          <Phone size={18} />
+          <span>Audio</span>
+        </button>
+        <button className="group-chat-info-page__action" type="button">
+          <Video size={18} />
+          <span>Video</span>
+        </button>
+        <button
+          className="group-chat-info-page__action"
+          type="button"
+          onClick={() => setShowSearch((s) => !s)}
+        >
+          <Search size={18} />
+          <span>Search</span>
+        </button>
+        <button
+          className="group-chat-info-page__action"
+          type="button"
+          onClick={() => {
+            setShowAddPanel(true);
+            handleAddSearch("");
+          }}
+        >
+          <UserPlus size={18} />
+          <span>Add Member</span>
+        </button>
+      </div>
 
       {showSearch && (
         <div className="group-chat-info-page__search-row">
@@ -87,36 +118,46 @@ export default function GroupChatInfo() {
         </div>
       )}
 
-      <div className="group-chat-info-page__members-header">
-        <span>{members.length} members</span>
-        <button
-          className="group-chat-info-page__add-link"
-          onClick={() => {
-            setShowAddPanel(true);
-            handleAddSearch("");
-          }}
-        >
-          <UserPlus size={16} /> Add Member
+      <div className="group-chat-info-page__card">
+        <button className="group-chat-info-page__row" type="button">
+          <Images size={19} className="group-chat-info-page__row-icon" />
+          <span className="group-chat-info-page__row-label">Media, Links &amp; Docs</span>
+          <ChevronRight size={18} className="group-chat-info-page__row-chevron" />
         </button>
-      </div>
 
-      <div className="group-chat-info-page__list">
-        {filtered && filtered.length === 0 && (
-          <p className="group-chat-info-page__empty">No members found.</p>
-        )}
-        {filtered?.map((m) => (
-          <div key={m.id} className="group-chat-info-page__member">
-            <Avatar name={m.name} size={40} />
-            <div className="group-chat-info-page__member-body">
-              <div className="group-chat-info-page__member-name">{m.name}</div>
-              {(m.email || m.phone) && (
-                <div className="group-chat-info-page__member-contact">
-                  {m.email ?? m.phone}
+        <button
+          className="group-chat-info-page__row"
+          type="button"
+          onClick={() => setShowMembers((s) => !s)}
+        >
+          <Users size={19} className="group-chat-info-page__row-icon" />
+          <span className="group-chat-info-page__row-label">View Members</span>
+          <ChevronDown
+            size={18}
+            className={`group-chat-info-page__row-chevron${showMembers ? " group-chat-info-page__row-chevron--open" : ""}`}
+          />
+        </button>
+
+        {showMembers && (
+          <div className="group-chat-info-page__list">
+            {filtered && filtered.length === 0 && (
+              <p className="group-chat-info-page__empty">No members found.</p>
+            )}
+            {filtered?.map((m) => (
+              <div key={m.id} className="group-chat-info-page__member">
+                <Avatar name={m.name} size={40} />
+                <div className="group-chat-info-page__member-body">
+                  <div className="group-chat-info-page__member-name">{m.name}</div>
+                  {(m.email || m.phone) && (
+                    <div className="group-chat-info-page__member-contact">
+                      {m.email ?? m.phone}
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
+              </div>
+            ))}
           </div>
-        ))}
+        )}
       </div>
 
       {showAddPanel && (

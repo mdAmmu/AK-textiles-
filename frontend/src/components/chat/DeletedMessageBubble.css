@@ -2,7 +2,7 @@
   display: flex;
   align-items: center;
   gap: 0.375rem;
-  color: var(--wa-text-secondary);
+  color: var(--chat-text-secondary);
   font-style: italic;
 }
 

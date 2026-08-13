@@ -2,7 +2,7 @@
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background: #fff;
+  background: var(--wa-bubble-other);
 }
 
 .user-profile-page__header {
@@ -43,6 +43,31 @@
 .user-profile-page__section {
   border-top: 8px solid var(--wa-panel-bg);
   padding: 0.875rem 1rem 1.25rem;
+}
+
+.user-profile-page__row {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+}
+
+.user-profile-page__row-icon {
+  color: var(--wa-text-secondary);
+  flex-shrink: 0;
+}
+
+.user-profile-page__row-label {
+  flex: 1;
+  font-weight: 500;
+  color: var(--wa-text);
+}
+
+.user-profile-page__row-sublabel {
+  display: block;
+  margin-top: 0.125rem;
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: var(--wa-text-secondary);
 }
 
 .user-profile-page__section-header {

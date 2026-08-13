@@ -17,6 +17,10 @@ export async function deleteGroup(groupId: string): Promise<void> {
   await api.delete(`/groups/${groupId}`);
 }
 
+export async function markGroupRead(groupId: string): Promise<void> {
+  await api.post(`/groups/${groupId}/read`);
+}
+
 export async function fetchMyGroup(): Promise<Group | null> {
   const { data } = await api.get<Group | null>("/groups/mine");
   return data;

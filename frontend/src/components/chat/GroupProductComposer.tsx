@@ -30,9 +30,9 @@ function priceFieldForGroup(groupName: string) {
 }
 
 export default function GroupProductComposer({ groupName, onSent, onClose, sendProduct }: Props) {
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [rate, setRate] = useState("");
+  const [name] = useState("");
+  const [description] = useState("");
+  const [rate] = useState("");
   const [images, setImages] = useState<(StagedImage | null)[]>([null, null, null, null]);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);

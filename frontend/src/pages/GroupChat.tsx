@@ -7,6 +7,7 @@ import {
   fetchGroupMessages,
   fetchGroups,
   forwardGroupMessages,
+  markGroupRead,
   sendGroupImageMessage,
   sendGroupMessage,
   sendGroupProductMessage,
@@ -17,7 +18,7 @@ import { useCurrentUser } from "../hooks/useCurrentUser";
 import { useChatSocket } from "../hooks/useChatSocket";
 import GroupIcon from "../components/admin/GroupIcon";
 import MessageList from "../components/chat/MessageList";
-import MessageInput from "../components/chat/MessageInput";
+import MessageInput, { type MessageInputHandle } from "../components/chat/MessageInput";
 import GroupProductComposer from "../components/chat/GroupProductComposer";
 import ForwardPicker from "../components/chat/ForwardPicker";
 import ForwardPreviewBar, { type StagedImage } from "../components/chat/ForwardPreviewBar";
@@ -51,6 +52,7 @@ export default function GroupChat() {
   const [draftText, setDraftText] = useState("");
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
+  const messageInputRef = useRef<MessageInputHandle>(null);
 
   const selectionMode = selectedIds.size > 0;
 
@@ -58,6 +60,7 @@ export default function GroupChat() {
     if (!groupId) return;
     fetchGroups().then((all) => setGroup(all.find((g) => g.id === groupId) ?? null));
     fetchGroupMessages(groupId).then(setMessages);
+    markGroupRead(groupId);
   }, [groupId]);
 
   useEffect(() => {
@@ -343,6 +346,7 @@ export default function GroupChat() {
           selectedIds={selectedIds}
           onLongPressMessage={handleLongPress}
           onToggleSelectMessage={handleToggleSelect}
+          onEmptySendClick={() => messageInputRef.current?.focus()}
         />
       </div>
 
@@ -351,6 +355,7 @@ export default function GroupChat() {
       <ForwardPreviewBar images={stagedImages} onRemove={handleRemoveStagedImage} />
 
       <MessageInput
+        ref={messageInputRef}
         onSend={handleSend}
         value={draftText}
         onChange={setDraftText}

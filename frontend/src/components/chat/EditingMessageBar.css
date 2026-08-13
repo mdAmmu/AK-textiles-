@@ -3,8 +3,8 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.5rem 0.875rem;
-  background: var(--wa-panel-bg);
-  color: var(--wa-accent);
+  background: var(--chat-panel-bg);
+  color: var(--chat-accent);
   font-size: 0.8125rem;
   font-weight: 500;
 }
@@ -21,7 +21,7 @@
   display: flex;
   border: none;
   background: none;
-  color: var(--wa-text-secondary);
+  color: var(--chat-text-secondary);
   cursor: pointer;
   padding: 0.125rem;
 }

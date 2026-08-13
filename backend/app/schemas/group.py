@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from pydantic import BaseModel
 
 
@@ -6,6 +8,8 @@ class GroupOut(BaseModel):
     name: str
     description: str | None = None
     customer_count: int
+    last_message_at: datetime | None = None
+    unread_count: int = 0
 
 
 class GroupUserOut(BaseModel):

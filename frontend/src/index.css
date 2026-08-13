@@ -12,11 +12,45 @@
   --wa-tick-read: #53bdeb;
   --wa-panel-bg: #f0f2f5;
 
+  /* Chat-screen-only theme tokens (used by ChatHeader/GroupChat/MessageList/
+     MessageBubble/MessageInput and friends) — kept separate from the --wa-*
+     tokens above so toggling dark mode only affects chat screens, not the
+     rest of the admin app which still relies on the original --wa-* values. */
+  --chat-header-bg: #ffffff;
+  --chat-accent: #0f9d6e;
+  --chat-accent-light: #4fc98a;
+  --chat-bg: #eef1f6;
+  --chat-bubble-own: #d9fdd3;
+  --chat-bubble-other: #ffffff;
+  --chat-text: #1a1a1a;
+  --chat-text-secondary: #7c827e;
+  --chat-border: #eef1ee;
+  --chat-tick-read: #34b7f1;
+  --chat-panel-bg: #f5f6f5;
+  --chat-date-chip-bg: #ffffff;
+  --chat-date-chip-text: #6b7069;
+
   --sans: system-ui, "Segoe UI", Roboto, sans-serif;
 
   font: 16px/145% var(--sans);
   color-scheme: light;
   color: var(--wa-text);
+}
+
+:root[data-theme="dark"] {
+  --chat-header-bg: #1c2430;
+  --chat-accent: #17c98d;
+  --chat-accent-light: #4fe0a8;
+  --chat-bg: #10161f;
+  --chat-bubble-own: #0b4a3c;
+  --chat-bubble-other: #1e2530;
+  --chat-text: #e9edef;
+  --chat-text-secondary: #8b96a5;
+  --chat-border: #232d3a;
+  --chat-tick-read: #53bdeb;
+  --chat-panel-bg: #131a24;
+  --chat-date-chip-bg: #1e2530;
+  --chat-date-chip-text: #a8b3c1;
 }
 
 * {
