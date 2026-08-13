@@ -78,6 +78,11 @@
   padding-right: 0.25rem;
 }
 
+.message-bubble__edited {
+  font-style: italic;
+  margin-right: 0.25rem;
+}
+
 .message-bubble__tick {
   display: flex;
   margin-left: 0.25rem;

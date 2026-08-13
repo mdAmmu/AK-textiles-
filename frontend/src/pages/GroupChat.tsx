@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, Camera, Forward, MoreVertical, Trash2, X } from "lucide-react";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { ArrowLeft, Camera, Forward, MoreVertical, Pencil, Trash2, X } from "lucide-react";
 import {
   deleteGroupMessages,
+  editGroupMessage,
   fetchGroupMessages,
   fetchGroups,
   forwardGroupMessages,
@@ -19,14 +20,25 @@ import MessageList from "../components/chat/MessageList";
 import MessageInput from "../components/chat/MessageInput";
 import GroupProductComposer from "../components/chat/GroupProductComposer";
 import ForwardPicker from "../components/chat/ForwardPicker";
+import ForwardPreviewBar, { type StagedImage } from "../components/chat/ForwardPreviewBar";
+import EditingMessageBar from "../components/chat/EditingMessageBar";
 import LoadingScreen from "../components/common/LoadingScreen";
+import { randomUUID } from "../utils/uuid";
 import "./UserChat.css";
 import "./GroupChat.css";
 import "./AdminChat.css";
 
+interface PendingForwardState {
+  sourceGroupId: string;
+  imageMessageIds: string[];
+  imageUrls: string[];
+  text: string;
+}
+
 export default function GroupChat() {
   const { groupId } = useParams<{ groupId: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useCurrentUser();
 
   const [group, setGroup] = useState<Group | null>(null);
@@ -34,6 +46,10 @@ export default function GroupChat() {
   const [showPicker, setShowPicker] = useState(false);
   const [showForward, setShowForward] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [stagedImages, setStagedImages] = useState<StagedImage[]>([]);
+  const [forwardSourceGroupId, setForwardSourceGroupId] = useState<string | null>(null);
+  const [draftText, setDraftText] = useState("");
+  const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
 
   const selectionMode = selectedIds.size > 0;
@@ -43,6 +59,23 @@ export default function GroupChat() {
     fetchGroups().then((all) => setGroup(all.find((g) => g.id === groupId) ?? null));
     fetchGroupMessages(groupId).then(setMessages);
   }, [groupId]);
+
+  useEffect(() => {
+    const pending = (location.state as { pendingForward?: PendingForwardState } | null)
+      ?.pendingForward;
+    if (!pending) return;
+    setStagedImages(
+      pending.imageMessageIds.map((id, i) => ({
+        key: id,
+        url: pending.imageUrls[i],
+        sourceMessageId: id,
+      })),
+    );
+    setForwardSourceGroupId(pending.sourceGroupId);
+    setDraftText(pending.text);
+    navigate(location.pathname, { replace: true, state: {} });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.state]);
 
   useChatSocket((event) => {
     if (event.type === "new_group_message") {
@@ -54,14 +87,98 @@ export default function GroupChat() {
     }
     if (event.type === "group_messages_deleted") {
       if (event.group_id !== groupId) return;
-      setMessages((prev) => prev?.filter((m) => !event.message_ids.includes(m.id)) ?? prev);
+      setMessages(
+        (prev) =>
+          prev?.map((m) =>
+            event.message_ids.includes(m.id) ? { ...m, is_deleted: true } : m,
+          ) ?? prev,
+      );
+    }
+    if (event.type === "group_message_edited") {
+      if (event.group_id !== groupId) return;
+      setMessages(
+        (prev) => prev?.map((m) => (m.id === event.message.id ? event.message : m)) ?? prev,
+      );
     }
   }, !!user && !!groupId);
 
   async function handleSend(text: string) {
     if (!groupId) return;
+    if (editingMessageId) {
+      await handleSaveEdit(text);
+      return;
+    }
+    if (stagedImages.length > 0) {
+      await handleSendStaged(text);
+      return;
+    }
     const message = await sendGroupMessage(groupId, text);
     setMessages((prev) => [...(prev ?? []), message]);
+  }
+
+  async function handleSaveEdit(text: string) {
+    if (!groupId || !editingMessageId) return;
+    const trimmed = text.trim();
+    if (!trimmed) return;
+    const updated = await editGroupMessage(groupId, editingMessageId, trimmed);
+    setMessages((prev) => prev?.map((m) => (m.id === updated.id ? updated : m)) ?? prev);
+    setEditingMessageId(null);
+    setDraftText("");
+  }
+
+  function handleCancelEdit() {
+    setEditingMessageId(null);
+    setDraftText("");
+  }
+
+  async function handleSendStaged(text: string) {
+    if (!groupId) return;
+    const forwardedIds = stagedImages
+      .filter((img) => img.sourceMessageId)
+      .map((img) => img.sourceMessageId as string);
+    const newFiles = stagedImages.filter((img) => img.file).map((img) => img.file as File);
+
+    // When more than one image is going out together, fold them into a
+    // single shared image_group_id so they render as one WhatsApp-style
+    // grid in the target chat, even if they weren't originally grouped.
+    const batchImageGroupId =
+      forwardedIds.length + newFiles.length > 1 ? randomUUID() : undefined;
+
+    const collected: Message[] = [];
+    if (forwardedIds.length > 0 && forwardSourceGroupId) {
+      const forwarded = await forwardGroupMessages(
+        forwardSourceGroupId,
+        forwardedIds,
+        [groupId],
+        batchImageGroupId,
+      );
+      collected.push(...forwarded);
+    }
+    if (newFiles.length > 0) {
+      const uploaded = await sendGroupImageMessage(groupId, newFiles, batchImageGroupId);
+      collected.push(...uploaded);
+    }
+    const trimmed = text.trim();
+    if (trimmed) {
+      const textMessage = await sendGroupMessage(groupId, trimmed);
+      collected.push(textMessage);
+    }
+
+    setMessages((prev) => [...(prev ?? []), ...collected]);
+    stagedImages.forEach((img) => {
+      if (img.file) URL.revokeObjectURL(img.url);
+    });
+    setStagedImages([]);
+    setForwardSourceGroupId(null);
+    setDraftText("");
+  }
+
+  function handleRemoveStagedImage(key: string) {
+    setStagedImages((prev) => {
+      const target = prev.find((img) => img.key === key);
+      if (target?.file) URL.revokeObjectURL(target.url);
+      return prev.filter((img) => img.key !== key);
+    });
   }
 
   function handleProductSent(newMessages: Message[]) {
@@ -73,6 +190,15 @@ export default function GroupChat() {
     const files = e.target.files ? Array.from(e.target.files) : [];
     e.target.value = "";
     if (files.length === 0 || !groupId) return;
+    if (stagedImages.length > 0) {
+      const newItems: StagedImage[] = files.map((file) => ({
+        key: `new-${randomUUID()}`,
+        url: URL.createObjectURL(file),
+        file,
+      }));
+      setStagedImages((prev) => [...prev, ...newItems]);
+      return;
+    }
     const newMessages = await sendGroupImageMessage(groupId, files);
     setMessages((prev) => [...(prev ?? []), ...newMessages]);
   }
@@ -94,12 +220,60 @@ export default function GroupChat() {
     if (!groupId || selectedIds.size === 0) return;
     const ids = Array.from(selectedIds);
     await deleteGroupMessages(groupId, ids);
-    setMessages((prev) => prev?.filter((m) => !ids.includes(m.id)) ?? prev);
+    setMessages(
+      (prev) => prev?.map((m) => (ids.includes(m.id) ? { ...m, is_deleted: true } : m)) ?? prev,
+    );
     setSelectedIds(new Set());
   }
 
+  function handleEditSelected() {
+    if (selectedIds.size !== 1 || !messages) return;
+    const [id] = Array.from(selectedIds);
+    const target = messages.find((m) => m.id === id);
+    if (!target || target.message_type !== "TEXT" || target.is_deleted) return;
+    setEditingMessageId(id);
+    setDraftText(target.text ?? "");
+    setSelectedIds(new Set());
+  }
+
+  const canEditSelection =
+    selectedIds.size === 1 &&
+    (() => {
+      const [id] = Array.from(selectedIds);
+      const target = messages?.find((m) => m.id === id);
+      return !!target && target.message_type === "TEXT" && !target.is_deleted;
+    })();
+
   async function handleForward(targetGroupIds: string[]) {
-    if (!groupId || selectedIds.size === 0) return;
+    if (!groupId || selectedIds.size === 0 || !messages) return;
+
+    const selected = messages.filter((m) => selectedIds.has(m.id));
+    const onlyTextOrImage = selected.every(
+      (m) => m.message_type === "TEXT" || m.message_type === "IMAGE",
+    );
+
+    if (targetGroupIds.length === 1 && onlyTextOrImage) {
+      const targetId = targetGroupIds[0];
+      const imageMessages = selected.filter(
+        (m) => m.message_type === "IMAGE" && m.product_image,
+      );
+      const textMessage = selected.find((m) => m.message_type === "TEXT");
+
+      setShowForward(false);
+      setSelectedIds(new Set());
+      navigate(`/admin/groups/${targetId}/chat`, {
+        state: {
+          pendingForward: {
+            sourceGroupId: groupId,
+            imageMessageIds: imageMessages.map((m) => m.id),
+            imageUrls: imageMessages.map((m) => m.product_image as string),
+            text: textMessage?.text ?? "",
+          } satisfies PendingForwardState,
+        },
+      });
+      return;
+    }
+
     await forwardGroupMessages(groupId, Array.from(selectedIds), targetGroupIds);
     setShowForward(false);
     setSelectedIds(new Set());
@@ -127,6 +301,15 @@ export default function GroupChat() {
           >
             <Forward size={20} />
           </button>
+          {canEditSelection && (
+            <button
+              className="group-chat-header__icon-btn"
+              onClick={handleEditSelected}
+              aria-label="Edit"
+            >
+              <Pencil size={19} />
+            </button>
+          )}
           <button className="group-chat-header__icon-btn" onClick={handleDelete} aria-label="Delete">
             <Trash2 size={20} />
           </button>
@@ -166,8 +349,15 @@ export default function GroupChat() {
         />
       </div>
 
+      {editingMessageId && <EditingMessageBar onCancel={handleCancelEdit} />}
+
+      <ForwardPreviewBar images={stagedImages} onRemove={handleRemoveStagedImage} />
+
       <MessageInput
         onSend={handleSend}
+        value={draftText}
+        onChange={setDraftText}
+        canSubmitEmpty={stagedImages.length > 0}
         extraAction={
           <>
             {/* <span

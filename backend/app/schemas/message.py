@@ -16,11 +16,17 @@ class MessageOut(BaseModel):
     product_image: str | None = None
     product_description: str | None = None
     image_group_id: str | None = None
+    is_deleted: bool = False
+    is_edited: bool = False
     created_at: datetime
     read_at: datetime | None = None
 
 
 class SendMessageRequest(BaseModel):
+    text: str
+
+
+class EditMessageRequest(BaseModel):
     text: str
 
 
@@ -35,3 +41,4 @@ class DeleteMessagesRequest(BaseModel):
 class ForwardMessagesRequest(BaseModel):
     message_ids: list[str]
     group_ids: list[str]
+    image_group_id: str | None = None

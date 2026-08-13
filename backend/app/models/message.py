@@ -1,7 +1,7 @@
 import enum
 import uuid
 
-from sqlalchemy import Column, String, Text, Numeric, DateTime, Enum, ForeignKey, func
+from sqlalchemy import Boolean, Column, String, Text, Numeric, DateTime, Enum, ForeignKey, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
@@ -33,6 +33,9 @@ class Message(Base):
     product_description = Column(Text, nullable=True)
 
     image_group_id = Column(UUID(as_uuid=True), nullable=True, index=True)
+
+    is_deleted = Column(Boolean, nullable=False, default=False, server_default="false")
+    is_edited = Column(Boolean, nullable=False, default=False, server_default="false")
 
     created_at = Column(DateTime(timezone=True), server_default=func.now(), index=True)
     read_at = Column(DateTime(timezone=True), nullable=True)

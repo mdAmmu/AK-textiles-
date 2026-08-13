@@ -1,5 +1,5 @@
-import { useState } from "react";
-import type { FormEvent, ReactNode } from "react";
+import { useEffect, useRef, useState } from "react";
+import type { ReactNode } from "react";
 import { Mic, Send, Smile } from "lucide-react";
 import "./MessageInput.css";
 
@@ -7,17 +7,46 @@ interface Props {
   onSend: (text: string) => void;
   disabled?: boolean;
   extraAction?: ReactNode;
+  value?: string;
+  onChange?: (text: string) => void;
+  canSubmitEmpty?: boolean;
 }
 
-export default function MessageInput({ onSend, disabled, extraAction }: Props) {
-  const [text, setText] = useState("");
+export default function MessageInput({
+  onSend,
+  disabled,
+  extraAction,
+  value,
+  onChange,
+  canSubmitEmpty,
+}: Props) {
+  const [internalText, setInternalText] = useState("");
+  const isControlled = value !== undefined;
+  const text = isControlled ? value : internalText;
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  function handleSubmit(e: FormEvent) {
-    e.preventDefault();
+  function setText(next: string) {
+    if (isControlled) onChange?.(next);
+    else setInternalText(next);
+  }
+
+  useEffect(() => {
+    const el = textareaRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${el.scrollHeight}px`;
+  }, [text]);
+
+  function submit() {
     const trimmed = text.trim();
-    if (!trimmed) return;
+    if (!trimmed && !canSubmitEmpty) return;
     onSend(trimmed);
     setText("");
+  }
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    submit();
   }
 
   return (
@@ -26,12 +55,14 @@ export default function MessageInput({ onSend, disabled, extraAction }: Props) {
         <span className="message-input__icon">
           <Smile size={20} />
         </span>
-        <input
+        <textarea
+          ref={textareaRef}
           className="message-input__field"
           placeholder="Type a message..."
           value={text}
           onChange={(e) => setText(e.target.value)}
           disabled={disabled}
+          rows={1}
         />
         {extraAction}
         {/* <span className="message-input__icon">
@@ -42,7 +73,7 @@ export default function MessageInput({ onSend, disabled, extraAction }: Props) {
         </span> */}
       </div>
       <button className="message-input__send" type="submit" disabled={disabled}>
-        {text.trim() ? <Send size={18} /> : <Mic size={18} />}
+        {text.trim() || canSubmitEmpty ? <Send size={18} /> : <Mic size={18} />}
       </button>
     </form>
   );

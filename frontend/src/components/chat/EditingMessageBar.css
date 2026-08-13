@@ -1,0 +1,27 @@
+.editing-message-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.875rem;
+  background: var(--wa-panel-bg);
+  color: var(--wa-accent);
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+.editing-message-bar__icon {
+  flex-shrink: 0;
+}
+
+.editing-message-bar__label {
+  flex: 1;
+}
+
+.editing-message-bar__cancel {
+  display: flex;
+  border: none;
+  background: none;
+  color: var(--wa-text-secondary);
+  cursor: pointer;
+  padding: 0.125rem;
+}

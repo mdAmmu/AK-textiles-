@@ -54,6 +54,15 @@ export async function sendGroupMessage(groupId: string, text: string): Promise<M
   return data;
 }
 
+export async function editGroupMessage(
+  groupId: string,
+  messageId: string,
+  text: string,
+): Promise<Message> {
+  const { data } = await api.patch<Message>(`/groups/${groupId}/messages/${messageId}`, { text });
+  return data;
+}
+
 export async function sendGroupProductMessage(
   groupId: string,
   productId: string,
@@ -64,9 +73,14 @@ export async function sendGroupProductMessage(
   return data;
 }
 
-export async function sendGroupImageMessage(groupId: string, files: File[]): Promise<Message[]> {
+export async function sendGroupImageMessage(
+  groupId: string,
+  files: File[],
+  imageGroupId?: string,
+): Promise<Message[]> {
   const formData = new FormData();
   files.forEach((file) => formData.append("files", file));
+  if (imageGroupId) formData.append("image_group_id", imageGroupId);
   const { data } = await api.post<Message[]>(`/groups/${groupId}/messages/image`, formData, {
     headers: { "Content-Type": "multipart/form-data" },
   });
@@ -87,10 +101,12 @@ export async function forwardGroupMessages(
   groupId: string,
   messageIds: string[],
   targetGroupIds: string[],
+  imageGroupId?: string,
 ): Promise<Message[]> {
   const { data } = await api.post<Message[]>(`/groups/${groupId}/messages/forward`, {
     message_ids: messageIds,
     group_ids: targetGroupIds,
+    image_group_id: imageGroupId,
   });
   return data;
 }

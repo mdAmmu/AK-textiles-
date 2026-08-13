@@ -21,6 +21,12 @@ export interface GroupMessagesDeletedEvent {
   message_ids: string[];
 }
 
+export interface GroupMessageEditedEvent {
+  type: "group_message_edited";
+  group_id: string;
+  message: import("../types/message").Message;
+}
+
 export interface GroupDeletedEvent {
   type: "group_deleted";
   group_id: string;
@@ -31,6 +37,7 @@ export type ChatSocketEvent =
   | MessagesReadEvent
   | NewGroupMessageEvent
   | GroupMessagesDeletedEvent
+  | GroupMessageEditedEvent
   | GroupDeletedEvent;
 
 export async function openChatSocket(

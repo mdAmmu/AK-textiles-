@@ -13,6 +13,8 @@ export interface Message {
   product_image?: string | null;
   product_description?: string | null;
   image_group_id?: string | null;
+  is_deleted?: boolean;
+  is_edited?: boolean;
   created_at: string;
   read_at?: string | null;
 }

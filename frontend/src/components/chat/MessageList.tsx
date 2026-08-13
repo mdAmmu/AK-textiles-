@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef } from "react";
 import type { Message } from "../../types/message";
 import MessageBubble from "./MessageBubble";
 import ImageGroupBubble from "./ImageGroupBubble";
+import DeletedMessageBubble from "./DeletedMessageBubble";
 import "./MessageList.css";
 
 interface Props {
@@ -66,22 +67,36 @@ export default function MessageList({
           <span>Today</span>
         </div>
       )}
-      {items.map((item) =>
-        item.kind === "group" ? (
-          <ImageGroupBubble
-            key={item.messages[0].id}
-            messages={item.messages}
-            isOwn={item.messages[0].sender_id === currentUserId}
-            selectionMode={selectionMode}
-            selectedIds={selectedIds}
-            onLongPressMessage={onLongPressMessage}
-            onToggleSelectMessage={onToggleSelectMessage}
-          />
-        ) : (
+      {items.map((item) => {
+        if (item.kind === "group") {
+          const isOwn = item.messages[0].sender_id === currentUserId;
+          if (item.messages.every((m) => m.is_deleted)) {
+            return (
+              <DeletedMessageBubble key={item.messages[0].id} message={item.messages[0]} isOwn={isOwn} />
+            );
+          }
+          return (
+            <ImageGroupBubble
+              key={item.messages[0].id}
+              messages={item.messages}
+              isOwn={isOwn}
+              selectionMode={selectionMode}
+              selectedIds={selectedIds}
+              onLongPressMessage={onLongPressMessage}
+              onToggleSelectMessage={onToggleSelectMessage}
+            />
+          );
+        }
+
+        const isOwn = item.message.sender_id === currentUserId;
+        if (item.message.is_deleted) {
+          return <DeletedMessageBubble key={item.message.id} message={item.message} isOwn={isOwn} />;
+        }
+        return (
           <MessageBubble
             key={item.message.id}
             message={item.message}
-            isOwn={item.message.sender_id === currentUserId}
+            isOwn={isOwn}
             selectionMode={selectionMode}
             selected={selectedIds?.has(item.message.id)}
             onLongPress={onLongPressMessage ? () => onLongPressMessage(item.message.id) : undefined}
@@ -89,8 +104,8 @@ export default function MessageList({
               onToggleSelectMessage ? () => onToggleSelectMessage(item.message.id) : undefined
             }
           />
-        ),
-      )}
+        );
+      })}
       <div ref={bottomRef} />
     </div>
   );

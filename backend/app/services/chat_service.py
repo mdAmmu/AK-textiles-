@@ -191,6 +191,29 @@ async def send_group_image_message(
     return message
 
 
+async def edit_group_message(db: Session, group: Group, message_id: str, text: str) -> Message:
+    message = (
+        db.query(Message)
+        .filter(
+            Message.group_id == group.id,
+            Message.id == message_id,
+            Message.message_type == MessageType.TEXT,
+            Message.is_deleted.is_(False),
+        )
+        .first()
+    )
+    if message is None:
+        raise ValueError("Message not found")
+
+    message.text = text
+    message.is_edited = True
+    db.commit()
+    db.refresh(message)
+
+    await _notify_group_members(db, group, message, event_type="group_message_edited")
+    return message
+
+
 async def delete_group(db: Session, group: Group) -> list[str]:
     """Deletes a group along with its messages, and unassigns + kicks out its members."""
     members = db.query(User).filter(User.group_id == group.id, User.role == UserRole.USER).all()
@@ -219,7 +242,9 @@ async def delete_group_messages(db: Session, group: Group, message_ids: list[str
     )
     deleted_ids = [str(m.id) for m in messages]
     for message in messages:
-        db.delete(message)
+        # Soft delete: keep the row (with its timestamp) so the chat can show
+        # a "You deleted this message" placeholder in its place.
+        message.is_deleted = True
     db.commit()
 
     if deleted_ids:
@@ -242,7 +267,15 @@ async def forward_group_messages(
     source_messages: list[Message],
     target_groups: list[Group],
     sender_id,
+    image_group_id=None,
 ) -> list[Message]:
+    """Forwards messages as-is by default, preserving each source message's own
+    image_group_id (so an already-grouped batch stays grouped). When
+    `image_group_id` is passed explicitly, every forwarded IMAGE message is
+    stamped with it instead — used to fold images that weren't originally
+    sent together into one new grid when the admin forwards a mixed
+    selection as a single batch.
+    """
     forwarded: list[Message] = []
     for target_group in target_groups:
         for source in source_messages:
@@ -256,7 +289,11 @@ async def forward_group_messages(
                 product_name=source.product_name,
                 product_image=source.product_image,
                 product_description=source.product_description,
-                image_group_id=source.image_group_id,
+                image_group_id=(
+                    image_group_id
+                    if image_group_id is not None and source.message_type == MessageType.IMAGE
+                    else source.image_group_id
+                ),
             )
             db.add(copy)
             db.commit()
@@ -266,10 +303,12 @@ async def forward_group_messages(
     return forwarded
 
 
-async def _notify_group_members(db: Session, group: Group, message: Message) -> None:
+async def _notify_group_members(
+    db: Session, group: Group, message: Message, event_type: str = "new_group_message"
+) -> None:
     members = db.query(User).filter(User.group_id == group.id, User.role == UserRole.USER).all()
     payload = {
-        "type": "new_group_message",
+        "type": event_type,
         "group_id": str(group.id),
         "message": serialize_message(message).model_dump(mode="json"),
     }
@@ -335,6 +374,8 @@ def serialize_message(message: Message) -> MessageOut:
         product_image=message.product_image,
         product_description=message.product_description,
         image_group_id=str(message.image_group_id) if message.image_group_id else None,
+        is_deleted=message.is_deleted,
+        is_edited=message.is_edited,
         created_at=message.created_at,
         read_at=message.read_at,
     )

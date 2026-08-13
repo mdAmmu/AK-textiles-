@@ -1,6 +1,6 @@
 import uuid
 
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
@@ -14,6 +14,7 @@ from app.models.user import User, UserRole
 from app.schemas.group import AssignGroupRequest, CreateGroupRequest, GroupOut, GroupUserOut
 from app.schemas.message import (
     DeleteMessagesRequest,
+    EditMessageRequest,
     ForwardMessagesRequest,
     MessageOut,
     SendMessageRequest,
@@ -22,6 +23,7 @@ from app.schemas.message import (
 from app.services.chat_service import (
     delete_group,
     delete_group_messages,
+    edit_group_message,
     forward_group_messages,
     send_group_image_message,
     send_group_product_message,
@@ -144,6 +146,22 @@ async def admin_send_group_message(
     return serialize_message(message)
 
 
+@router.patch("/{group_id}/messages/{message_id}", response_model=MessageOut)
+async def admin_edit_group_message(
+    group_id: str,
+    message_id: str,
+    body: EditMessageRequest,
+    db: Session = Depends(get_db),
+    _admin: User = Depends(require_admin),
+):
+    group = _get_group_or_404(db, group_id)
+    try:
+        message = await edit_group_message(db, group, message_id, body.text)
+    except ValueError:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Message not found")
+    return serialize_message(message)
+
+
 @router.post("/{group_id}/messages/product", response_model=list[MessageOut])
 async def admin_send_group_product_message(
     group_id: str,
@@ -164,12 +182,15 @@ async def admin_send_group_product_message(
 async def admin_send_group_image_message(
     group_id: str,
     files: list[UploadFile] = File(...),
+    image_group_id: str | None = Form(None),
     db: Session = Depends(get_db),
     admin: User = Depends(require_admin),
 ):
     group = _get_group_or_404(db, group_id)
 
-    image_group_id = uuid.uuid4() if len(files) > 1 else None
+    parsed_group_id = (
+        uuid.UUID(image_group_id) if image_group_id else (uuid.uuid4() if len(files) > 1 else None)
+    )
 
     messages = []
     for file in files:
@@ -180,7 +201,7 @@ async def admin_send_group_image_message(
         filename = f"{group_id}/{uuid.uuid4()}.{extension}"
         url = upload_chat_image(filename, content, file.content_type or "image/jpeg")
 
-        message = await send_group_image_message(db, group, admin.id, url, image_group_id)
+        message = await send_group_image_message(db, group, admin.id, url, parsed_group_id)
         messages.append(serialize_message(message))
     return messages
 
@@ -217,7 +238,10 @@ async def admin_forward_group_messages(
     if not target_groups:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No target groups found")
 
-    forwarded = await forward_group_messages(db, source_messages, target_groups, admin.id)
+    image_group_id = uuid.UUID(body.image_group_id) if body.image_group_id else None
+    forwarded = await forward_group_messages(
+        db, source_messages, target_groups, admin.id, image_group_id
+    )
     return [serialize_message(m) for m in forwarded]
 
 

@@ -134,6 +134,7 @@ export default function MessageBubble({
               <p className="message-bubble__text">{message.text}</p>
             )}
             <span className="message-bubble__time">
+              {message.is_edited && <span className="message-bubble__edited">Edited</span>}
               {time}
               {tick}
             </span>
