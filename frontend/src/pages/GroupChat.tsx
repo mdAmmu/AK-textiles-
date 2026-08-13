@@ -186,21 +186,18 @@ export default function GroupChat() {
     setShowPicker(false);
   }
 
-  async function handleCameraCapture(e: React.ChangeEvent<HTMLInputElement>) {
+  function handleCameraCapture(e: React.ChangeEvent<HTMLInputElement>) {
     const files = e.target.files ? Array.from(e.target.files) : [];
     e.target.value = "";
-    if (files.length === 0 || !groupId) return;
-    if (stagedImages.length > 0) {
-      const newItems: StagedImage[] = files.map((file) => ({
-        key: `new-${randomUUID()}`,
-        url: URL.createObjectURL(file),
-        file,
-      }));
-      setStagedImages((prev) => [...prev, ...newItems]);
-      return;
-    }
-    const newMessages = await sendGroupImageMessage(groupId, files);
-    setMessages((prev) => [...(prev ?? []), ...newMessages]);
+    if (files.length === 0) return;
+    // Stage picked images above the input instead of sending immediately,
+    // so the admin can add a caption (or more images) before sending.
+    const newItems: StagedImage[] = files.map((file) => ({
+      key: `new-${randomUUID()}`,
+      url: URL.createObjectURL(file),
+      file,
+    }));
+    setStagedImages((prev) => [...prev, ...newItems]);
   }
 
   function handleLongPress(id: string) {
