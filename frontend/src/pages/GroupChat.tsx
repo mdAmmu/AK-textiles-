@@ -70,11 +70,11 @@ export default function GroupChat() {
   }
 
   async function handleCameraCapture(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
+    const files = e.target.files ? Array.from(e.target.files) : [];
     e.target.value = "";
-    if (!file || !groupId) return;
-    const message = await sendGroupImageMessage(groupId, file);
-    setMessages((prev) => [...(prev ?? []), message]);
+    if (files.length === 0 || !groupId) return;
+    const newMessages = await sendGroupImageMessage(groupId, files);
+    setMessages((prev) => [...(prev ?? []), ...newMessages]);
   }
 
   function handleLongPress(id: string) {
@@ -190,6 +190,7 @@ export default function GroupChat() {
               ref={cameraInputRef}
               type="file"
               accept="image/*"
+              multiple
               hidden
               onChange={handleCameraCapture}
             />

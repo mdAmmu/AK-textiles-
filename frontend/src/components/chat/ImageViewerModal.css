@@ -1,0 +1,66 @@
+.image-viewer {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: #000;
+  display: flex;
+  flex-direction: column;
+}
+
+.image-viewer__header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: #1f1f1f;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.image-viewer__back {
+  background: none;
+  border: none;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  padding: 0;
+}
+
+.image-viewer__title {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.image-viewer__title-main {
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.image-viewer__title-sub {
+  font-size: 0.8125rem;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.image-viewer__scroll {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: y proximity;
+}
+
+.image-viewer__item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100%;
+  padding: 0.5rem 0;
+  scroll-snap-align: start;
+}
+
+.image-viewer__img {
+  max-width: 100%;
+  max-height: calc(100vh - 4rem);
+  object-fit: contain;
+}

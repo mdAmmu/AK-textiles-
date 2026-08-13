@@ -173,12 +173,15 @@ async def send_group_product_message(
     return messages
 
 
-async def send_group_image_message(db: Session, group: Group, sender_id, image_url: str) -> Message:
+async def send_group_image_message(
+    db: Session, group: Group, sender_id, image_url: str, image_group_id=None
+) -> Message:
     message = Message(
         group_id=group.id,
         sender_id=sender_id,
         message_type=MessageType.IMAGE,
         product_image=image_url,
+        image_group_id=image_group_id,
     )
     db.add(message)
     db.commit()
@@ -253,6 +256,7 @@ async def forward_group_messages(
                 product_name=source.product_name,
                 product_image=source.product_image,
                 product_description=source.product_description,
+                image_group_id=source.image_group_id,
             )
             db.add(copy)
             db.commit()
@@ -330,6 +334,7 @@ def serialize_message(message: Message) -> MessageOut:
         product_name=message.product_name,
         product_image=message.product_image,
         product_description=message.product_description,
+        image_group_id=str(message.image_group_id) if message.image_group_id else None,
         created_at=message.created_at,
         read_at=message.read_at,
     )

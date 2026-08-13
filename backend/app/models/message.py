@@ -32,6 +32,8 @@ class Message(Base):
     product_image = Column(String(500), nullable=True)
     product_description = Column(Text, nullable=True)
 
+    image_group_id = Column(UUID(as_uuid=True), nullable=True, index=True)
+
     created_at = Column(DateTime(timezone=True), server_default=func.now(), index=True)
     read_at = Column(DateTime(timezone=True), nullable=True)
 

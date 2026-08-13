@@ -2,7 +2,7 @@ import { useRef } from "react";
 import { Check, CheckCheck } from "lucide-react";
 import type { Message } from "../../types/message";
 import ProductMessage from "./ProductMessage";
-import ImageMessage from "./ImageMessage";
+import ImageMessage, { type ImageMessageHandle } from "./ImageMessage";
 import "./MessageBubble.css";
 
 interface Props {
@@ -29,6 +29,7 @@ export default function MessageBubble({
   const firedRef = useRef(false);
   const movedRef = useRef(false);
   const touchStartRef = useRef<{ x: number; y: number } | null>(null);
+  const imageRef = useRef<ImageMessageHandle>(null);
 
   const time = new Date(message.created_at).toLocaleTimeString([], {
     hour: "2-digit",
@@ -93,10 +94,15 @@ export default function MessageBubble({
 
   function handleTouchEnd(e: React.TouchEvent) {
     // Prevent the browser's synthetic mouse/click events from firing a
-    // second (conflicting) endPress() right after this one.
+    // second (conflicting) endPress() right after this one. Since that also
+    // suppresses the image's own onClick, open it here directly on a tap.
+    const wasTap = !firedRef.current && !movedRef.current;
     e.preventDefault();
     touchStartRef.current = null;
     endPress();
+    if (wasTap && isImage && !selectionMode) {
+      imageRef.current?.open();
+    }
   }
 
   return (
@@ -114,7 +120,7 @@ export default function MessageBubble({
       >
         {isImage ? (
           <div className="message-bubble__image-wrap">
-            <ImageMessage message={message} />
+            <ImageMessage ref={imageRef} message={message} selectionMode={selectionMode} />
             <span className="message-bubble__image-time">
               {time}
               {tick}

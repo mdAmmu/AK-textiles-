@@ -15,6 +15,7 @@ class MessageOut(BaseModel):
     product_name: str | None = None
     product_image: str | None = None
     product_description: str | None = None
+    image_group_id: str | None = None
     created_at: datetime
     read_at: datetime | None = None
 

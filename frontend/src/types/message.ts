@@ -12,6 +12,7 @@ export interface Message {
   product_name?: string | null;
   product_image?: string | null;
   product_description?: string | null;
+  image_group_id?: string | null;
   created_at: string;
   read_at?: string | null;
 }
