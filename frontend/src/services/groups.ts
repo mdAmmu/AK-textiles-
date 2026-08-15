@@ -43,6 +43,20 @@ export async function fetchUnassignedUsers(search?: string): Promise<User[]> {
   return data;
 }
 
+export async function createAndAssignCustomer(
+  groupId: string,
+  name: string,
+  phone: string,
+  password: string,
+): Promise<GroupUser> {
+  const { data } = await api.post<GroupUser>(`/groups/${groupId}/customers`, {
+    name,
+    phone,
+    password,
+  });
+  return data;
+}
+
 export async function fetchMyGroupMessages(): Promise<Message[]> {
   const { data } = await api.get<Message[]>("/groups/mine/messages");
   return data;

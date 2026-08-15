@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, MoreVertical, Pencil, User as UserIcon, UserPlus } from "lucide-react";
 import {
   assignUserGroup,
+  createAndAssignCustomer,
   fetchGroups,
   fetchGroupUsers,
   fetchUnassignedUsers,
@@ -44,6 +45,14 @@ export default function GroupDetail() {
   async function handleAdd(userId: string) {
     if (!groupId) return;
     const added = await assignUserGroup(userId, groupId);
+    setCustomers((prev) => [...(prev ?? []), added]);
+    setGroup((prev) => (prev ? { ...prev, customer_count: prev.customer_count + 1 } : prev));
+    setShowAddPanel(false);
+  }
+
+  async function handleAddNew(phone: string, name: string, password: string) {
+    if (!groupId) return;
+    const added = await createAndAssignCustomer(groupId, name, phone, password);
     setCustomers((prev) => [...(prev ?? []), added]);
     setGroup((prev) => (prev ? { ...prev, customer_count: prev.customer_count + 1 } : prev));
     setShowAddPanel(false);
@@ -123,6 +132,7 @@ export default function GroupDetail() {
           candidates={candidates}
           onSearch={handleSearch}
           onAdd={handleAdd}
+          onAddNew={handleAddNew}
           onClose={() => setShowAddPanel(false)}
         />
       )}

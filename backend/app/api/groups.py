@@ -6,13 +6,20 @@ from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user, require_admin
 from app.core.database import get_db
+from app.core.security import hash_password
 from app.core.supabase_client import upload_chat_image
 from app.models.group import Group
 from app.models.group_read import GroupRead
 from app.models.message import Message
 from app.models.product import Product
 from app.models.user import User, UserRole
-from app.schemas.group import AssignGroupRequest, CreateGroupRequest, GroupOut, GroupUserOut
+from app.schemas.group import (
+    AssignGroupRequest,
+    CreateCustomerRequest,
+    CreateGroupRequest,
+    GroupOut,
+    GroupUserOut,
+)
 from app.schemas.message import (
     DeleteMessagesRequest,
     EditMessageRequest,
@@ -187,6 +194,37 @@ def list_group_users(
     return [
         GroupUserOut(id=str(u.id), name=u.name, phone=u.phone, email=u.email) for u in users
     ]
+
+
+@router.post("/{group_id}/customers", response_model=GroupUserOut)
+def create_and_assign_customer(
+    group_id: str,
+    body: CreateCustomerRequest,
+    db: Session = Depends(get_db),
+    _admin: User = Depends(require_admin),
+):
+    group = _get_group_or_404(db, group_id)
+
+    phone = body.phone.strip()
+    name = body.name.strip()
+    if not phone or not name or not body.password:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Name, phone and password are required"
+        )
+    if db.query(User).filter(User.phone == phone).first() is not None:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Phone number already registered")
+
+    user = User(
+        name=name,
+        phone=phone,
+        password_hash=hash_password(body.password),
+        role=UserRole.USER,
+        group_id=group.id,
+    )
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    return GroupUserOut(id=str(user.id), name=user.name, phone=user.phone, email=user.email)
 
 
 @router.get("/{group_id}/messages", response_model=list[MessageOut])

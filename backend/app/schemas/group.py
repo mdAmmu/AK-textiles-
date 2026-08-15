@@ -26,3 +26,9 @@ class AssignGroupRequest(BaseModel):
 class CreateGroupRequest(BaseModel):
     name: str
     description: str | None = None
+
+
+class CreateCustomerRequest(BaseModel):
+    name: str
+    phone: str
+    password: str

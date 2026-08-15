@@ -52,7 +52,6 @@ export default function UserChat() {
   if (messages === null || !user) return <LoadingScreen />;
 
   const groupName = group?.name ?? "Admin";
-  const memberCount = (group?.customer_count ?? 0) + 1;
 
   function handleLongPress(id: string) {
     setSelectedIds(new Set([id]));
@@ -156,7 +155,6 @@ export default function UserChat() {
           <GroupIcon name={groupName} size={36} />
           <div className="group-chat-header__info">
             <div className="group-chat-header__title">{groupName}</div>
-            <div className="group-chat-header__subtitle">{memberCount} members</div>
           </div>
           <button
             className="group-chat-header__icon-btn"

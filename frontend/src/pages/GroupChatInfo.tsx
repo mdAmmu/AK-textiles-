@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import {
   assignUserGroup,
+  createAndAssignCustomer,
   fetchGroups,
   fetchGroupUsers,
   fetchUnassignedUsers,
@@ -58,6 +59,14 @@ export default function GroupChatInfo() {
   async function handleAdd(userId: string) {
     if (!groupId) return;
     const added = await assignUserGroup(userId, groupId);
+    setMembers((prev) => [...(prev ?? []), added]);
+    setGroup((prev) => (prev ? { ...prev, customer_count: prev.customer_count + 1 } : prev));
+    setShowAddPanel(false);
+  }
+
+  async function handleAddNew(phone: string, name: string, password: string) {
+    if (!groupId) return;
+    const added = await createAndAssignCustomer(groupId, name, phone, password);
     setMembers((prev) => [...(prev ?? []), added]);
     setGroup((prev) => (prev ? { ...prev, customer_count: prev.customer_count + 1 } : prev));
     setShowAddPanel(false);
@@ -165,6 +174,7 @@ export default function GroupChatInfo() {
           candidates={candidates}
           onSearch={handleAddSearch}
           onAdd={handleAdd}
+          onAddNew={handleAddNew}
           onClose={() => setShowAddPanel(false)}
         />
       )}
