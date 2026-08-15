@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { MoreVertical, Share2, Trash2, X } from "lucide-react";
-import { useClerk } from "@clerk/clerk-react";
 import { useCurrentUser } from "../hooks/useCurrentUser";
+import { logout } from "../services/auth";
 import { useChatSocket } from "../hooks/useChatSocket";
 import { deleteMyGroupMessages, fetchMyGroup, fetchMyGroupMessages } from "../services/groups";
 import { downloadImage, shareImageFiles } from "../utils/shareImage";
@@ -17,7 +17,6 @@ import "./GroupChat.css";
 export default function UserChat() {
   const navigate = useNavigate();
   const { user } = useCurrentUser();
-  const { signOut } = useClerk();
   const [messages, setMessages] = useState<Message[] | null>(null);
   const [group, setGroup] = useState<Group | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -45,7 +44,8 @@ export default function UserChat() {
     }
     if (event.type === "group_deleted") {
       if (group && event.group_id !== group.id) return;
-      signOut().then(() => navigate("/login", { replace: true }));
+      logout();
+      navigate("/login", { replace: true });
     }
   }, !!user && !!group);
 

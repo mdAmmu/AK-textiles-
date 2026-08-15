@@ -9,9 +9,9 @@ class Settings(BaseSettings):
     supabase_anon_key: str = ""
     supabase_service_key: str = ""
 
-    clerk_publishable_key: str = ""
-    clerk_secret_key: str = ""
-    clerk_jwks_url: str = ""
+    jwt_secret: str = "dev-insecure-secret-change-me"
+    jwt_algorithm: str = "HS256"
+    jwt_expire_minutes: int = 60 * 24 * 7
 
     cors_origins: list[str] = ["http://localhost:5173"]
 

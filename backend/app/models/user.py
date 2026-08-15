@@ -17,9 +17,9 @@ class User(Base):
     __tablename__ = "users"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    clerk_user_id = Column(String(150), unique=True, nullable=False, index=True)
     name = Column(String(150), nullable=False)
-    phone = Column(String(20), unique=True, nullable=True, index=True)
+    phone = Column(String(20), unique=True, nullable=False, index=True)
+    password_hash = Column(String(255), nullable=False)
     email = Column(String(150), unique=True, nullable=True)
     role = Column(Enum(UserRole), nullable=False, default=UserRole.USER)
     group_id = Column(UUID(as_uuid=True), ForeignKey("groups.id"), nullable=True)

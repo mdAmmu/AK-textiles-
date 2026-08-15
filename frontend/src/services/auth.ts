@@ -1,13 +1,26 @@
-import { api } from "./api";
+import { api, clearToken, setToken } from "./api";
 import type { User } from "../types/user";
 
-export async function syncCurrentUser(
-  name: string,
-  email?: string,
-  phone?: string,
-): Promise<User> {
-  const { data } = await api.post<User>("/auth/sync", { name, email, phone });
-  return data;
+interface TokenResponse {
+  access_token: string;
+  token_type: string;
+  user: User;
+}
+
+export function logout(): void {
+  clearToken();
+}
+
+export async function login(phone: string, password: string): Promise<User> {
+  const { data } = await api.post<TokenResponse>("/auth/login", { phone, password });
+  setToken(data.access_token);
+  return data.user;
+}
+
+export async function register(name: string, phone: string, password: string): Promise<User> {
+  const { data } = await api.post<TokenResponse>("/auth/register", { name, phone, password });
+  setToken(data.access_token);
+  return data.user;
 }
 
 export async function fetchCurrentUser(): Promise<User> {

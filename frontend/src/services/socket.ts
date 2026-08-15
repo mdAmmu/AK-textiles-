@@ -1,3 +1,5 @@
+import { getToken } from "./api";
+
 export interface NewMessageEvent {
   type: "new_message";
   message: import("../types/message").Message;
@@ -43,7 +45,7 @@ export type ChatSocketEvent =
 export async function openChatSocket(
   onMessage: (event: ChatSocketEvent) => void,
 ): Promise<WebSocket | null> {
-  const token = await window.Clerk?.session?.getToken();
+  const token = getToken();
   if (!token) return null;
 
   const apiBase = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000";

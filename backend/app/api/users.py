@@ -23,7 +23,9 @@ def list_users(
 
     if search:
         like = f"%{search}%"
-        query = query.filter((User.name.ilike(like)) | (User.email.ilike(like)))
+        query = query.filter(
+            (User.name.ilike(like)) | (User.email.ilike(like)) | (User.phone.ilike(like))
+        )
 
     users = query.order_by(User.name).all()
     return [

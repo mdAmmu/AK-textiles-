@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, LogOut, Moon } from "lucide-react";
-import { useClerk, useUser } from "@clerk/clerk-react";
 import { useCurrentUser } from "../hooks/useCurrentUser";
+import { logout } from "../services/auth";
 import { useTheme } from "../contexts/ThemeContext";
 import { fetchMyGroupMessages } from "../services/groups";
 import type { Message } from "../types/message";
@@ -14,8 +14,6 @@ import "./UserProfile.css";
 export default function UserProfile() {
   const navigate = useNavigate();
   const { user } = useCurrentUser();
-  const { user: clerkUser } = useUser();
-  const { signOut } = useClerk();
   const { theme } = useTheme();
 
   const [media, setMedia] = useState<Message[] | null>(null);
@@ -26,8 +24,8 @@ export default function UserProfile() {
     );
   }, []);
 
-  async function handleLogout() {
-    await signOut();
+  function handleLogout() {
+    logout();
     navigate("/login", { replace: true });
   }
 
@@ -42,7 +40,7 @@ export default function UserProfile() {
       </header>
 
       <div className="user-profile-page__hero">
-        <Avatar name={user.name} imageUrl={clerkUser?.imageUrl} size={112} />
+        <Avatar name={user.name} size={112} />
         <h1>{user.name} (You)</h1>
         {(user.phone || user.email) && (
           <span className="user-profile-page__meta">{user.phone ?? user.email}</span>

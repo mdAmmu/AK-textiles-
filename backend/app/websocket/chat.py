@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Query, WebSocket, WebSocketDisconnect
 
-from app.core.clerk import verify_clerk_token
 from app.core.database import SessionLocal
+from app.core.security import decode_access_token
 from app.models.user import User
 from app.websocket.manager import manager
 
@@ -11,14 +11,14 @@ router = APIRouter()
 @router.websocket("/ws/chat")
 async def chat_socket(websocket: WebSocket, token: str = Query(...)):
     try:
-        payload = verify_clerk_token(token)
+        payload = decode_access_token(token)
     except Exception:
         await websocket.close(code=4401)
         return
 
     db = SessionLocal()
     try:
-        user = db.query(User).filter(User.clerk_user_id == payload["sub"]).first()
+        user = db.query(User).filter(User.id == payload["sub"]).first()
     finally:
         db.close()
 

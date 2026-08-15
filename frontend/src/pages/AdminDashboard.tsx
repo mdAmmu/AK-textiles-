@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
 import { Filter, Menu, Search } from "lucide-react";
-import { useUser } from "@clerk/clerk-react";
 import { fetchGroups } from "../services/groups";
 import type { Group } from "../types/group";
 import { useCurrentUser } from "../hooks/useCurrentUser";
@@ -13,7 +12,6 @@ import "./AdminDashboard.css";
 
 export default function AdminDashboard() {
   const { user } = useCurrentUser();
-  const { user: clerkUser } = useUser();
   const [groups, setGroups] = useState<Group[] | null>(null);
   const [search, setSearch] = useState("");
   const [showAccount, setShowAccount] = useState(false);
@@ -48,7 +46,7 @@ export default function AdminDashboard() {
           aria-label="Profile"
           onClick={() => setShowProfile(true)}
         >
-          <Avatar name={user?.name ?? "Admin"} imageUrl={clerkUser?.imageUrl} online size={44} />
+          <Avatar name={user?.name ?? "Admin"} online size={44} />
         </button>
       </header>
 
@@ -96,7 +94,6 @@ export default function AdminDashboard() {
       {showProfile && user && (
         <AdminProfileScreen
           admin={user}
-          imageUrl={clerkUser?.imageUrl}
           onClose={() => setShowProfile(false)}
         />
       )}

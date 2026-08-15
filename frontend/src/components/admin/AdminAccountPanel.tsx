@@ -2,10 +2,10 @@ import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, LogOut, Plus, Trash2 } from "lucide-react";
-import { useClerk } from "@clerk/clerk-react";
 import type { User } from "../../types/user";
 import type { Group } from "../../types/group";
 import { createGroup, deleteGroup, fetchGroups } from "../../services/groups";
+import { logout } from "../../services/auth";
 import Avatar from "../common/Avatar";
 import GroupIcon from "./GroupIcon";
 import "./AdminAccountPanel.css";
@@ -35,7 +35,6 @@ export default function AdminAccountPanel({
   const [loggingOut, setLoggingOut] = useState(false);
 
   const navigate = useNavigate();
-  const { signOut } = useClerk();
 
   useEffect(() => {
     fetchGroups().then(setGroups);
@@ -77,7 +76,7 @@ export default function AdminAccountPanel({
     if (loggingOut) return;
     setLoggingOut(true);
     try {
-      await signOut();
+      logout();
       navigate("/login", { replace: true });
     } finally {
       setLoggingOut(false);

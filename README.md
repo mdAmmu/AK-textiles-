@@ -20,7 +20,7 @@ app was built from.
 | Backend         | FastAPI (Python)                                    |
 | Database        | PostgreSQL (hosted on Supabase)                     |
 | Realtime        | WebSockets (FastAPI native)                          |
-| Auth            | Clerk (Google sign-in for now, phone OTP planned)    |
+| Auth            | Phone number + password (custom JWT, phone OTP planned) |
 | Image storage   | Supabase Storage (public bucket `product-images`)    |
 
 ---
@@ -30,25 +30,18 @@ app was built from.
 - **Node.js** 18+ and **npm**
 - **Python** 3.11+ (project was built/tested on 3.14)
 - A **Supabase** project (free tier is fine) — for Postgres + Storage
-- A **Clerk** application (free tier is fine) — for auth
 
 ---
 
 ## 1. Clone and get API keys
 
-You'll need three sets of credentials before anything runs:
+You'll need Supabase credentials before anything runs:
 
 ### Supabase
 1. Go to https://supabase.com → sign in → your project (or create one)
 2. **Project Settings → Database** → copy the **Connection string** (URI). You'll turn
    `postgresql://...` into `postgresql+psycopg://...` (see `backend/.env.example`)
 3. **Project Settings → API** → copy the **Project URL**, **anon public key**, and **service_role key**
-
-### Clerk
-1. Go to https://clerk.com → your application → **API Keys**
-2. Copy the **Publishable key** (`pk_...`) and **Secret key** (`sk_...`)
-3. Under **Configure → SSO Connections**, make sure **Google** is enabled (this app currently signs
-   in via Google only — phone OTP is a planned future step, see `implementation.md`)
 
 ---
 
@@ -69,8 +62,9 @@ SUPABASE_URL=https://YOUR_PROJECT.supabase.co
 SUPABASE_ANON_KEY=your-anon-key
 SUPABASE_SERVICE_KEY=your-service-role-key
 
-CLERK_PUBLISHABLE_KEY=pk_test_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-CLERK_SECRET_KEY=sk_test_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+JWT_SECRET=change-this-to-a-long-random-string
+JWT_ALGORITHM=HS256
+JWT_EXPIRE_MINUTES=10080
 
 CORS_ORIGINS=["http://localhost:5173"]
 ```
@@ -120,10 +114,7 @@ Create `frontend\.env` (copy `frontend\.env.example` and fill in your real value
 
 ```env
 VITE_API_BASE_URL=http://localhost:8000
-VITE_CLERK_PUBLISHABLE_KEY=pk_test_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ```
-
-(Use the **same** Clerk publishable key as the backend's `CLERK_PUBLISHABLE_KEY`.)
 
 Run the frontend:
 
@@ -137,10 +128,11 @@ Open http://localhost:5173
 
 ## 4. First-time login: making yourself Admin
 
-Every new Google sign-in becomes a plain `USER` with no group. To use the admin dashboard, you need
-to manually promote your own account to `ADMIN` once, in the database:
+Every new sign-up on the Login page becomes a plain `USER` with no group. To use the admin
+dashboard, you need to manually promote your own account to `ADMIN` once, in the database:
 
-1. Sign in once at http://localhost:5173 with the Google account you want to be admin
+1. Sign up once at http://localhost:5173/login with the phone number + password you want to use as
+   admin
 2. Run this from `backend/` (with the venv active):
    ```powershell
    python -c "
@@ -148,16 +140,16 @@ to manually promote your own account to `ADMIN` once, in the database:
    from app.models.user import User, UserRole
 
    db = SessionLocal()
-   u = db.query(User).filter(User.email == 'YOUR_EMAIL@gmail.com').first()
+   u = db.query(User).filter(User.phone == 'YOUR_PHONE_NUMBER').first()
    u.role = UserRole.ADMIN
    db.commit()
    print(u.name, '->', u.role)
    db.close()
    "
    ```
-3. Refresh the app — you should now land on `/admin` instead of `/chat`
+3. Log out and back in — you should now land on `/admin` instead of `/chat`
 
-To test the **customer side**, sign in with a *different* Google account in an incognito window —
+To test the **customer side**, sign up with a *different* phone number in an incognito window —
 it'll default to `USER` and land on `/chat`. Use `/admin/groups` to assign that test customer to a
 group so broadcasts/prices work for them.
 
@@ -217,7 +209,7 @@ Note: if your WiFi network changes, your LAN IP changes too — repeat steps 1�
 backend/
   app/
     api/            # REST endpoints (auth, users, groups, products, chats)
-    core/           # config, database session, Clerk token verification, Supabase client
+    core/           # config, database session, password hashing/JWT, Supabase client
     models/         # SQLAlchemy models (users, groups, products, conversations, messages)
     schemas/        # Pydantic request/response schemas
     services/       # business logic (chat, broadcast)
