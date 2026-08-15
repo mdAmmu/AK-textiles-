@@ -21,3 +21,7 @@
   border: 2px solid #fff;
   border-radius: 50%;
 }
+
+:root[data-theme="dark"] .avatar__online {
+  border-color: #10161f;
+}

@@ -22,7 +22,7 @@
   align-items: center;
   /* justify-content: space-between; */
   gap: 10px;
-  padding: 1rem 1.125rem;
+  padding: 2rem 1.125rem;
   color: #fff;
   font-weight: 700;
   font-size: 1.0625rem;
@@ -64,7 +64,7 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
-  padding: 3rem 1.5rem 0;
+  padding: 4rem 1.5rem 0;
 }
 
 .admin-profile-screen__identity h1 {
@@ -131,4 +131,42 @@
 .admin-profile-screen__row-chevron {
   color: #c2c6c3;
   flex-shrink: 0;
+}
+
+:root[data-theme="dark"] .admin-profile-screen {
+  background: #10161f;
+}
+
+:root[data-theme="dark"] .admin-profile-screen__body {
+  background: #1e2530;
+  box-shadow: none;
+}
+
+:root[data-theme="dark"] .admin-profile-screen__identity h1 {
+  color: #e9edef;
+}
+
+:root[data-theme="dark"] .admin-profile-screen__identity span {
+  color: #8b96a5;
+}
+
+:root[data-theme="dark"] .admin-profile-screen__identity p {
+  color: #6b7480;
+}
+
+:root[data-theme="dark"] .admin-profile-screen__row {
+  border-bottom-color: #232d3a;
+  color: #e9edef;
+}
+
+:root[data-theme="dark"] .admin-profile-screen__row-icon {
+  color: #8b96a5;
+}
+
+:root[data-theme="dark"] .admin-profile-screen__row-sublabel {
+  color: #6b7480;
+}
+
+:root[data-theme="dark"] .admin-profile-screen__row-chevron {
+  color: #6b7480;
 }

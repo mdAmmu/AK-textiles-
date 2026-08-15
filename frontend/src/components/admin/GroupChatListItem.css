@@ -41,6 +41,23 @@
   font-size: 0.75rem;
 }
 
+:root[data-theme="dark"] .group-chat-list-item {
+  background: #1e2530;
+  border-color: #232d3a;
+}
+
+:root[data-theme="dark"] .group-chat-list-item__name {
+  color: #e9edef;
+}
+
+:root[data-theme="dark"] .group-chat-list-item__preview {
+  color: #8b96a5;
+}
+
+:root[data-theme="dark"] .group-chat-list-item__time {
+  color: #6b7480;
+}
+
 .group-chat-list-item__badge {
   min-width: 20px;
   height: 20px;

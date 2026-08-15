@@ -12,6 +12,20 @@
   background: linear-gradient(180deg, #eaf7ee 0%, #f6fbf7 40%, #ffffff 75%);
 }
 
+:root[data-theme="dark"] .admin-dashboard-page {
+  --acc: #17c98d;
+  --ink: #e9edef;
+  --ink-secondary: #8b96a5;
+  --card-bg: #1e2530;
+  --page-bg: #10161f;
+  background: #10161f;
+}
+
+:root[data-theme="dark"] .admin-dashboard-page__search-row {
+  box-shadow: none;
+  border: 1px solid #232d3a;
+}
+
 .admin-dashboard-page__header {
   display: flex;
   align-items: center;

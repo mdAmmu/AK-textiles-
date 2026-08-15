@@ -6,7 +6,7 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.625rem 1rem;
+  padding: 1rem 1rem;
   background: var(--chat-header-bg);
   color: var(--chat-text);
   border-bottom: 1px solid var(--chat-border);
@@ -53,12 +53,14 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  padding-left: 10px;
 }
 
 .group-chat-header__subtitle {
   font-size: 0.75rem;
   color: var(--chat-accent);
   font-weight: 600;
+  padding-left: 10px;
 }
 
 .group-chat-header--selection {

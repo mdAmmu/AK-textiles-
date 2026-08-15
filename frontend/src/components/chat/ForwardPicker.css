@@ -147,3 +147,50 @@
   opacity: 0.5;
   cursor: default;
 }
+
+:root[data-theme="dark"] .forward-picker {
+  background: var(--chat-bg);
+}
+
+:root[data-theme="dark"] .forward-picker__header {
+  color: var(--chat-text);
+}
+
+:root[data-theme="dark"] .forward-picker__header button {
+  color: var(--chat-text-secondary);
+}
+
+:root[data-theme="dark"] .forward-picker__search-row {
+  background: var(--chat-panel-bg);
+}
+
+:root[data-theme="dark"] .forward-picker__search {
+  color: var(--chat-text);
+}
+
+:root[data-theme="dark"] .forward-picker__item {
+  background: var(--chat-bubble-other);
+  border-color: var(--chat-border);
+}
+
+:root[data-theme="dark"] .forward-picker__item-name {
+  color: var(--chat-text);
+}
+
+:root[data-theme="dark"] .forward-picker__item-count,
+:root[data-theme="dark"] .forward-picker__empty {
+  color: var(--chat-text-secondary);
+}
+
+:root[data-theme="dark"] .forward-picker__checkbox {
+  border-color: var(--chat-border);
+}
+
+:root[data-theme="dark"] .forward-picker__checkbox--checked {
+  background: var(--chat-accent);
+  border-color: var(--chat-accent);
+}
+
+:root[data-theme="dark"] .forward-picker__send {
+  background: var(--chat-accent);
+}

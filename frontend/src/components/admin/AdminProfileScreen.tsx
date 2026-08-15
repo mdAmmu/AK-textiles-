@@ -3,11 +3,11 @@ import type { User } from "../../types/user";
 import { useTheme } from "../../contexts/ThemeContext";
 import Avatar from "../common/Avatar";
 import ThemeToggle from "../common/ThemeToggle";
+import logo from "../../assets/ak-logo.png";
 import "./AdminProfileScreen.css";
 
 interface Props {
   admin: User;
-  imageUrl?: string | null;
   onClose: () => void;
 }
 
@@ -18,7 +18,7 @@ const ROWS = [
   { icon: Clock, label: "Storage and Data" },
 ];
 
-export default function AdminProfileScreen({ admin, imageUrl, onClose }: Props) {
+export default function AdminProfileScreen({ admin, onClose }: Props) {
   const { theme } = useTheme();
 
   return (
@@ -34,7 +34,7 @@ export default function AdminProfileScreen({ admin, imageUrl, onClose }: Props) 
           </button> */}
         </div>
         <div className="admin-profile-screen__avatar-wrap">
-          <Avatar name={admin.name} imageUrl={imageUrl} online size={92} />
+          <Avatar name={admin.name} imageUrl={logo} size={92} />
         </div>
       </div>
 

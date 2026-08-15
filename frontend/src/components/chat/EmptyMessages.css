@@ -97,3 +97,32 @@
   border-radius: 999px;
   cursor: pointer;
 }
+
+:root[data-theme="dark"] .empty-messages {
+  background: var(--chat-panel-bg);
+  box-shadow: none;
+}
+
+:root[data-theme="dark"] .empty-messages__title {
+  color: var(--chat-text);
+}
+
+:root[data-theme="dark"] .empty-messages__subtitle {
+  color: var(--chat-text-secondary);
+}
+
+:root[data-theme="dark"] .empty-messages__button {
+  background: var(--chat-accent);
+}
+
+:root[data-theme="dark"] .empty-messages__bubble--top {
+  background: #2a2f45;
+}
+
+:root[data-theme="dark"] .empty-messages__bubble--top span {
+  background: #6c7fe0;
+}
+
+:root[data-theme="dark"] .empty-messages__bubble--mid {
+  background: #1c2e4a;
+}

@@ -164,3 +164,53 @@
   padding: 1rem 0;
   color: #7c827e;
 }
+
+:root[data-theme="dark"] .group-chat-info-page {
+  background: #10161f;
+}
+
+:root[data-theme="dark"] .group-chat-info-page__action {
+  background: #1e2530;
+  color: #17c98d;
+  box-shadow: none;
+}
+
+:root[data-theme="dark"] .group-chat-info-page__search-row {
+  background: #1e2530;
+  color: #8b96a5;
+}
+
+:root[data-theme="dark"] .group-chat-info-page__search-row input {
+  color: #e9edef;
+}
+
+:root[data-theme="dark"] .group-chat-info-page__card {
+  background: #1e2530;
+  box-shadow: none;
+}
+
+:root[data-theme="dark"] .group-chat-info-page__row {
+  border-bottom-color: #232d3a;
+  color: #e9edef;
+}
+
+:root[data-theme="dark"] .group-chat-info-page__row-icon {
+  color: #17c98d;
+}
+
+:root[data-theme="dark"] .group-chat-info-page__row-chevron {
+  color: #6b7480;
+}
+
+:root[data-theme="dark"] .group-chat-info-page__list {
+  border-top-color: #232d3a;
+}
+
+:root[data-theme="dark"] .group-chat-info-page__member {
+  border-bottom-color: #232d3a;
+}
+
+:root[data-theme="dark"] .group-chat-info-page__member-contact,
+:root[data-theme="dark"] .group-chat-info-page__empty {
+  color: #8b96a5;
+}

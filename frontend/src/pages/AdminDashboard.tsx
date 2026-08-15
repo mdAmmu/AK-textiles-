@@ -8,6 +8,7 @@ import GroupChatListItem from "../components/admin/GroupChatListItem";
 import AdminAccountPanel from "../components/admin/AdminAccountPanel";
 import AdminProfileScreen from "../components/admin/AdminProfileScreen";
 import LoadingScreen from "../components/common/LoadingScreen";
+import logo from "../assets/ak-logo.png";
 import "./AdminDashboard.css";
 
 export default function AdminDashboard() {
@@ -46,7 +47,7 @@ export default function AdminDashboard() {
           aria-label="Profile"
           onClick={() => setShowProfile(true)}
         >
-          <Avatar name={user?.name ?? "Admin"} online size={44} />
+          <Avatar name={user?.name ?? "Admin"} imageUrl={logo} size={44} />
         </button>
       </header>
 

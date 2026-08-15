@@ -7,6 +7,19 @@
   z-index: 10;
 }
 
+:root[data-theme="dark"] .admin-account-panel {
+  background: #131a24;
+}
+
+:root[data-theme="dark"] .admin-account-panel__logout-btn {
+  background: #3a1c1c;
+  color: #ff8177;
+}
+
+:root[data-theme="dark"] .admin-account-panel__confirm-dialog {
+  background: #1e2530;
+}
+
 .admin-account-panel__header {
   display: flex;
   align-items: center;

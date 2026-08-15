@@ -38,6 +38,21 @@
 }
 
 :root[data-theme="dark"] {
+  --wa-header: #1c2430;
+  --wa-header-dark: #131a24;
+  --wa-accent: #17c98d;
+  --wa-accent-light: #4fe0a8;
+  --wa-chat-bg: #10161f;
+  --wa-bubble-own: #0b4a3c;
+  --wa-bubble-other: #1e2530;
+  --wa-text: #e9edef;
+  --wa-text-secondary: #8b96a5;
+  --wa-border: #232d3a;
+  --wa-tick-read: #53bdeb;
+  --wa-panel-bg: #10161f;
+  --wa-card-bg: #1e2530;
+  color-scheme: dark;
+
   --chat-header-bg: #1c2430;
   --chat-accent: #17c98d;
   --chat-accent-light: #4fe0a8;
@@ -61,6 +76,13 @@ body {
   margin: 0;
   font-family: var(--sans);
   background: var(--wa-panel-bg);
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+h1,
+h2,
+p {
+  color: var(--wa-text);
 }
 
 #root {

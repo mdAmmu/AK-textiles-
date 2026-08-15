@@ -18,6 +18,7 @@
   display: flex;
   justify-content: center;
   margin-bottom: 0.5rem;
+  padding-top: 25px;
 }
 
 .message-list__date-divider span {
