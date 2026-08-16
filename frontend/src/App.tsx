@@ -1,3 +1,4 @@
+import { Suspense, lazy } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/Login";
 import RoleRedirect from "./pages/RoleRedirect";
@@ -18,10 +19,15 @@ import ProtectedRoute from "./components/common/ProtectedRoute";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import "./App.css";
 
+const InstallAppBanner = lazy(() => import("./components/common/InstallAppBanner"));
+
 function App() {
   return (
     <ThemeProvider>
       <BrowserRouter>
+        <Suspense fallback={null}>
+          <InstallAppBanner />
+        </Suspense>
         <Routes>
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/login/*" element={<Login />} />
