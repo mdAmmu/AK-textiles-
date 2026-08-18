@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { fetchCurrentUser } from "../services/auth";
-import { getToken } from "../services/api";
+import { getToken, clearToken } from "../services/api";
 import type { User } from "../types/user";
 
 interface State {
@@ -25,6 +25,7 @@ export function useCurrentUser(): State {
         if (!cancelled) setState({ user: profile, loading: false, error: null });
       })
       .catch((err) => {
+        clearToken();
         if (!cancelled) setState({ user: null, loading: false, error: (err as Error).message });
       });
 
