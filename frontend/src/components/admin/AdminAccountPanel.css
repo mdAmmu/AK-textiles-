@@ -11,11 +11,6 @@
   background: #131a24;
 }
 
-:root[data-theme="dark"] .admin-account-panel__logout-btn {
-  background: #3a1c1c;
-  color: #ff8177;
-}
-
 :root[data-theme="dark"] .admin-account-panel__confirm-dialog {
   background: #1e2530;
 }
@@ -77,22 +72,6 @@
   border-radius: 8px;
   background: var(--wa-accent);
   color: #fff;
-  font-weight: 600;
-  font-size: 0.9375rem;
-  cursor: pointer;
-}
-
-.admin-account-panel__logout-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  width: 100%;
-  padding: 0.75rem;
-  border: none;
-  border-radius: 8px;
-  background: #fdecea;
-  color: #d92d20;
   font-weight: 600;
   font-size: 0.9375rem;
   cursor: pointer;

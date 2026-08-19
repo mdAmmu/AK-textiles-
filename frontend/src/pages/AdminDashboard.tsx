@@ -68,9 +68,6 @@ export default function AdminDashboard() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
-        <span className="admin-dashboard-page__filter-icon">
-          <Filter size={17} />
-        </span>
       </div>
 
       <main className="admin-dashboard-page__content">

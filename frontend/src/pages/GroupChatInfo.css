@@ -133,6 +133,24 @@
   transform: rotate(180deg);
 }
 
+.group-chat-info-page__row-chevron--open-right {
+  transform: rotate(90deg);
+}
+
+.group-chat-info-page__media-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.375rem;
+  padding: 0.75rem 0;
+}
+
+.group-chat-info-page__media-grid img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
 .group-chat-info-page__list {
   padding: 0 1rem 0.5rem;
   border-top: 1px solid #eef1ee;

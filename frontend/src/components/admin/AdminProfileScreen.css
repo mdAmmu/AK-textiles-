@@ -133,6 +133,28 @@
   flex-shrink: 0;
 }
 
+.admin-profile-screen__logout-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  margin-top: 1.25rem;
+  padding: 0.75rem;
+  border: none;
+  border-radius: 8px;
+  background: #fdecea;
+  color: #d92d20;
+  font-weight: 600;
+  font-size: 0.9375rem;
+  cursor: pointer;
+}
+
+:root[data-theme="dark"] .admin-profile-screen__logout-btn {
+  background: #3a1c1c;
+  color: #ff8177;
+}
+
 :root[data-theme="dark"] .admin-profile-screen {
   background: #10161f;
 }
@@ -169,4 +191,87 @@
 
 :root[data-theme="dark"] .admin-profile-screen__row-chevron {
   color: #6b7480;
+}
+
+.admin-profile-screen__confirm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  z-index: 20;
+}
+
+.admin-profile-screen__confirm-dialog {
+  background: #fff;
+  border-radius: 12px;
+  padding: 1.25rem;
+  max-width: 320px;
+  width: 100%;
+}
+
+.admin-profile-screen__confirm-dialog h2 {
+  margin: 0 0 0.5rem;
+  font-size: 1.0625rem;
+  color: #1a1a1a;
+}
+
+.admin-profile-screen__confirm-dialog p {
+  margin: 0;
+  color: #6b7069;
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+.admin-profile-screen__confirm-actions {
+  display: flex;
+  gap: 0.625rem;
+  margin-top: 1.25rem;
+}
+
+.admin-profile-screen__cancel-btn {
+  flex: 1;
+  padding: 0.75rem;
+  border: 1px solid #e2e6e3;
+  border-radius: 8px;
+  background: none;
+  color: #1a1a1a;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.admin-profile-screen__logout-confirm-btn {
+  flex: 1;
+  padding: 0.75rem;
+  border: none;
+  border-radius: 8px;
+  background: #d92d20;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.admin-profile-screen__logout-confirm-btn:disabled,
+.admin-profile-screen__cancel-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+:root[data-theme="dark"] .admin-profile-screen__confirm-dialog {
+  background: #1e2530;
+}
+
+:root[data-theme="dark"] .admin-profile-screen__confirm-dialog h2 {
+  color: #e9edef;
+}
+
+:root[data-theme="dark"] .admin-profile-screen__confirm-dialog p {
+  color: #8b96a5;
+}
+
+:root[data-theme="dark"] .admin-profile-screen__cancel-btn {
+  border-color: #2a3341;
+  color: #e9edef;
 }

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, Camera, Forward, MoreVertical, Pencil, Trash2, X } from "lucide-react";
+import { ArrowLeft, Camera, Forward, Pencil, Trash2, X } from "lucide-react";
 import {
   deleteGroupMessages,
   editGroupMessage,
@@ -115,8 +115,28 @@ export default function GroupChat() {
       await handleSendStaged(text);
       return;
     }
-    const message = await sendGroupMessage(groupId, text);
-    setMessages((prev) => [...(prev ?? []), message]);
+    if (!text.trim() || !user) return;
+
+    const tempId = `temp-${randomUUID()}`;
+    setMessages((prev) => [
+      ...(prev ?? []),
+      {
+        id: tempId,
+        group_id: groupId,
+        sender_id: user.id,
+        message_type: "TEXT",
+        text,
+        created_at: new Date().toISOString(),
+        _pending: true,
+      },
+    ]);
+    try {
+      const message = await sendGroupMessage(groupId, text);
+      setMessages((prev) => prev?.map((m) => (m.id === tempId ? message : m)) ?? prev);
+    } catch (err) {
+      setMessages((prev) => prev?.filter((m) => m.id !== tempId) ?? prev);
+      throw err;
+    }
   }
 
   async function handleSaveEdit(text: string) {
@@ -135,45 +155,93 @@ export default function GroupChat() {
   }
 
   async function handleSendStaged(text: string) {
-    if (!groupId) return;
-    const forwardedIds = stagedImages
+    if (!groupId || !user) return;
+    const stagedToSend = stagedImages;
+    const forwardedIds = stagedToSend
       .filter((img) => img.sourceMessageId)
       .map((img) => img.sourceMessageId as string);
-    const newFiles = stagedImages.filter((img) => img.file).map((img) => img.file as File);
+    const newFiles = stagedToSend.filter((img) => img.file).map((img) => img.file as File);
+    const trimmed = text.trim();
+    const sourceGroupIdForForward = forwardSourceGroupId;
+
+    // Clear staged/draft state immediately so a second tap on Send can't
+    // re-submit the same images while the request is still in flight.
+    setStagedImages([]);
+    setForwardSourceGroupId(null);
+    setDraftText("");
 
     // When more than one image is going out together, fold them into a
     // single shared image_group_id so they render as one WhatsApp-style
     // grid in the target chat, even if they weren't originally grouped.
-    const batchImageGroupId =
-      forwardedIds.length + newFiles.length > 1 ? randomUUID() : undefined;
+    const batchImageGroupId = stagedToSend.length > 1 ? randomUUID() : undefined;
 
-    const collected: Message[] = [];
-    if (forwardedIds.length > 0 && forwardSourceGroupId) {
-      const forwarded = await forwardGroupMessages(
-        forwardSourceGroupId,
-        forwardedIds,
-        [groupId],
-        batchImageGroupId,
+    const now = new Date().toISOString();
+    const tempIds = stagedToSend.map((img) => `temp-${img.key}`);
+    const tempTextId = trimmed ? `temp-${randomUUID()}` : null;
+
+    setMessages((prev) => [
+      ...(prev ?? []),
+      ...stagedToSend.map(
+        (img, i): Message => ({
+          id: tempIds[i],
+          group_id: groupId,
+          sender_id: user.id,
+          message_type: "IMAGE",
+          product_image: img.url,
+          image_group_id: batchImageGroupId ?? null,
+          created_at: now,
+          _pending: true,
+        }),
+      ),
+      ...(tempTextId
+        ? [
+            {
+              id: tempTextId,
+              group_id: groupId,
+              sender_id: user.id,
+              message_type: "TEXT" as const,
+              text: trimmed,
+              created_at: now,
+              _pending: true,
+            },
+          ]
+        : []),
+    ]);
+
+    try {
+      const collected: Message[] = [];
+      if (forwardedIds.length > 0 && sourceGroupIdForForward) {
+        const forwarded = await forwardGroupMessages(
+          sourceGroupIdForForward,
+          forwardedIds,
+          [groupId],
+          batchImageGroupId,
+        );
+        collected.push(...forwarded);
+      }
+      if (newFiles.length > 0) {
+        const uploaded = await sendGroupImageMessage(groupId, newFiles, batchImageGroupId);
+        collected.push(...uploaded);
+      }
+      if (tempTextId) {
+        const textMessage = await sendGroupMessage(groupId, trimmed);
+        collected.push(textMessage);
+      }
+
+      setMessages((prev) => {
+        const withoutTemps = prev?.filter((m) => !tempIds.includes(m.id) && m.id !== tempTextId) ?? [];
+        return [...withoutTemps, ...collected];
+      });
+    } catch (err) {
+      setMessages(
+        (prev) => prev?.filter((m) => !tempIds.includes(m.id) && m.id !== tempTextId) ?? prev,
       );
-      collected.push(...forwarded);
+      throw err;
+    } finally {
+      stagedToSend.forEach((img) => {
+        if (img.file) URL.revokeObjectURL(img.url);
+      });
     }
-    if (newFiles.length > 0) {
-      const uploaded = await sendGroupImageMessage(groupId, newFiles, batchImageGroupId);
-      collected.push(...uploaded);
-    }
-    const trimmed = text.trim();
-    if (trimmed) {
-      const textMessage = await sendGroupMessage(groupId, trimmed);
-      collected.push(textMessage);
-    }
-
-    setMessages((prev) => [...(prev ?? []), ...collected]);
-    stagedImages.forEach((img) => {
-      if (img.file) URL.revokeObjectURL(img.url);
-    });
-    setStagedImages([]);
-    setForwardSourceGroupId(null);
-    setDraftText("");
   }
 
   function handleRemoveStagedImage(key: string) {
@@ -332,9 +400,6 @@ export default function GroupChat() {
               <div className="group-chat-header__title">{group.name}</div>
               <div className="group-chat-header__subtitle">{group.customer_count} members</div>
             </div>
-          </button>
-          <button className="group-chat-header__icon-btn" aria-label="More options">
-            <MoreVertical size={20} />
           </button>
         </header>
       )}

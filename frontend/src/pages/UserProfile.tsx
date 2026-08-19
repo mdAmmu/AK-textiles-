@@ -20,7 +20,9 @@ export default function UserProfile() {
 
   useEffect(() => {
     fetchMyGroupMessages().then((messages) =>
-      setMedia(messages.filter((m) => m.message_type === "IMAGE" && m.product_image)),
+      setMedia(
+        messages.filter((m) => m.message_type === "IMAGE" && m.product_image && !m.is_deleted),
+      ),
     );
   }, []);
 

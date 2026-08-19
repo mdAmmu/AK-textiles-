@@ -17,4 +17,6 @@ export interface Message {
   is_edited?: boolean;
   created_at: string;
   read_at?: string | null;
+  /** Client-only: set while an optimistic message is still being sent. */
+  _pending?: boolean;
 }

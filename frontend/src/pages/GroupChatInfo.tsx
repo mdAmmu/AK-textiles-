@@ -5,20 +5,20 @@ import {
   ChevronDown,
   ChevronRight,
   Images,
-  Phone,
   Search,
   UserPlus,
   Users,
-  Video,
 } from "lucide-react";
 import {
   assignUserGroup,
   createAndAssignCustomer,
+  fetchGroupMessages,
   fetchGroups,
   fetchGroupUsers,
   fetchUnassignedUsers,
 } from "../services/groups";
 import type { Group, GroupUser } from "../types/group";
+import type { Message } from "../types/message";
 import type { User } from "../types/user";
 import GroupIcon from "../components/admin/GroupIcon";
 import Avatar from "../components/common/Avatar";
@@ -37,6 +37,8 @@ export default function GroupChatInfo() {
   const [showMembers, setShowMembers] = useState(false);
   const [showAddPanel, setShowAddPanel] = useState(false);
   const [candidates, setCandidates] = useState<User[]>([]);
+  const [showMedia, setShowMedia] = useState(false);
+  const [media, setMedia] = useState<Message[] | null>(null);
 
   useEffect(() => {
     if (!groupId) return;
@@ -72,6 +74,23 @@ export default function GroupChatInfo() {
     setShowAddPanel(false);
   }
 
+  function handleToggleMedia() {
+    setShowMedia((s) => {
+      const next = !s;
+      if (next && groupId) {
+        setMedia(null);
+        fetchGroupMessages(groupId).then((messages) =>
+          setMedia(
+            messages.filter(
+              (m) => m.message_type === "IMAGE" && m.product_image && !m.is_deleted,
+            ),
+          ),
+        );
+      }
+      return next;
+    });
+  }
+
   if (group === null || members === null) return <LoadingScreen />;
 
   return (
@@ -86,14 +105,6 @@ export default function GroupChatInfo() {
       </div>
 
       <div className="group-chat-info-page__actions">
-        <button className="group-chat-info-page__action" type="button">
-          <Phone size={18} />
-          <span>Audio</span>
-        </button>
-        <button className="group-chat-info-page__action" type="button">
-          <Video size={18} />
-          <span>Video</span>
-        </button>
         <button
           className="group-chat-info-page__action"
           type="button"
@@ -128,11 +139,34 @@ export default function GroupChatInfo() {
       )}
 
       <div className="group-chat-info-page__card">
-        <button className="group-chat-info-page__row" type="button">
+        <button
+          className="group-chat-info-page__row"
+          type="button"
+          onClick={handleToggleMedia}
+        >
           <Images size={19} className="group-chat-info-page__row-icon" />
           <span className="group-chat-info-page__row-label">Media, Links &amp; Docs</span>
-          <ChevronRight size={18} className="group-chat-info-page__row-chevron" />
+          <ChevronRight
+            size={18}
+            className={`group-chat-info-page__row-chevron${showMedia ? " group-chat-info-page__row-chevron--open-right" : ""}`}
+          />
         </button>
+
+        {showMedia && (
+          <div className="group-chat-info-page__list">
+            {media === null ? (
+              <p className="group-chat-info-page__empty">Loading…</p>
+            ) : media.length === 0 ? (
+              <p className="group-chat-info-page__empty">No media shared yet.</p>
+            ) : (
+              <div className="group-chat-info-page__media-grid">
+                {media.map((m) => (
+                  <img key={m.id} src={m.product_image!} alt="" />
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
         <button
           className="group-chat-info-page__row"

@@ -4,7 +4,7 @@ import { Mic, Send, Smile } from "lucide-react";
 import "./MessageInput.css";
 
 interface Props {
-  onSend: (text: string) => void;
+  onSend: (text: string) => void | Promise<void>;
   disabled?: boolean;
   extraAction?: ReactNode;
   value?: string;
@@ -21,6 +21,7 @@ function MessageInput(
   ref: React.Ref<MessageInputHandle>,
 ) {
   const [internalText, setInternalText] = useState("");
+  const [sending, setSending] = useState(false);
   const isControlled = value !== undefined;
   const text = isControlled ? value : internalText;
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -41,11 +42,17 @@ function MessageInput(
     el.style.height = `${el.scrollHeight}px`;
   }, [text]);
 
-  function submit() {
+  async function submit() {
+    if (sending) return;
     const trimmed = text.trim();
     if (!trimmed && !canSubmitEmpty) return;
-    onSend(trimmed);
     setText("");
+    setSending(true);
+    try {
+      await onSend(trimmed);
+    } finally {
+      setSending(false);
+    }
   }
 
   function handleSubmit(e: React.FormEvent) {
@@ -76,7 +83,7 @@ function MessageInput(
           <Camera size={20} />
         </span> */}
       </div>
-      <button className="message-input__send" type="submit" disabled={disabled}>
+      <button className="message-input__send" type="submit" disabled={disabled || sending}>
         {text.trim() || canSubmitEmpty ? <Send size={18} /> : <Mic size={18} />}
       </button>
     </form>

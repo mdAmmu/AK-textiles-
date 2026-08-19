@@ -1,5 +1,5 @@
 import { useRef } from "react";
-import { Check, CheckCheck } from "lucide-react";
+import { Check, CheckCheck, Clock } from "lucide-react";
 import type { Message } from "../../types/message";
 import ProductMessage from "./ProductMessage";
 import ImageMessage, { type ImageMessageHandle } from "./ImageMessage";
@@ -39,7 +39,13 @@ export default function MessageBubble({
 
   const tick = isOwn && (
     <span className={`message-bubble__tick${message.read_at ? " message-bubble__tick--read" : ""}`}>
-      {message.read_at ? <CheckCheck size={14} /> : <Check size={14} />}
+      {message._pending ? (
+        <Clock size={12} />
+      ) : message.read_at ? (
+        <CheckCheck size={14} />
+      ) : (
+        <Check size={14} />
+      )}
     </span>
   );
 
@@ -107,7 +113,7 @@ export default function MessageBubble({
 
   return (
     <div
-      className={`message-bubble-row${isOwn ? " message-bubble-row--own" : ""}${selected ? " message-bubble-row--selected" : ""}`}
+      className={`message-bubble-row${isOwn ? " message-bubble-row--own" : ""}${selected ? " message-bubble-row--selected" : ""}${message._pending ? " message-bubble-row--pending" : ""}`}
       onMouseDown={startPress}
       onMouseUp={endPress}
       onMouseLeave={cancelPress}

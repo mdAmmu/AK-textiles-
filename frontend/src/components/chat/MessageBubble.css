@@ -13,6 +13,10 @@
   background: rgba(15, 157, 110, 0.12);
 }
 
+.message-bubble-row--pending {
+  opacity: 0.6;
+}
+
 .message-bubble {
   max-width: 75%;
   background: var(--chat-bubble-other);

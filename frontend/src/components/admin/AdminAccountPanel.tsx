@@ -1,11 +1,9 @@
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
-import { useNavigate } from "react-router-dom";
-import { ArrowLeft, LogOut, Plus, Trash2 } from "lucide-react";
+import { ArrowLeft, Plus, Trash2 } from "lucide-react";
 import type { User } from "../../types/user";
 import type { Group } from "../../types/group";
 import { createGroup, deleteGroup, fetchGroups } from "../../services/groups";
-import { logout } from "../../services/auth";
 import Avatar from "../common/Avatar";
 import GroupIcon from "./GroupIcon";
 import "./AdminAccountPanel.css";
@@ -31,10 +29,6 @@ export default function AdminAccountPanel({
   const [creating, setCreating] = useState(false);
   const [pendingDelete, setPendingDelete] = useState<Group | null>(null);
   const [deleting, setDeleting] = useState(false);
-  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
-  const [loggingOut, setLoggingOut] = useState(false);
-
-  const navigate = useNavigate();
 
   useEffect(() => {
     fetchGroups().then(setGroups);
@@ -69,17 +63,6 @@ export default function AdminAccountPanel({
       setPendingDelete(null);
     } finally {
       setDeleting(false);
-    }
-  }
-
-  async function handleConfirmLogout() {
-    if (loggingOut) return;
-    setLoggingOut(true);
-    try {
-      logout();
-      navigate("/login", { replace: true });
-    } finally {
-      setLoggingOut(false);
     }
   }
 
@@ -172,15 +155,6 @@ export default function AdminAccountPanel({
         )}
       </div>
 
-      <div className="admin-account-panel__section">
-        <button
-          className="admin-account-panel__logout-btn"
-          onClick={() => setShowLogoutConfirm(true)}
-        >
-          <LogOut size={18} /> Logout
-        </button>
-      </div>
-
       {pendingDelete && (
         <div className="admin-account-panel__confirm-overlay">
           <div className="admin-account-panel__confirm-dialog">
@@ -209,30 +183,6 @@ export default function AdminAccountPanel({
         </div>
       )}
 
-      {showLogoutConfirm && (
-        <div className="admin-account-panel__confirm-overlay">
-          <div className="admin-account-panel__confirm-dialog">
-            <h2>Logout?</h2>
-            <p>You'll need to sign in again to access the admin panel.</p>
-            <div className="admin-account-panel__confirm-actions">
-              <button
-                className="admin-account-panel__cancel-btn"
-                onClick={() => setShowLogoutConfirm(false)}
-                disabled={loggingOut}
-              >
-                Cancel
-              </button>
-              <button
-                className="admin-account-panel__delete-confirm-btn"
-                onClick={handleConfirmLogout}
-                disabled={loggingOut}
-              >
-                {loggingOut ? "Logging out..." : "OK"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
