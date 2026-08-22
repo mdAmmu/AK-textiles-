@@ -34,6 +34,32 @@ export async function markMyConversationRead(): Promise<void> {
   await api.post("/chats/me/read");
 }
 
+// WhatsApp deep link -> lands the customer in their own conversation
+
+export async function openWhatsAppDeepLink(
+  productId: string,
+  broadcastId: string | null,
+): Promise<ConversationDetail> {
+  const { data } = await api.post<ConversationDetail>(
+    `/api/whatsapp/deep-link/${productId}`,
+    null,
+    { params: broadcastId ? { broadcast_id: broadcastId } : {} },
+  );
+  return data;
+}
+
+// What a real product template's CTA button actually points to — Meta only
+// allows one dynamic URL suffix variable, so it carries just the broadcast
+// id and the backend resolves the product from it.
+export async function openWhatsAppDeepLinkByBroadcast(
+  broadcastId: string,
+): Promise<ConversationDetail> {
+  const { data } = await api.post<ConversationDetail>(
+    `/api/whatsapp/deep-link/by-broadcast/${broadcastId}`,
+  );
+  return data;
+}
+
 // Admin side
 
 export async function fetchConversations(): Promise<ConversationSummary[]> {

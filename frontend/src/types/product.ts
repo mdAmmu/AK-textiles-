@@ -1,6 +1,7 @@
 export interface ProductInput {
   name: string;
   description?: string;
+  quantity_in_bundle?: string;
   dubai_price?: number;
   south_africa_price?: number;
   india_price?: number;
@@ -11,6 +12,7 @@ export interface Product {
   id: string;
   name: string;
   description?: string | null;
+  quantity_in_bundle?: string | null;
   image_1?: string | null;
   image_2?: string | null;
   image_3?: string | null;

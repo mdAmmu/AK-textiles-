@@ -15,5 +15,16 @@ class Settings(BaseSettings):
 
     cors_origins: list[str] = ["http://localhost:5173"]
 
+    whatsapp_access_token: str = ""
+    whatsapp_app_id: str = ""
+    whatsapp_phone_number_id: str = ""
+    whatsapp_business_account_id: str = ""
+    whatsapp_verify_token: str = ""
+    whatsapp_app_secret: str = ""
+    whatsapp_api_version: str = "v21.0"
+    whatsapp_default_country_code: str = "91"
+
+    frontend_base_url: str = "http://localhost:5173"
+
 
 settings = Settings()

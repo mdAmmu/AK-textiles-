@@ -12,6 +12,7 @@ interface Props {
 export default function ProductForm({ initial, submitLabel, onSubmit }: Props) {
   const [name, setName] = useState(initial?.name ?? "");
   const [description, setDescription] = useState(initial?.description ?? "");
+  const [quantityInBundle, setQuantityInBundle] = useState(initial?.quantity_in_bundle ?? "");
   const [dubaiPrice, setDubaiPrice] = useState(initial?.dubai_price?.toString() ?? "");
   const [southAfricaPrice, setSouthAfricaPrice] = useState(
     initial?.south_africa_price?.toString() ?? "",
@@ -24,6 +25,7 @@ export default function ProductForm({ initial, submitLabel, onSubmit }: Props) {
     onSubmit({
       name,
       description: description || undefined,
+      quantity_in_bundle: quantityInBundle || undefined,
       dubai_price: dubaiPrice ? Number(dubaiPrice) : undefined,
       south_africa_price: southAfricaPrice ? Number(southAfricaPrice) : undefined,
       india_price: indiaPrice ? Number(indiaPrice) : undefined,
@@ -47,6 +49,14 @@ export default function ProductForm({ initial, submitLabel, onSubmit }: Props) {
         value={description}
         onChange={(e) => setDescription(e.target.value)}
         rows={3}
+      />
+
+      <label className="product-form__label">Quantity in Bundle</label>
+      <input
+        className="product-form__input"
+        value={quantityInBundle}
+        onChange={(e) => setQuantityInBundle(e.target.value)}
+        placeholder="e.g. 12 pcs / box"
       />
 
       <label className="product-form__label">Prices</label>

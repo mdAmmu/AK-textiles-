@@ -1,0 +1,227 @@
+.wa-broadcasts-page {
+  min-height: 100vh;
+  background: var(--wa-panel-bg);
+  padding-bottom: 4.5rem;
+}
+
+.wa-broadcasts-page__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.125rem 1rem;
+}
+
+.wa-broadcasts-page__header h1 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.wa-broadcasts-page__create {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 0.875rem;
+  background: var(--wa-accent);
+  color: #fff;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.875rem;
+  text-decoration: none;
+}
+
+.wa-broadcasts-page__content {
+  padding: 0 1rem;
+}
+
+.wa-broadcasts-page__empty {
+  color: var(--wa-text-secondary);
+  text-align: center;
+  margin-top: 3rem;
+}
+
+.wa-broadcasts-page__list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+
+.wa-broadcasts-page__row {
+  background: #fff;
+  border-radius: 8px;
+  padding: 0.875rem;
+  cursor: pointer;
+}
+
+.wa-broadcasts-page__row-main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.375rem;
+}
+
+.wa-broadcasts-page__row-title {
+  font-weight: 600;
+}
+
+.wa-broadcasts-page__status {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.125rem 0.5rem;
+  border-radius: 999px;
+}
+
+.wa-broadcasts-page__status--completed {
+  background: #e6f4ea;
+  color: #0f9d58;
+}
+
+.wa-broadcasts-page__status--sending {
+  background: #fff4e5;
+  color: #b3701c;
+}
+
+.wa-broadcasts-page__status--failed {
+  background: #fdecea;
+  color: #d32f2f;
+}
+
+.wa-broadcasts-page__status--draft {
+  background: #eceff1;
+  color: #607d8b;
+}
+
+.wa-broadcasts-page__status--queued {
+  background: #eceff1;
+  color: #607d8b;
+}
+
+.wa-broadcasts-page__status--sent {
+  background: #e8f0fe;
+  color: #1a73e8;
+}
+
+.wa-broadcasts-page__status--delivered {
+  background: #e6f4ea;
+  color: #0f9d58;
+}
+
+.wa-broadcasts-page__status--read {
+  background: #e6f4ea;
+  color: #0f9d58;
+}
+
+.wa-broadcasts-page__row-stats {
+  display: flex;
+  gap: 0.75rem;
+  font-size: 0.8125rem;
+  color: var(--wa-text-secondary);
+}
+
+.wa-broadcasts-page__failed {
+  color: #d32f2f;
+}
+
+.wa-broadcast-detail__summary {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  background: #fff;
+  border-radius: 8px;
+  padding: 0.875rem;
+  margin-bottom: 0.875rem;
+  font-size: 0.875rem;
+}
+
+.wa-broadcast-detail__recipient {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: #fff;
+  border-radius: 8px;
+  padding: 0.75rem 0.875rem;
+  font-size: 0.875rem;
+}
+
+.wa-broadcast-create__product-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.wa-broadcast-create__product {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.375rem;
+  background: #fff;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  padding: 0.5rem;
+  cursor: pointer;
+  font-size: 0.75rem;
+  text-align: center;
+}
+
+.wa-broadcast-create__product img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+.wa-broadcast-create__product--selected {
+  border-color: var(--wa-accent);
+}
+
+.wa-broadcast-create__confirm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  z-index: 50;
+}
+
+.wa-broadcast-create__confirm-dialog {
+  background: #fff;
+  border-radius: 12px;
+  padding: 1.25rem;
+  max-width: 360px;
+  width: 100%;
+}
+
+.wa-broadcast-create__confirm-dialog h2 {
+  margin-top: 0;
+  font-size: 1.0625rem;
+}
+
+.wa-broadcast-detail__summary label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  margin-bottom: 0.625rem;
+}
+
+.wa-broadcast-detail__summary input,
+.wa-broadcast-detail__summary select,
+.wa-broadcast-detail__summary textarea {
+  font-weight: normal;
+  font-family: inherit;
+  padding: 0.5rem 0.625rem;
+  border: 1px solid #dcdfe3;
+  border-radius: 6px;
+  font-size: 0.875rem;
+}
+
+.wa-broadcast-create__confirm-image {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 0.625rem;
+}

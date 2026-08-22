@@ -5,6 +5,8 @@ import Login from "./pages/Login";
 import RoleRedirect from "./pages/RoleRedirect";
 import UserChat from "./pages/UserChat";
 import UserProfile from "./pages/UserProfile";
+import SupportChat from "./pages/SupportChat";
+import ProductLanding from "./pages/ProductLanding";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminChat from "./pages/AdminChat";
 import Groups from "./pages/Groups";
@@ -16,6 +18,11 @@ import CreateProduct from "./pages/CreateProduct";
 import EditProduct from "./pages/EditProduct";
 import ProductDetail from "./pages/ProductDetail";
 import BroadcastConfirm from "./pages/BroadcastConfirm";
+import WhatsAppBroadcasts from "./pages/WhatsAppBroadcasts";
+import WhatsAppCreateBroadcast from "./pages/WhatsAppCreateBroadcast";
+import WhatsAppBroadcastDetail from "./pages/WhatsAppBroadcastDetail";
+import WhatsAppTemplates from "./pages/WhatsAppTemplates";
+import WhatsAppRedirect from "./pages/WhatsAppRedirect";
 import ProtectedRoute from "./components/common/ProtectedRoute";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import "./App.css";
@@ -57,6 +64,15 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/chat/support"
+          element={
+            <ProtectedRoute role="USER">
+              <SupportChat />
+            </ProtectedRoute>
+          }
+        />
+        <Route path="/p/:productId" element={<ProductLanding />} />
         <Route
           path="/admin"
           element={
@@ -145,6 +161,39 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/admin/whatsapp"
+          element={
+            <ProtectedRoute role="ADMIN">
+              <WhatsAppBroadcasts />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/whatsapp/new"
+          element={
+            <ProtectedRoute role="ADMIN">
+              <WhatsAppCreateBroadcast />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/whatsapp/templates"
+          element={
+            <ProtectedRoute role="ADMIN">
+              <WhatsAppTemplates />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/whatsapp/:broadcastId"
+          element={
+            <ProtectedRoute role="ADMIN">
+              <WhatsAppBroadcastDetail />
+            </ProtectedRoute>
+          }
+        />
+        <Route path="/w/:broadcastId" element={<WhatsAppRedirect />} />
       </Routes>
       </BrowserRouter>
     </ThemeProvider>

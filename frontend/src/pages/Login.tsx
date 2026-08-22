@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, useSearchParams } from "react-router-dom";
 import { Phone, Lock, Eye, EyeOff, ArrowRight, Check } from "lucide-react";
 import { getToken } from "../services/api";
 import { login, register } from "../services/auth";
@@ -16,8 +16,14 @@ export default function Login() {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [loggedIn, setLoggedIn] = useState(!!getToken());
+  const [searchParams] = useSearchParams();
 
-  if (loggedIn) return <Navigate to="/redirect" replace />;
+  const nextParam = searchParams.get("next");
+  // Only ever follow an internal path (never "//host", a protocol-relative
+  // open redirect) so this can't be abused to bounce off-site after login.
+  const next = nextParam && nextParam.startsWith("/") && !nextParam.startsWith("//") ? nextParam : null;
+
+  if (loggedIn) return <Navigate to={next ?? "/redirect"} replace />;
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();

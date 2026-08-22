@@ -18,6 +18,8 @@ class Product(Base):
     image_3 = Column(String(500), nullable=True)
     image_4 = Column(String(500), nullable=True)
 
+    quantity_in_bundle = Column(String(100), nullable=True)
+
     dubai_price = Column(Numeric(10, 2), nullable=True)
     south_africa_price = Column(Numeric(10, 2), nullable=True)
     india_price = Column(Numeric(10, 2), nullable=True)

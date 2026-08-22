@@ -4,6 +4,7 @@ from pydantic import BaseModel
 class ProductCreate(BaseModel):
     name: str
     description: str | None = None
+    quantity_in_bundle: str | None = None
     dubai_price: float | None = None
     south_africa_price: float | None = None
     india_price: float | None = None
@@ -13,6 +14,7 @@ class ProductCreate(BaseModel):
 class ProductUpdate(BaseModel):
     name: str | None = None
     description: str | None = None
+    quantity_in_bundle: str | None = None
     dubai_price: float | None = None
     south_africa_price: float | None = None
     india_price: float | None = None
@@ -23,6 +25,7 @@ class ProductOut(BaseModel):
     id: str
     name: str
     description: str | None = None
+    quantity_in_bundle: str | None = None
     image_1: str | None = None
     image_2: str | None = None
     image_3: str | None = None

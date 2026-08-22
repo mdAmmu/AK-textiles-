@@ -34,6 +34,10 @@ class Message(Base):
 
     image_group_id = Column(UUID(as_uuid=True), nullable=True, index=True)
 
+    whatsapp_broadcast_id = Column(
+        UUID(as_uuid=True), ForeignKey("whatsapp_broadcasts.id"), nullable=True, index=True
+    )
+
     is_deleted = Column(Boolean, nullable=False, default=False, server_default="false")
     is_edited = Column(Boolean, nullable=False, default=False, server_default="false")
 

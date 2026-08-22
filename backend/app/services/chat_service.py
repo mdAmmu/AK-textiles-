@@ -45,7 +45,11 @@ async def send_text_message(
 
 
 async def send_product_message(
-    db: Session, conversation: Conversation, sender_id, product: Product
+    db: Session,
+    conversation: Conversation,
+    sender_id,
+    product: Product,
+    whatsapp_broadcast_id=None,
 ) -> list[Message]:
     """Sends all of the product's images one by one, followed by a final
     product detail card (name/description/price).
@@ -85,6 +89,7 @@ async def send_product_message(
         product_name=product.name,
         product_image=product.image_1,
         product_description=product.description,
+        whatsapp_broadcast_id=whatsapp_broadcast_id,
     )
     db.add(detail_message)
     db.commit()

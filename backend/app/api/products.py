@@ -122,6 +122,7 @@ def _to_out(product: Product) -> ProductOut:
         id=str(product.id),
         name=product.name,
         description=product.description,
+        quantity_in_bundle=product.quantity_in_bundle,
         image_1=product.image_1,
         image_2=product.image_2,
         image_3=product.image_3,
