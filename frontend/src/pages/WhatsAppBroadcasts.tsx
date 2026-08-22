@@ -9,9 +9,10 @@ import LoadingScreen from "../components/common/LoadingScreen";
 import "./WhatsAppBroadcasts.css";
 
 const STATUS_LABEL: Record<WhatsAppBroadcast["status"], string> = {
-  DRAFT: "Draft",
+  DRAFT: "Queued",
   SENDING: "Sending...",
   COMPLETED: "Completed",
+  PARTIALLY_COMPLETED: "Partially completed",
   FAILED: "Failed",
 };
 

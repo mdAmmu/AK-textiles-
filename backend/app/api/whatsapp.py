@@ -1,6 +1,17 @@
 import logging
 
-from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, Response, UploadFile, status
+from fastapi import (
+    APIRouter,
+    BackgroundTasks,
+    Depends,
+    File,
+    Form,
+    HTTPException,
+    Request,
+    Response,
+    UploadFile,
+    status,
+)
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user, require_admin
@@ -88,12 +99,17 @@ async def send_test_message(
 @router.post("/broadcasts", response_model=BroadcastOut)
 async def create_broadcast(
     body: BroadcastCreateRequest,
+    background_tasks: BackgroundTasks,
     admin: User = Depends(require_admin),
     db: Session = Depends(get_db),
 ):
+    """Creates the broadcast + its queued recipient rows synchronously (fast,
+    no Meta calls), then hands the actual sending off to a background task
+    so this request returns immediately regardless of recipient count.
+    """
     template_name = body.template_name or whatsapp_send_service.DEFAULT_TEMPLATE_NAME
     try:
-        broadcast = await whatsapp_send_service.create_and_send_broadcast(
+        broadcast = await whatsapp_send_service.create_broadcast(
             db,
             admin,
             product_id=body.product_id,
@@ -103,6 +119,7 @@ async def create_broadcast(
     except ValueError as exc:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
 
+    background_tasks.add_task(whatsapp_send_service.run_broadcast, broadcast.id)
     return _broadcast_to_out(broadcast)
 
 

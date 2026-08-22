@@ -11,6 +11,7 @@ class BroadcastStatus(str, enum.Enum):
     DRAFT = "DRAFT"
     SENDING = "SENDING"
     COMPLETED = "COMPLETED"
+    PARTIALLY_COMPLETED = "PARTIALLY_COMPLETED"
     FAILED = "FAILED"
 
 

@@ -5,7 +5,7 @@ export interface WhatsAppBroadcast {
   template_name: string;
   product_id: string;
   group_ids: string[];
-  status: "DRAFT" | "SENDING" | "COMPLETED" | "FAILED";
+  status: "DRAFT" | "SENDING" | "COMPLETED" | "PARTIALLY_COMPLETED" | "FAILED";
   total_recipients: number;
   sent_count: number;
   failed_count: number;

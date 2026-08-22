@@ -12,7 +12,27 @@ export default function WhatsAppBroadcastDetail() {
   const [detail, setDetail] = useState<Detail | null>(null);
 
   useEffect(() => {
-    if (broadcastId) fetchWhatsAppBroadcast(broadcastId).then(setDetail);
+    if (!broadcastId) return;
+
+    let cancelled = false;
+    let timer: ReturnType<typeof setTimeout>;
+
+    const poll = async () => {
+      const next = await fetchWhatsAppBroadcast(broadcastId);
+      if (cancelled) return;
+      setDetail(next);
+      // Sending now happens in a background task, so keep polling while
+      // it's in flight — otherwise the admin is stuck looking at 0 sent.
+      if (next.status === "DRAFT" || next.status === "SENDING") {
+        timer = setTimeout(poll, 3000);
+      }
+    };
+    poll();
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
   }, [broadcastId]);
 
   if (!detail) return <LoadingScreen />;

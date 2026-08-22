@@ -85,6 +85,11 @@
   color: #d32f2f;
 }
 
+.wa-broadcasts-page__status--partially_completed {
+  background: #fff4e5;
+  color: #b3701c;
+}
+
 .wa-broadcasts-page__status--draft {
   background: #eceff1;
   color: #607d8b;

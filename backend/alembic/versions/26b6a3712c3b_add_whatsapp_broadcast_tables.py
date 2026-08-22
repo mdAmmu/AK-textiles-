@@ -36,7 +36,7 @@ def upgrade() -> None:
     sa.Column('template_name', sa.String(length=200), nullable=False),
     sa.Column('product_id', sa.UUID(), nullable=False),
     sa.Column('group_ids', postgresql.ARRAY(sa.UUID()), nullable=False),
-    sa.Column('status', sa.Enum('DRAFT', 'SENDING', 'COMPLETED', 'FAILED', name='broadcaststatus'), nullable=False),
+    sa.Column('status', sa.Enum('DRAFT', 'SENDING', 'COMPLETED', 'PARTIALLY_COMPLETED', 'FAILED', name='broadcaststatus'), nullable=False),
     sa.Column('total_recipients', sa.Integer(), nullable=False),
     sa.Column('sent_count', sa.Integer(), nullable=False),
     sa.Column('failed_count', sa.Integer(), nullable=False),
