@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, Camera, Forward, Pencil, Trash2, X } from "lucide-react";
+import { ArrowLeft, Camera, FileText, Forward, Pencil, Trash2, X } from "lucide-react";
 import {
   deleteGroupMessages,
   editGroupMessage,
@@ -12,6 +12,7 @@ import {
   sendGroupMessage,
   sendGroupProductMessage,
 } from "../services/groups";
+import type { GroupTemplateSendResult } from "../services/messageTemplates";
 import type { Group } from "../types/group";
 import type { Message } from "../types/message";
 import { useCurrentUser } from "../hooks/useCurrentUser";
@@ -20,6 +21,7 @@ import GroupIcon from "../components/admin/GroupIcon";
 import MessageList from "../components/chat/MessageList";
 import MessageInput, { type MessageInputHandle } from "../components/chat/MessageInput";
 import GroupProductComposer from "../components/chat/GroupProductComposer";
+import GroupTemplateSelector from "../components/chat/GroupTemplateSelector";
 import ForwardPicker from "../components/chat/ForwardPicker";
 import ForwardPreviewBar, { type StagedImage } from "../components/chat/ForwardPreviewBar";
 import EditingMessageBar from "../components/chat/EditingMessageBar";
@@ -45,6 +47,7 @@ export default function GroupChat() {
   const [group, setGroup] = useState<Group | null>(null);
   const [messages, setMessages] = useState<Message[] | null>(null);
   const [showPicker, setShowPicker] = useState(false);
+  const [showTemplatePicker, setShowTemplatePicker] = useState(false);
   const [showForward, setShowForward] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [stagedImages, setStagedImages] = useState<StagedImage[]>([]);
@@ -257,6 +260,14 @@ export default function GroupChat() {
     setShowPicker(false);
   }
 
+  async function handleTemplateSent(result: GroupTemplateSendResult) {
+    setShowTemplatePicker(false);
+    if (groupId) setMessages(await fetchGroupMessages(groupId));
+    alert(
+      `Sent to ${result.in_app_sent} member(s) in-app. WhatsApp: ${result.whatsapp_sent} sent, ${result.whatsapp_skipped} skipped.`,
+    );
+  }
+
   function handleCameraCapture(e: React.ChangeEvent<HTMLInputElement>) {
     const files = e.target.files ? Array.from(e.target.files) : [];
     e.target.value = "";
@@ -437,6 +448,14 @@ export default function GroupChat() {
             </span> */}
             <span
               className="message-input__icon"
+              onClick={() => setShowTemplatePicker(true)}
+              role="button"
+              aria-label="Send a template"
+            >
+              <FileText size={20} />
+            </span>
+            <span
+              className="message-input__icon"
               onClick={() => cameraInputRef.current?.click()}
               role="button"
               aria-label="Take a photo"
@@ -461,6 +480,14 @@ export default function GroupChat() {
           onSent={handleProductSent}
           onClose={() => setShowPicker(false)}
           sendProduct={(productId) => sendGroupProductMessage(groupId, productId)}
+        />
+      )}
+
+      {showTemplatePicker && groupId && (
+        <GroupTemplateSelector
+          groupId={groupId}
+          onSent={handleTemplateSent}
+          onClose={() => setShowTemplatePicker(false)}
         />
       )}
 

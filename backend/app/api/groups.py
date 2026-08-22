@@ -1,6 +1,6 @@
 import uuid
 
-from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
+from fastapi import APIRouter, BackgroundTasks, Depends, File, Form, HTTPException, UploadFile, status
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
@@ -11,6 +11,7 @@ from app.core.supabase_client import upload_chat_image
 from app.models.group import Group
 from app.models.group_read import GroupRead
 from app.models.message import Message
+from app.models.message_template import MessageTemplate
 from app.models.product import Product
 from app.models.user import User, UserRole
 from app.schemas.group import (
@@ -28,6 +29,8 @@ from app.schemas.message import (
     SendMessageRequest,
     SendProductMessageRequest,
 )
+from app.schemas.message_template import GroupTemplateSendResult, SendGroupTemplateRequest
+from app.services import message_template_broadcast_service
 from app.services.chat_service import (
     delete_group,
     delete_group_messages,
@@ -347,6 +350,43 @@ async def admin_forward_group_messages(
         db, source_messages, target_groups, admin.id, image_group_id
     )
     return [serialize_message(m) for m in forwarded]
+
+
+@router.post("/{group_id}/template", response_model=GroupTemplateSendResult)
+async def admin_send_group_template(
+    group_id: str,
+    body: SendGroupTemplateRequest,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
+    admin: User = Depends(require_admin),
+):
+    group = _get_group_or_404(db, group_id)
+    template = (
+        db.query(MessageTemplate).filter(MessageTemplate.id == body.template_id).first()
+    )
+    if template is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Template not found")
+
+    try:
+        total_members, phone_numbers = await message_template_broadcast_service.send_template_to_group(
+            db, group, admin, template
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
+
+    background_tasks.add_task(
+        message_template_broadcast_service.send_whatsapp_template,
+        phone_numbers,
+        template.name,
+        template.message,
+    )
+
+    return GroupTemplateSendResult(
+        success=True,
+        in_app_sent=total_members,
+        whatsapp_sent=len(phone_numbers),
+        whatsapp_skipped=max(total_members - len(phone_numbers), 0),
+    )
 
 
 @router.patch("/users/{user_id}", response_model=GroupUserOut)

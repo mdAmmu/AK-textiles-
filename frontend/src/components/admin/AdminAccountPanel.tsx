@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
-import { ArrowLeft, MessageSquareText, Plus, Trash2 } from "lucide-react";
+import { ArrowLeft, FileText, MessageSquareText, Plus, Trash2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import type { User } from "../../types/user";
 import type { Group } from "../../types/group";
@@ -87,6 +87,9 @@ export default function AdminAccountPanel({
       <div className="admin-account-panel__section">
         <Link to="/admin/whatsapp" className="admin-account-panel__add-group-btn">
           <MessageSquareText size={18} /> WhatsApp Campaigns
+        </Link>
+        <Link to="/admin/message-templates" className="admin-account-panel__add-group-btn">
+          <FileText size={18} /> Message Templates
         </Link>
       </div>
 

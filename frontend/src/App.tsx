@@ -23,6 +23,7 @@ import WhatsAppCreateBroadcast from "./pages/WhatsAppCreateBroadcast";
 import WhatsAppBroadcastDetail from "./pages/WhatsAppBroadcastDetail";
 import WhatsAppTemplates from "./pages/WhatsAppTemplates";
 import WhatsAppRedirect from "./pages/WhatsAppRedirect";
+import MessageTemplates from "./pages/MessageTemplates";
 import ProtectedRoute from "./components/common/ProtectedRoute";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import "./App.css";
@@ -194,6 +195,14 @@ function App() {
           }
         />
         <Route path="/w/:broadcastId" element={<WhatsAppRedirect />} />
+        <Route
+          path="/admin/message-templates"
+          element={
+            <ProtectedRoute role="ADMIN">
+              <MessageTemplates />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
       </BrowserRouter>
     </ThemeProvider>

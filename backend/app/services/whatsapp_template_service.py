@@ -80,3 +80,65 @@ async def create_product_template(
     }
 
     return await whatsapp_api_service.create_template(payload)
+
+
+# Group-chat message templates (Message Templates admin screen) all reuse
+# ONE Meta template shape with a variable header + variable body, rather
+# than creating (and waiting for approval on) a brand-new Meta template per
+# admin-created template. Meta only needs to approve the *shape* once —
+# after that, every send just fills {{1}} in the header and {{1}} in the
+# body with that template's own name/message, the same way the product
+# broadcast feature fills in per-product variables on its own approved
+# template. This is what makes "create a template, click Send, it goes out
+# now" actually possible (a fresh custom template would sit in Meta review
+# for anywhere from minutes to ~24h *every single time*).
+GROUP_MESSAGE_TEMPLATE_NAME = "ak_group_message_v2"
+GROUP_MESSAGE_LANGUAGE = "en_US"
+
+
+# Meta rejects a HEADER component that contains any formatting/emoji, and
+# rejects a BODY that's just a bare variable (no literal text around it, or
+# too high a variable-to-word ratio) — so instead of a HEADER, the bold
+# title is done with WhatsApp's own *bold* markdown inside the BODY, and
+# the single {{1}} variable (the fully composed "*title*\n\nmessage" text,
+# see build_body_text) is wrapped in static lead-in/trailing text to satisfy
+# both of those rules.
+BODY_TEMPLATE_TEXT = "Hello, we have an update for you.\n\n{{1}}\n\nTap below to open the app."
+
+
+def build_body_text(title: str, message: str) -> str:
+    return f"*{title}*\n\n{message}"
+
+
+async def ensure_group_message_template(button_text: str = "View Product Detail") -> dict:
+    """Idempotent: returns the shared template's current entry on the WABA,
+    creating it (for one-time Meta review) only if it doesn't exist yet.
+    """
+    existing = await list_templates()
+    match = next((t for t in existing if t.get("name") == GROUP_MESSAGE_TEMPLATE_NAME), None)
+    if match is not None:
+        return match
+
+    payload = {
+        "name": GROUP_MESSAGE_TEMPLATE_NAME,
+        "language": GROUP_MESSAGE_LANGUAGE,
+        "category": "MARKETING",
+        "components": [
+            {
+                "type": "BODY",
+                "text": BODY_TEMPLATE_TEXT,
+                "example": {
+                    "body_text": [
+                        [build_body_text("Today's Product", "New products available now.")]
+                    ]
+                },
+            },
+            {
+                "type": "BUTTONS",
+                "buttons": [
+                    {"type": "URL", "text": button_text, "url": settings.frontend_base_url}
+                ],
+            },
+        ],
+    }
+    return await whatsapp_api_service.create_template(payload)

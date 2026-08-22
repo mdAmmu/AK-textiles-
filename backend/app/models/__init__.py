@@ -4,6 +4,7 @@ from app.models.group_read import GroupRead
 from app.models.product import Product
 from app.models.conversation import Conversation
 from app.models.message import Message, MessageType
+from app.models.message_template import MessageTemplate
 from app.models.whatsapp_broadcast import WhatsAppBroadcast, BroadcastStatus
 from app.models.whatsapp_message import WhatsAppMessage, WhatsAppMessageStatus
 from app.models.whatsapp_event import WhatsAppEvent
@@ -17,6 +18,7 @@ __all__ = [
     "Conversation",
     "Message",
     "MessageType",
+    "MessageTemplate",
     "WhatsAppBroadcast",
     "BroadcastStatus",
     "WhatsAppMessage",
