@@ -44,6 +44,37 @@ async def send_text_message(
     return message
 
 
+async def receive_whatsapp_text_message(
+    db: Session, customer: User, text: str, whatsapp_message_id: str
+) -> Message | None:
+    """Persists an inbound WhatsApp text message from a customer into their
+    existing admin conversation, and pushes it to the admin over the same
+    WebSocket path as an in-app message.
+
+    Returns None (without creating anything) if this wamid was already
+    processed — Meta redelivers webhook events on anything but a prompt 200,
+    so this must be safe to call more than once for the same message.
+    """
+    if db.query(Message).filter(Message.whatsapp_message_id == whatsapp_message_id).first():
+        return None
+
+    conversation = get_or_create_conversation(db, customer)
+
+    message = Message(
+        conversation_id=conversation.id,
+        sender_id=customer.id,
+        message_type=MessageType.TEXT,
+        text=text,
+        whatsapp_message_id=whatsapp_message_id,
+    )
+    db.add(message)
+    db.commit()
+    db.refresh(message)
+
+    await _notify_other_party(conversation, customer.id, message)
+    return message
+
+
 async def send_product_message(
     db: Session,
     conversation: Conversation,

@@ -1,5 +1,6 @@
 import hashlib
 import hmac
+import logging
 from datetime import datetime, timezone
 
 from sqlalchemy.orm import Session
@@ -7,6 +8,10 @@ from sqlalchemy.orm import Session
 from app.core.config import settings
 from app.models.whatsapp_event import WhatsAppEvent
 from app.models.whatsapp_message import WhatsAppMessage, WhatsAppMessageStatus
+from app.services import chat_service
+from app.utils.whatsapp_phone import find_user_by_wa_number
+
+logger = logging.getLogger("whatsapp")
 
 
 def verify_signature(body: bytes, signature_header: str | None) -> bool:
@@ -28,17 +33,21 @@ _STATUS_MAP = {
 }
 
 
-def process_webhook_payload(db: Session, payload: dict) -> None:
-    """Processes a Meta webhook payload: status updates for outbound messages.
+async def process_webhook_payload(db: Session, payload: dict) -> None:
+    """Processes a Meta webhook payload: status updates for outbound
+    broadcast sends, and inbound text messages from customers.
 
-    Idempotent per external event id (a status object's message id + status
-    combination is treated as the unique event).
+    Idempotent — a status event is deduped by message id + status, and an
+    inbound message is deduped by its wamid — so Meta redelivering the same
+    webhook call (which it does on anything but a prompt 200) is safe.
     """
     for entry in payload.get("entry", []):
         for change in entry.get("changes", []):
             value = change.get("value", {})
             for status_event in value.get("statuses", []):
                 _process_status_event(db, status_event)
+            for inbound_message in value.get("messages", []):
+                await _process_inbound_message(db, inbound_message)
 
 
 def _process_status_event(db: Session, status_event: dict) -> None:
@@ -84,3 +93,30 @@ def _process_status_event(db: Session, status_event: dict) -> None:
                 message.error_message = errors[0].get("title", "")
 
     db.commit()
+
+
+async def _process_inbound_message(db: Session, inbound_message: dict) -> None:
+    wa_message_id = inbound_message.get("id")
+    from_number = inbound_message.get("from")
+    message_type = inbound_message.get("type")
+    if not wa_message_id or not from_number:
+        return
+
+    if message_type == "text":
+        text = inbound_message.get("text", {}).get("body", "")
+    else:
+        # Media/location/interactive/etc. — not transcribed yet; still land
+        # a placeholder so the admin knows the customer sent *something* and
+        # can follow up on WhatsApp directly for now.
+        text = f"[Customer sent a {message_type or 'unsupported'} message on WhatsApp]"
+
+    customer = find_user_by_wa_number(db, from_number)
+    if customer is None:
+        logger.warning(
+            "Inbound WhatsApp message from unregistered number %s (wamid=%s)",
+            from_number,
+            wa_message_id,
+        )
+        return
+
+    await chat_service.receive_whatsapp_text_message(db, customer, text, wa_message_id)

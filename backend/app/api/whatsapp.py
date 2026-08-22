@@ -70,7 +70,7 @@ async def receive_webhook(request: Request, db: Session = Depends(get_db)):
 
     payload = await request.json()
     try:
-        whatsapp_webhook_service.process_webhook_payload(db, payload)
+        await whatsapp_webhook_service.process_webhook_payload(db, payload)
     except Exception:
         logger.exception("Failed to process WhatsApp webhook payload")
         # Swallow: Meta retries on non-200, and a malformed/unknown event

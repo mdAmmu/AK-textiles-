@@ -38,6 +38,10 @@ class Message(Base):
         UUID(as_uuid=True), ForeignKey("whatsapp_broadcasts.id"), nullable=True, index=True
     )
 
+    # Meta's wamid for an inbound customer reply this message was created
+    # from. Unique so a redelivered webhook event can't insert it twice.
+    whatsapp_message_id = Column(String(200), nullable=True, unique=True, index=True)
+
     is_deleted = Column(Boolean, nullable=False, default=False, server_default="false")
     is_edited = Column(Boolean, nullable=False, default=False, server_default="false")
 
