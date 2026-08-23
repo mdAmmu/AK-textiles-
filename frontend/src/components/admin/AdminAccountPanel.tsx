@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
-import { ArrowLeft, Plus, Trash2 } from "lucide-react";
+import { ArrowLeft, MessageCircle, Plus, Trash2 } from "lucide-react";
+import { Link } from "react-router-dom";
 import type { User } from "../../types/user";
 import type { Group } from "../../types/group";
 import { createGroup, deleteGroup, fetchGroups } from "../../services/groups";
@@ -81,6 +82,12 @@ export default function AdminAccountPanel({
         {(admin.phone || admin.email) && (
           <span className="admin-account-panel__meta">{admin.phone ?? admin.email}</span>
         )}
+      </div>
+
+      <div className="admin-account-panel__section">
+        <Link to="/admin/whatsapp-send" className="admin-account-panel__add-group-btn">
+          <MessageCircle size={18} /> Send WhatsApp Message
+        </Link>
       </div>
 
       <div className="admin-account-panel__section">

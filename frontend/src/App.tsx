@@ -16,6 +16,7 @@ import CreateProduct from "./pages/CreateProduct";
 import EditProduct from "./pages/EditProduct";
 import ProductDetail from "./pages/ProductDetail";
 import BroadcastConfirm from "./pages/BroadcastConfirm";
+import WhatsAppSend from "./pages/WhatsAppSend";
 import ProtectedRoute from "./components/common/ProtectedRoute";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import "./App.css";
@@ -142,6 +143,14 @@ function App() {
           element={
             <ProtectedRoute role="ADMIN">
               <BroadcastConfirm />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/whatsapp-send"
+          element={
+            <ProtectedRoute role="ADMIN">
+              <WhatsAppSend />
             </ProtectedRoute>
           }
         />
