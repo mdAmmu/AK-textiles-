@@ -2,14 +2,13 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, ImagePlus, X } from "lucide-react";
 import {
+  CAROUSEL_CARD_COUNTS,
   fetchCarouselStatus,
   sendWhatsAppMessage,
   uploadWhatsAppImage,
 } from "../services/whatsapp";
-import type { WhatsAppMessageType } from "../services/whatsapp";
+import type { CarouselCardCount, CarouselStatusByCount, WhatsAppMessageType } from "../services/whatsapp";
 import "./WhatsAppSend.css";
-
-const CAROUSEL_CARD_COUNT = 3;
 
 export default function WhatsAppSend() {
   const navigate = useNavigate();
@@ -17,13 +16,12 @@ export default function WhatsAppSend() {
   const [messageType, setMessageType] = useState<WhatsAppMessageType>("text");
   const [message, setMessage] = useState("");
   const [imageUrl, setImageUrl] = useState("");
-  const [carouselUrls, setCarouselUrls] = useState<(string | null)[]>(
-    Array(CAROUSEL_CARD_COUNT).fill(null),
-  );
+  const [cardCount, setCardCount] = useState<CarouselCardCount>(3);
+  const [carouselUrls, setCarouselUrls] = useState<(string | null)[]>(Array(3).fill(null));
   const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState("");
-  const [carouselStatus, setCarouselStatus] = useState<string | null>(null);
+  const [carouselStatusByCount, setCarouselStatusByCount] = useState<CarouselStatusByCount | null>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const carouselSlotRef = useRef<number | null>(null);
   const carouselInputRef = useRef<HTMLInputElement>(null);
@@ -31,9 +29,16 @@ export default function WhatsAppSend() {
   useEffect(() => {
     if (messageType !== "carousel") return;
     fetchCarouselStatus()
-      .then((s) => setCarouselStatus(s.exists ? s.status : "NOT_CREATED"))
-      .catch(() => setCarouselStatus(null));
+      .then(setCarouselStatusByCount)
+      .catch(() => setCarouselStatusByCount(null));
   }, [messageType]);
+
+  function changeCardCount(count: CarouselCardCount) {
+    setCardCount(count);
+    setCarouselUrls(Array(count).fill(null));
+  }
+
+  const carouselStatus = carouselStatusByCount?.[String(cardCount)]?.status ?? null;
 
   function extractErrorDetail(err: unknown): string | undefined {
     const detail = (err as { response?: { data?: { detail?: unknown } } })?.response?.data?.detail;
@@ -116,7 +121,7 @@ export default function WhatsAppSend() {
         return;
       }
       if (carouselUrls.some((u) => !u)) {
-        setStatus(`Please upload all ${CAROUSEL_CARD_COUNT} images.`);
+        setStatus(`Please upload all ${cardCount} images.`);
         return;
       }
     }
@@ -135,7 +140,7 @@ export default function WhatsAppSend() {
       setStatus("Message sent successfully!");
       setMessage("");
       setImageUrl("");
-      setCarouselUrls(Array(CAROUSEL_CARD_COUNT).fill(null));
+      setCarouselUrls(Array(cardCount).fill(null));
     } catch (err: unknown) {
       setStatus(extractErrorDetail(err) ?? "Something went wrong");
     } finally {
@@ -220,8 +225,22 @@ export default function WhatsAppSend() {
 
         {messageType === "carousel" && (
           <>
+            <label className="whatsapp-send-page__label">Number of Photos</label>
+            <div className="whatsapp-send-page__type-toggle">
+              {CAROUSEL_CARD_COUNTS.map((count) => (
+                <button
+                  key={count}
+                  type="button"
+                  className={cardCount === count ? "active" : ""}
+                  onClick={() => changeCardCount(count)}
+                >
+                  {count}
+                </button>
+              ))}
+            </div>
+
             <label className="whatsapp-send-page__label">
-              Images ({carouselUrls.filter(Boolean).length}/{CAROUSEL_CARD_COUNT})
+              Images ({carouselUrls.filter(Boolean).length}/{cardCount})
             </label>
             <div className="whatsapp-send-page__carousel-grid">
               {carouselUrls.map((url, i) =>

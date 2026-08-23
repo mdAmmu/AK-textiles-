@@ -8,7 +8,7 @@ from app.core.config import settings
 from app.core.supabase_client import upload_product_image
 from app.models.user import User
 from app.schemas.whatsapp import WhatsAppMessageRequest
-from app.services.whatsapp_service import CAROUSEL_TEMPLATE_NAME, whatsapp_service
+from app.services.whatsapp_service import ALLOWED_CAROUSEL_CARD_COUNTS, CAROUSEL_TEMPLATE_NAMES, whatsapp_service
 
 router = APIRouter(prefix="/api/whatsapp", tags=["WhatsApp"])
 logger = logging.getLogger("whatsapp")
@@ -54,16 +54,24 @@ async def send_whatsapp_message(data: WhatsAppMessageRequest, _admin: User = Dep
 
 @router.get("/carousel-status")
 async def carousel_status(_admin: User = Depends(require_admin)):
-    """The carousel feature reuses one shared, pre-approved template (see
-    whatsapp_service.ensure_carousel_template) rather than creating a new
-    Meta template per send — this reports whether that shared template
-    exists yet and, once it does, its current Meta review status.
+    """Each supported card count (3/4/5) is its own separate, independently
+    -approved template (see whatsapp_service.ensure_carousel_template) —
+    this reports each one's status so the UI can show which sizes are
+    ready to send.
     """
     templates = await whatsapp_service.get_templates()
-    match = next((t for t in templates if t.get("name") == CAROUSEL_TEMPLATE_NAME), None)
-    if match is None:
-        return {"exists": False, "status": "NOT_CREATED"}
-    return {"exists": True, "status": match.get("status", "UNKNOWN")}
+    by_name = {t.get("name"): t for t in templates}
+
+    result = {}
+    for count in ALLOWED_CAROUSEL_CARD_COUNTS:
+        name = CAROUSEL_TEMPLATE_NAMES[count]
+        match = by_name.get(name)
+        result[str(count)] = (
+            {"exists": False, "status": "NOT_CREATED"}
+            if match is None
+            else {"exists": True, "status": match.get("status", "UNKNOWN")}
+        )
+    return result
 
 
 @router.post("/upload-image")

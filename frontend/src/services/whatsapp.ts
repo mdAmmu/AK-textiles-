@@ -25,12 +25,17 @@ export async function uploadWhatsAppImage(file: File): Promise<string> {
   return data.url;
 }
 
+export const CAROUSEL_CARD_COUNTS = [3, 4, 5] as const;
+export type CarouselCardCount = (typeof CAROUSEL_CARD_COUNTS)[number];
+
 export interface CarouselStatus {
   exists: boolean;
   status: string;
 }
 
-export async function fetchCarouselStatus(): Promise<CarouselStatus> {
-  const { data } = await api.get<CarouselStatus>("/api/whatsapp/carousel-status");
+export type CarouselStatusByCount = Record<string, CarouselStatus>;
+
+export async function fetchCarouselStatus(): Promise<CarouselStatusByCount> {
+  const { data } = await api.get<CarouselStatusByCount>("/api/whatsapp/carousel-status");
   return data;
 }

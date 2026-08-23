@@ -2,7 +2,7 @@ from typing import Literal, Optional
 
 from pydantic import BaseModel, Field, model_validator
 
-CAROUSEL_CARD_COUNT = 3
+from app.services.whatsapp_service import ALLOWED_CAROUSEL_CARD_COUNTS
 
 
 class WhatsAppMessageRequest(BaseModel):
@@ -28,8 +28,9 @@ class WhatsAppMessageRequest(BaseModel):
         if self.message_type == "carousel":
             if not self.message.strip():
                 raise ValueError("message is required for carousel messages")
-            if not self.image_urls or len(self.image_urls) != CAROUSEL_CARD_COUNT:
-                raise ValueError(f"carousel messages need exactly {CAROUSEL_CARD_COUNT} images")
+            if not self.image_urls or len(self.image_urls) not in ALLOWED_CAROUSEL_CARD_COUNTS:
+                allowed = ", ".join(str(c) for c in ALLOWED_CAROUSEL_CARD_COUNTS)
+                raise ValueError(f"carousel messages need {allowed} images")
             for url in self.image_urls:
                 if not url.startswith(("http://", "https://")):
                     raise ValueError("every carousel image_url must be an http:// or https:// URL")

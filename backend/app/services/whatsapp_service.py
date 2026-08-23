@@ -2,9 +2,23 @@ import httpx
 
 from app.core.config import settings
 
-CAROUSEL_TEMPLATE_NAME = "ak_carousel_message_v1"
 CAROUSEL_TEMPLATE_LANGUAGE = "en_US"
-CAROUSEL_CARD_COUNT = 3
+ALLOWED_CAROUSEL_CARD_COUNTS = (3, 4, 5)
+
+# Each card count is its own separate, independently-approved template —
+# Meta locks a template's card count once approved, so a 3-photo product
+# and a 5-photo product need different templates, not one flexible one.
+CAROUSEL_TEMPLATE_NAMES = {
+    3: "ak_carousel_message_v1",  # kept as-is: this one was already submitted for review
+    4: "ak_carousel_message_4",
+    5: "ak_carousel_message_5",
+}
+
+
+def carousel_template_name(card_count: int) -> str:
+    if card_count not in CAROUSEL_TEMPLATE_NAMES:
+        raise ValueError(f"Unsupported carousel card count: {card_count}")
+    return CAROUSEL_TEMPLATE_NAMES[card_count]
 
 # Meta rejects a body that's just a bare variable (no literal text around
 # it, or too high a variable-to-word ratio), so the single {{1}} — the
@@ -62,22 +76,20 @@ class WhatsAppService:
     async def ensure_carousel_template(
         self, sample_image_urls: list[str], button_text: str = "View Product Detail"
     ) -> dict:
-        """Idempotent: returns the shared carousel template's current entry
-        on the WABA, creating it (one-time Meta review) only if it doesn't
-        exist yet. Every future carousel send reuses this same approved
-        template — only its variables (body text + each card's image) are
-        filled in per send, so nothing after this first call needs a fresh
-        review.
+        """Idempotent: returns the shared carousel template (matching this
+        card count) current entry on the WABA, creating it (one-time Meta
+        review) only if it doesn't exist yet. Every future carousel send at
+        this same card count reuses this same approved template — only its
+        variables (body text + each card's image) are filled in per send,
+        so nothing after this first call needs a fresh review.
         """
+        card_count = len(sample_image_urls)
+        template_name = carousel_template_name(card_count)
+
         existing_templates = await self.get_templates()
-        match = next(
-            (t for t in existing_templates if t.get("name") == CAROUSEL_TEMPLATE_NAME), None
-        )
+        match = next((t for t in existing_templates if t.get("name") == template_name), None)
         if match is not None:
             return match
-
-        if len(sample_image_urls) != CAROUSEL_CARD_COUNT:
-            raise ValueError(f"Need {CAROUSEL_CARD_COUNT} sample images to create the carousel template")
 
         handles = []
         async with httpx.AsyncClient(timeout=30) as client:
@@ -110,7 +122,7 @@ class WhatsAppService:
             )
 
         payload = {
-            "name": CAROUSEL_TEMPLATE_NAME,
+            "name": template_name,
             "language": CAROUSEL_TEMPLATE_LANGUAGE,
             "category": "MARKETING",
             "components": [
@@ -129,8 +141,7 @@ class WhatsAppService:
     async def send_carousel_message(
         self, phone_number: str, body_text: str, image_urls: list[str]
     ):
-        if len(image_urls) != CAROUSEL_CARD_COUNT:
-            raise ValueError(f"Carousel messages need exactly {CAROUSEL_CARD_COUNT} images")
+        template_name = carousel_template_name(len(image_urls))
 
         cards = []
         for index, url in enumerate(image_urls):
@@ -152,7 +163,7 @@ class WhatsAppService:
             "to": phone_number,
             "type": "template",
             "template": {
-                "name": CAROUSEL_TEMPLATE_NAME,
+                "name": template_name,
                 "language": {"code": CAROUSEL_TEMPLATE_LANGUAGE},
                 "components": [
                     {"type": "body", "parameters": [{"type": "text", "text": body_text}]},
