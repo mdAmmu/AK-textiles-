@@ -59,13 +59,10 @@ async def carousel_status(_admin: User = Depends(require_admin)):
     this reports each one's status so the UI can show which sizes are
     ready to send.
     """
-    templates = await whatsapp_service.get_templates()
-    by_name = {t.get("name"): t for t in templates}
-
     result = {}
     for count in ALLOWED_CAROUSEL_CARD_COUNTS:
         name = CAROUSEL_TEMPLATE_NAMES[count]
-        match = by_name.get(name)
+        match = await whatsapp_service.get_template_by_name(name)
         result[str(count)] = (
             {"exists": False, "status": "NOT_CREATED"}
             if match is None

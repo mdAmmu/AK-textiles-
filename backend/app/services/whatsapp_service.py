@@ -1,6 +1,18 @@
+import re
+
 import httpx
 
 from app.core.config import settings
+
+# Meta rejects template variable text containing newlines, tabs, or 4+
+# consecutive spaces (error #132018) — session/freeform messages have no
+# such restriction, so this only needs to run on template parameter text.
+_TEMPLATE_PARAM_WHITESPACE_RE = re.compile(r"\s{2,}")
+
+
+def _sanitize_template_param(text: str) -> str:
+    collapsed = _TEMPLATE_PARAM_WHITESPACE_RE.sub(" ", text.replace("\n", " ").replace("\t", " "))
+    return collapsed.strip()
 
 CAROUSEL_TEMPLATE_LANGUAGE = "en_US"
 ALLOWED_CAROUSEL_CARD_COUNTS = (3, 4, 5)
@@ -8,11 +20,17 @@ ALLOWED_CAROUSEL_CARD_COUNTS = (3, 4, 5)
 # Each card count is its own separate, independently-approved template —
 # Meta locks a template's card count once approved, so a 3-photo product
 # and a 5-photo product need different templates, not one flexible one.
+# v2 swaps the per-card "View Product Detail" URL button (which linked out
+# to the site) for a small Quick Reply button — Meta requires every
+# carousel card to have at least one button (a button-less card is
+# rejected outright), so this is the least visually prominent option
+# available, not a fully button-free card.
 CAROUSEL_TEMPLATE_NAMES = {
-    3: "ak_carousel_message_v1",  # kept as-is: this one was already submitted for review
-    4: "ak_carousel_message_4",
-    5: "ak_carousel_message_5",
+    3: "ak_carousel_message_v2_3",
+    4: "ak_carousel_message_v2_4",
+    5: "ak_carousel_message_v2_5",
 }
+CAROUSEL_QUICK_REPLY_TEXT = "Interested"
 
 
 def carousel_template_name(card_count: int) -> str:
@@ -73,9 +91,7 @@ class WhatsAppService:
     # Carousel template
     # ------------------------------------------------------------------
 
-    async def ensure_carousel_template(
-        self, sample_image_urls: list[str], button_text: str = "View Product Detail"
-    ) -> dict:
+    async def ensure_carousel_template(self, sample_image_urls: list[str]) -> dict:
         """Idempotent: returns the shared carousel template (matching this
         card count) current entry on the WABA, creating it (one-time Meta
         review) only if it doesn't exist yet. Every future carousel send at
@@ -86,8 +102,7 @@ class WhatsAppService:
         card_count = len(sample_image_urls)
         template_name = carousel_template_name(card_count)
 
-        existing_templates = await self.get_templates()
-        match = next((t for t in existing_templates if t.get("name") == template_name), None)
+        match = await self.get_template_by_name(template_name)
         if match is not None:
             return match
 
@@ -114,7 +129,7 @@ class WhatsAppService:
                         {
                             "type": "BUTTONS",
                             "buttons": [
-                                {"type": "URL", "text": button_text, "url": settings.frontend_base_url}
+                                {"type": "QUICK_REPLY", "text": CAROUSEL_QUICK_REPLY_TEXT}
                             ],
                         },
                     ],
@@ -166,7 +181,7 @@ class WhatsAppService:
                 "name": template_name,
                 "language": {"code": CAROUSEL_TEMPLATE_LANGUAGE},
                 "components": [
-                    {"type": "body", "parameters": [{"type": "text", "text": body_text}]},
+                    {"type": "body", "parameters": [{"type": "text", "text": _sanitize_template_param(body_text)}]},
                     {"type": "carousel", "cards": cards},
                 ],
             },
@@ -186,6 +201,23 @@ class WhatsAppService:
             response = await client.get(url, headers=self._headers())
         data = self._parse(response)
         return data.get("data", [])
+
+    async def get_template_by_name(self, name: str) -> dict | None:
+        """Looks up a single template by exact name via Meta's server-side
+        filter, instead of listing every template on the WABA — get_templates()
+        only returns its first page, so a template that isn't among the most
+        recent ~25 (e.g. the account has accumulated many test/rejected
+        templates) would silently look missing to name-matching over that list.
+        """
+        url = (
+            f"https://graph.facebook.com/{settings.whatsapp_api_version}/"
+            f"{settings.whatsapp_business_account_id}/message_templates"
+        )
+        async with httpx.AsyncClient(timeout=15) as client:
+            response = await client.get(url, params={"name": name}, headers=self._headers())
+        data = self._parse(response)
+        matches = data.get("data", [])
+        return matches[0] if matches else None
 
     async def create_template(self, payload: dict) -> dict:
         url = (
@@ -259,7 +291,10 @@ class WhatsAppService:
     def _parse(self, response: httpx.Response) -> dict:
         data = response.json()
         if response.is_error:
-            raise Exception(data.get("error", {}).get("message", "WhatsApp API request failed"))
+            error = data.get("error", {})
+            message = error.get("message", "WhatsApp API request failed")
+            details = error.get("error_data", {}).get("details")
+            raise Exception(f"{message} — {details}" if details else message)
         return data
 
 
