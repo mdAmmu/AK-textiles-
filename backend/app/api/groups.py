@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user, require_admin
 from app.core.database import get_db
+from app.core.image_utils import normalize_image
 from app.core.security import hash_password
 from app.core.supabase_client import upload_chat_image
 from app.models.group import Group
@@ -299,11 +300,9 @@ async def admin_send_group_image_message(
     messages = []
     for file in files:
         content = await file.read()
-        extension = (
-            (file.filename or "").rsplit(".", 1)[-1] if "." in (file.filename or "") else "jpg"
-        )
+        content, content_type, extension = normalize_image(content, file.content_type, file.filename)
         filename = f"{group_id}/{uuid.uuid4()}.{extension}"
-        url = upload_chat_image(filename, content, file.content_type or "image/jpeg")
+        url = upload_chat_image(filename, content, content_type)
 
         message = await send_group_image_message(db, group, admin.id, url, parsed_group_id)
         messages.append(serialize_message(message))
