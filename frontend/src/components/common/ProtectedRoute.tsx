@@ -16,7 +16,7 @@ export default function ProtectedRoute({ role, children }: Props) {
   if (loading) return <LoadingScreen />;
   if (!user) return <Navigate to="/login" replace />;
   if (!allowedRoles.includes(user.role)) {
-    return <Navigate to={user.role === "ADMIN" ? "/admin" : "/chat"} replace />;
+    return <Navigate to={user.role === "ADMIN" ? "/admin/chats" : "/chat"} replace />;
   }
 
   return <>{children}</>;

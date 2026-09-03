@@ -1,12 +1,28 @@
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
-import { ArrowLeft, MessageCircle, Plus, Trash2 } from "lucide-react";
-import { Link } from "react-router-dom";
+import {
+  ArrowLeft,
+  ChevronRight,
+  FileText,
+  Megaphone,
+  MessageCircle,
+  Plus,
+  ShoppingBag,
+  Trash2,
+  Wallet,
+} from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 import type { User } from "../../types/user";
 import type { Group } from "../../types/group";
 import { createGroup, deleteGroup, fetchGroups } from "../../services/groups";
 import Avatar from "../common/Avatar";
 import GroupIcon from "./GroupIcon";
+
+// Send WhatsApp Message and group management (Add Group / Delete Group) are
+// disabled here for now — group management will move to its own menu
+// section. Left in place, not deleted, so re-enabling is a one-line flip.
+const SHOW_SEND_WHATSAPP = false;
+const SHOW_GROUP_MANAGEMENT = false;
 
 const SECTION = "border-t-8 border-[var(--wa-panel-bg)] p-4";
 const ADD_GROUP_BTN =
@@ -17,6 +33,18 @@ const CANCEL_BTN =
   "flex-1 py-3 border border-[var(--wa-border)] rounded-lg bg-transparent text-[var(--wa-text)] font-semibold cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed";
 const SUBMIT_BTN =
   "flex-1 py-3 border-none rounded-lg bg-[var(--wa-accent)] text-white font-semibold cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed";
+const ROW_BASE =
+  "flex items-center gap-3.5 w-full py-[0.9375rem] px-4 border-none bg-transparent font-[inherit] text-left cursor-pointer text-[#1a1a1a] dark:text-[#e9edef] border-b border-[#eef1ee] dark:border-[#232d3a] last:border-b-0";
+const ROW_ICON = "text-[#0f9d6e] dark:text-[#17c98d] shrink-0";
+const ROW_LABEL = "flex-1 font-medium";
+const ROW_CHEVRON = "text-[#c2c6c3] dark:text-[#6b7480] shrink-0";
+
+const MENU_OPTIONS = [
+  { key: "campaign", label: "Campaign", icon: Megaphone, path: "/admin/campaign" },
+  { key: "templates", label: "Template", icon: FileText, path: "/admin/templates" },
+  { key: "balance", label: "Balance", icon: Wallet, path: "/admin/balance" },
+  { key: "orders", label: "Order", icon: ShoppingBag, path: "/admin/orders" },
+] as const;
 
 interface Props {
   admin: User;
@@ -31,6 +59,7 @@ export default function AdminAccountPanel({
   onGroupCreated,
   onGroupDeleted,
 }: Props) {
+  const navigate = useNavigate();
   const [groups, setGroups] = useState<Group[] | null>(null);
   const [showAddGroup, setShowAddGroup] = useState(false);
   const [name, setName] = useState("");
@@ -99,84 +128,102 @@ export default function AdminAccountPanel({
         )}
       </div>
 
-      <div className={SECTION}>
-        <Link to="/admin/whatsapp-send" className={ADD_GROUP_BTN}>
-          <MessageCircle size={18} /> Send WhatsApp Message
-        </Link>
-      </div>
+      {SHOW_SEND_WHATSAPP && (
+        <div className={SECTION}>
+          <Link to="/admin/whatsapp-send" className={ADD_GROUP_BTN}>
+            <MessageCircle size={18} /> Send WhatsApp Message
+          </Link>
+        </div>
+      )}
 
       <div className={SECTION}>
-        {!showAddGroup ? (
-          <button className={ADD_GROUP_BTN} onClick={() => setShowAddGroup(true)}>
-            <Plus size={18} /> Add Group
-          </button>
-        ) : (
-          <form className="flex flex-col gap-1" onSubmit={handleCreateGroup}>
-            <label className={LABEL}>Group Name</label>
-            <input
-              className={INPUT}
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              autoFocus
-              required
-            />
-
-            <label className={LABEL}>Description (optional)</label>
-            <input className={INPUT} value={description} onChange={(e) => setDescription(e.target.value)} />
-
-            {error && <p className="mt-2 mb-0 text-[#d92d20] text-[13px]">{error}</p>}
-
-            <div className="flex gap-2.5 mt-6">
-              <button
-                type="button"
-                className={CANCEL_BTN}
-                onClick={() => {
-                  setShowAddGroup(false);
-                  setError(null);
-                }}
-              >
-                Cancel
-              </button>
-              <button className={SUBMIT_BTN} type="submit" disabled={creating}>
-                {creating ? "Creating..." : "Create"}
-              </button>
-            </div>
-          </form>
-        )}
+        <div className="bg-white dark:bg-[#1e2530] rounded-2xl overflow-hidden shadow-[0_4px_18px_rgba(15,157,110,0.06)] dark:shadow-none border border-[#eef1ee] dark:border-[#232d3a]">
+          {MENU_OPTIONS.map(({ key, label, icon: Icon, path }) => (
+            <button key={key} type="button" className={ROW_BASE} onClick={() => navigate(path)}>
+              <Icon size={19} className={ROW_ICON} />
+              <span className={ROW_LABEL}>{label}</span>
+              <ChevronRight size={18} className={ROW_CHEVRON} />
+            </button>
+          ))}
+        </div>
       </div>
 
-      <div className={`${SECTION} flex-1 overflow-y-auto`}>
-        <div className="text-[var(--wa-text-secondary)] font-semibold text-[15px] mb-3">Groups</div>
-        {groups === null ? (
-          <p className="text-[var(--wa-text-secondary)] text-sm">Loading...</p>
-        ) : groups.length === 0 ? (
-          <p className="text-[var(--wa-text-secondary)] text-sm">No groups yet.</p>
-        ) : (
-          <div className="flex flex-col">
-            {groups.map((g) => (
-              <div
-                key={g.id}
-                className="flex items-center gap-3 py-2.5 border-b border-[var(--wa-border)]"
-              >
-                <GroupIcon name={g.name} size={40} />
-                <div className="flex flex-col flex-1 min-w-0">
-                  <span className="font-medium">{g.name}</span>
-                  <span className="text-[var(--wa-text-secondary)] text-[13px] mt-0.5">
-                    {g.customer_count} members
-                  </span>
-                </div>
+      {SHOW_GROUP_MANAGEMENT && (
+        <div className={SECTION}>
+          {!showAddGroup ? (
+            <button className={ADD_GROUP_BTN} onClick={() => setShowAddGroup(true)}>
+              <Plus size={18} /> Add Group
+            </button>
+          ) : (
+            <form className="flex flex-col gap-1" onSubmit={handleCreateGroup}>
+              <label className={LABEL}>Group Name</label>
+              <input
+                className={INPUT}
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                autoFocus
+                required
+              />
+
+              <label className={LABEL}>Description (optional)</label>
+              <input className={INPUT} value={description} onChange={(e) => setDescription(e.target.value)} />
+
+              {error && <p className="mt-2 mb-0 text-[#d92d20] text-[13px]">{error}</p>}
+
+              <div className="flex gap-2.5 mt-6">
                 <button
-                  className="flex border-none bg-transparent text-[#d92d20] cursor-pointer p-1.5 shrink-0"
-                  onClick={() => setPendingDelete(g)}
-                  aria-label={`Delete ${g.name}`}
+                  type="button"
+                  className={CANCEL_BTN}
+                  onClick={() => {
+                    setShowAddGroup(false);
+                    setError(null);
+                  }}
                 >
-                  <Trash2 size={18} />
+                  Cancel
+                </button>
+                <button className={SUBMIT_BTN} type="submit" disabled={creating}>
+                  {creating ? "Creating..." : "Create"}
                 </button>
               </div>
-            ))}
-          </div>
-        )}
-      </div>
+            </form>
+          )}
+        </div>
+      )}
+
+      {SHOW_GROUP_MANAGEMENT && (
+        <div className={`${SECTION} flex-1 overflow-y-auto`}>
+          <div className="text-[var(--wa-text-secondary)] font-semibold text-[15px] mb-3">Groups</div>
+          {groups === null ? (
+            <p className="text-[var(--wa-text-secondary)] text-sm">Loading...</p>
+          ) : groups.length === 0 ? (
+            <p className="text-[var(--wa-text-secondary)] text-sm">No groups yet.</p>
+          ) : (
+            <div className="flex flex-col">
+              {groups.map((g) => (
+                <div
+                  key={g.id}
+                  className="flex items-center gap-3 py-2.5 border-b border-[var(--wa-border)]"
+                >
+                  <GroupIcon name={g.name} size={40} />
+                  <div className="flex flex-col flex-1 min-w-0">
+                    <span className="font-medium">{g.name}</span>
+                    <span className="text-[var(--wa-text-secondary)] text-[13px] mt-0.5">
+                      {g.customer_count} members
+                    </span>
+                  </div>
+                  <button
+                    className="flex border-none bg-transparent text-[#d92d20] cursor-pointer p-1.5 shrink-0"
+                    onClick={() => setPendingDelete(g)}
+                    aria-label={`Delete ${g.name}`}
+                  >
+                    <Trash2 size={18} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {pendingDelete && (
         <div className="fixed inset-0 bg-black/45 flex items-center justify-center p-6 z-20">

@@ -26,8 +26,25 @@ class BroadcastAudienceOut(BaseModel):
     updated_at: datetime
 
 
+class BroadcastAudienceMemberOut(BaseModel):
+    id: str
+    name: str
+    phone: str | None = None
+    email: str | None = None
+
+
 class BroadcastAudienceDetailOut(BroadcastAudienceOut):
     member_ids: list[str]
+    members: list[BroadcastAudienceMemberOut]
+
+
+class BroadcastAudienceStatsOut(BaseModel):
+    total_broadcasts: int
+    total_recipients_reached: int
+    total_read: int
+    total_failed: int
+    delivery_rate: int
+    read_rate: int
 
 
 class BroadcastCreateRequest(BaseModel):

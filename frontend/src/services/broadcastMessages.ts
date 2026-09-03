@@ -2,6 +2,7 @@ import { api } from "./api";
 import type {
   BroadcastAudience,
   BroadcastAudienceDetail,
+  BroadcastAudienceStats,
   BroadcastMessage,
   BroadcastMessageDetail,
   BroadcastRecipientRow,
@@ -97,6 +98,11 @@ export async function fetchAudiences(): Promise<BroadcastAudience[]> {
 
 export async function fetchAudience(id: string): Promise<BroadcastAudienceDetail> {
   const { data } = await api.get<BroadcastAudienceDetail>(`/broadcasts/audiences/${id}`);
+  return data;
+}
+
+export async function fetchAudienceStats(id: string): Promise<BroadcastAudienceStats> {
+  const { data } = await api.get<BroadcastAudienceStats>(`/broadcasts/audiences/${id}/stats`);
   return data;
 }
 

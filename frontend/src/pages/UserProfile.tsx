@@ -40,7 +40,7 @@ export default function UserProfile() {
   if (!user) return <LoadingScreen />;
 
   return (
-    <div className="flex flex-col min-h-screen bg-[var(--wa-bubble-other)]">
+    <div className="flex flex-col min-h-dvh bg-[var(--wa-bubble-other)]">
       <header className="flex items-center py-3.5 px-4 shrink-0">
         <button
           className="flex border-none bg-transparent text-[var(--wa-text)] cursor-pointer p-1"

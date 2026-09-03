@@ -76,6 +76,15 @@
   box-sizing: border-box;
 }
 
+html,
+body {
+  /* Safety net: no page should ever need horizontal scrolling on mobile —
+     a single overflowing child (e.g. a flex row without min-w-0) should
+     clip rather than shift the whole app sideways. */
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
 body {
   margin: 0;
   font-family: var(--sans);

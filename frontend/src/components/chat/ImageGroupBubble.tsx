@@ -15,13 +15,14 @@ import {
   IMAGE_WRAP,
 } from "./MessageBubble";
 
-const TILE_GRID_BASE = "grid gap-[2px] w-[260px] h-[260px] max-w-full rounded-md overflow-hidden";
-const TILE_GRID_COUNT: Record<number, string> = {
+export const TILE_GRID_BASE = "grid gap-[2px] w-[260px] h-[260px] max-w-full rounded-md overflow-hidden";
+export const TILE_GRID_COUNT: Record<number, string> = {
   1: "grid-cols-1 grid-rows-1",
   2: "grid-cols-2 grid-rows-1",
   3: "grid-cols-2 grid-rows-2",
   4: "grid-cols-2 grid-rows-2",
 };
+export const MAX_GRID_TILES = 4;
 
 interface Props {
   messages: Message[];

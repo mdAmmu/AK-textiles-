@@ -2,13 +2,21 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Plus, Radio } from "lucide-react";
 import BottomNav from "../components/admin/BottomNav";
+import AdminHomeHeader from "../components/admin/AdminHomeHeader";
+import AdminAccountPanel from "../components/admin/AdminAccountPanel";
+import AdminProfileScreen from "../components/admin/AdminProfileScreen";
 import LoadingScreen from "../components/common/LoadingScreen";
 import { fetchAudiences } from "../services/broadcastMessages";
 import type { BroadcastAudience } from "../types/broadcastMessage";
 import { formatGroupTimestamp } from "../utils/formatGroupTimestamp";
+import { useCurrentUser } from "../hooks/useCurrentUser";
 
 export default function AdminBroadcastHome() {
+  const { user } = useCurrentUser();
   const [audiences, setAudiences] = useState<BroadcastAudience[] | null>(null);
+  const [search, setSearch] = useState("");
+  const [showAccount, setShowAccount] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -20,27 +28,41 @@ export default function AdminBroadcastHome() {
     };
   }, []);
 
+  const filtered =
+    audiences === null
+      ? null
+      : audiences.filter((a) => a.name.toLowerCase().includes(search.trim().toLowerCase()));
+
   return (
-    <div className="relative flex flex-col h-screen bg-[linear-gradient(180deg,#eaf7ee_0%,#f6fbf7_40%,#ffffff_75%)] dark:bg-[#10161f]">
-      <header className="flex items-center justify-between pt-[1.125rem] px-5 shrink-0">
-        <h1 className="text-2xl font-bold text-[#1a1a1a] dark:text-[#e9edef]">Broadcast</h1>
-        <Link
-          to="/admin/broadcast/new"
-          className="flex items-center gap-1.5 bg-[#0f9d6e] text-white no-underline font-semibold text-sm rounded-full py-2 px-4"
-        >
-          <Plus size={16} /> New
-        </Link>
-      </header>
+    <div className="relative flex flex-col h-dvh bg-[linear-gradient(180deg,#eaf7ee_0%,#f6fbf7_40%,#ffffff_75%)] dark:bg-[#10161f]">
+      <AdminHomeHeader
+        adminName={user?.name}
+        onMenuClick={() => setShowAccount(true)}
+        onProfileClick={() => setShowProfile(true)}
+        searchValue={search}
+        onSearchChange={setSearch}
+        searchPlaceholder="Search broadcasts..."
+        trailing={
+          <Link
+            to="/admin/broadcast/new"
+            className="flex items-center gap-1.5 bg-[#0f9d6e] text-white no-underline font-semibold text-sm rounded-full py-2.5 px-4 shrink-0"
+            aria-label="New broadcast"
+          >
+            <Plus size={16} /> New
+          </Link>
+        }
+      />
 
       <main className="flex-1 overflow-y-auto pt-3.5 px-5 pb-24">
-        {audiences === null ? (
+        {filtered === null ? (
           <LoadingScreen />
-        ) : audiences.length === 0 ? (
+        ) : filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center gap-3 text-center text-[#7c827e] dark:text-[#8b96a5] mt-16">
             <Radio size={40} />
             <p className="max-w-[240px]">
-              No broadcasts yet. Create one, add recipients, and message all of them privately at
-              once — from one place.
+              {audiences && audiences.length > 0
+                ? "No broadcasts match your search."
+                : "No broadcasts yet. Create one, add recipients, and message all of them privately at once — from one place."}
             </p>
             <Link
               to="/admin/broadcast/new"
@@ -51,7 +73,7 @@ export default function AdminBroadcastHome() {
           </div>
         ) : (
           <div className="flex flex-col gap-2.5">
-            {audiences.map((a) => (
+            {filtered.map((a) => (
               <Link
                 key={a.id}
                 to={`/admin/broadcast/${a.id}`}
@@ -78,6 +100,17 @@ export default function AdminBroadcastHome() {
       </main>
 
       <BottomNav />
+
+      {showProfile && user && <AdminProfileScreen admin={user} onClose={() => setShowProfile(false)} />}
+
+      {showAccount && user && (
+        <AdminAccountPanel
+          admin={user}
+          onClose={() => setShowAccount(false)}
+          onGroupCreated={() => {}}
+          onGroupDeleted={() => {}}
+        />
+      )}
     </div>
   );
 }

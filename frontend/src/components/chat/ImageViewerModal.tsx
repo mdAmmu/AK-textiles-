@@ -49,7 +49,7 @@ export default function ImageViewerModal({ images, startIndex, onClose }: Props)
             }}
           >
             <img
-              className="max-w-full max-h-[calc(100vh-4rem)] object-contain"
+              className="max-w-full max-h-[calc(100dvh-4rem)] object-contain"
               src={src}
               alt={`Photo ${index + 1}`}
             />

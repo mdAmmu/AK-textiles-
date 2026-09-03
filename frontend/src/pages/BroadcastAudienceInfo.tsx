@@ -1,28 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import {
-  ArrowLeft,
-  ChevronDown,
-  ChevronRight,
-  Images,
-  Search,
-  UserPlus,
-  Users,
-} from "lucide-react";
-import {
-  assignUserGroup,
-  createAndAssignCustomer,
-  fetchGroupMessages,
-  fetchGroups,
-  fetchGroupUsers,
-  fetchUnassignedUsers,
-} from "../services/groups";
-import type { Group, GroupUser } from "../types/group";
-import type { Message } from "../types/message";
-import type { User } from "../types/user";
-import GroupIcon from "../components/admin/GroupIcon";
+import { ArrowLeft, BarChart3, ChevronDown, ChevronRight, Radio, Search, UserPlus, Users, X } from "lucide-react";
+import { fetchAudience, fetchAudienceStats, updateAudience } from "../services/broadcastMessages";
+import type { BroadcastAudienceDetail, BroadcastAudienceStats } from "../types/broadcastMessage";
 import Avatar from "../components/common/Avatar";
-import AddCustomerPanel from "../components/admin/AddCustomerPanel";
+import AddAudienceMemberPanel from "../components/admin/AddAudienceMemberPanel";
 import LoadingScreen from "../components/common/LoadingScreen";
 
 const ACTION_BTN =
@@ -34,72 +16,61 @@ const ROW_LABEL = "flex-1 font-medium";
 const ROW_CHEVRON = "text-[#c2c6c3] dark:text-[#6b7480] shrink-0 transition-transform duration-150 ease-in-out";
 const EMPTY_TEXT = "py-4 text-[#7c827e] dark:text-[#8b96a5]";
 
-export default function GroupChatInfo() {
-  const { groupId } = useParams<{ groupId: string }>();
+export default function BroadcastAudienceInfo() {
+  const { audienceId } = useParams<{ audienceId: string }>();
   const navigate = useNavigate();
 
-  const [group, setGroup] = useState<Group | null>(null);
-  const [members, setMembers] = useState<GroupUser[] | null>(null);
+  const [audience, setAudience] = useState<BroadcastAudienceDetail | null>(null);
   const [showSearch, setShowSearch] = useState(false);
   const [search, setSearch] = useState("");
   const [showMembers, setShowMembers] = useState(false);
   const [showAddPanel, setShowAddPanel] = useState(false);
-  const [candidates, setCandidates] = useState<User[]>([]);
-  const [showMedia, setShowMedia] = useState(false);
-  const [media, setMedia] = useState<Message[] | null>(null);
+  const [showStats, setShowStats] = useState(false);
+  const [stats, setStats] = useState<BroadcastAudienceStats | null>(null);
 
   useEffect(() => {
-    if (!groupId) return;
-    fetchGroups().then((all) => setGroup(all.find((g) => g.id === groupId) ?? null));
-    fetchGroupUsers(groupId).then(setMembers);
-  }, [groupId]);
+    if (!audienceId) return;
+    fetchAudience(audienceId).then(setAudience);
+  }, [audienceId]);
 
   const filtered = useMemo(() => {
-    if (!members) return members;
+    if (!audience) return null;
     const term = search.trim().toLowerCase();
-    if (!term) return members;
-    return members.filter((m) => m.name.toLowerCase().includes(term));
-  }, [members, search]);
+    if (!term) return audience.members;
+    return audience.members.filter((m) => m.name.toLowerCase().includes(term));
+  }, [audience, search]);
 
-  async function handleAddSearch(term: string) {
-    const results = await fetchUnassignedUsers(term || undefined);
-    setCandidates(results);
-  }
-
-  async function handleAdd(userId: string) {
-    if (!groupId) return;
-    const added = await assignUserGroup(userId, groupId);
-    setMembers((prev) => [...(prev ?? []), added]);
-    setGroup((prev) => (prev ? { ...prev, customer_count: prev.customer_count + 1 } : prev));
-    setShowAddPanel(false);
-  }
-
-  async function handleAddNew(phone: string, name: string, password: string) {
-    if (!groupId) return;
-    const added = await createAndAssignCustomer(groupId, name, phone, password);
-    setMembers((prev) => [...(prev ?? []), added]);
-    setGroup((prev) => (prev ? { ...prev, customer_count: prev.customer_count + 1 } : prev));
-    setShowAddPanel(false);
-  }
-
-  function handleToggleMedia() {
-    setShowMedia((s) => {
+  function handleToggleStats() {
+    setShowStats((s) => {
       const next = !s;
-      if (next && groupId) {
-        setMedia(null);
-        fetchGroupMessages(groupId).then((messages) =>
-          setMedia(
-            messages.filter(
-              (m) => m.message_type === "IMAGE" && m.product_image && !m.is_deleted,
-            ),
-          ),
-        );
+      if (next && audienceId) {
+        setStats(null);
+        fetchAudienceStats(audienceId).then(setStats);
       }
       return next;
     });
   }
 
-  if (group === null || members === null) return <LoadingScreen />;
+  async function handleAdd(userId: string) {
+    if (!audienceId || !audience) return;
+    await updateAudience(audienceId, undefined, [...audience.member_ids, userId]);
+    const refreshed = await fetchAudience(audienceId);
+    setAudience(refreshed);
+    setShowAddPanel(false);
+  }
+
+  async function handleRemove(userId: string) {
+    if (!audienceId || !audience) return;
+    await updateAudience(
+      audienceId,
+      undefined,
+      audience.member_ids.filter((id) => id !== userId),
+    );
+    const refreshed = await fetchAudience(audienceId);
+    setAudience(refreshed);
+  }
+
+  if (audience === null) return <LoadingScreen />;
 
   return (
     <div className="flex flex-col min-h-dvh bg-[#eef2f0] dark:bg-[#10161f] pb-8">
@@ -111,9 +82,11 @@ export default function GroupChatInfo() {
         >
           <ArrowLeft size={20} />
         </button>
-        <GroupIcon name={group.name} size={80} variant="hero" />
-        <h1 className="mt-2 mb-0 text-xl font-bold text-white">{group.name}</h1>
-        <span className="text-white/85 text-sm">{members.length} members</span>
+        <span className="w-20 h-20 rounded-full bg-white/[0.22] border-[3px] border-white/[0.55] flex items-center justify-center">
+          <Radio size={36} color="#fff" />
+        </span>
+        <h1 className="mt-2 mb-0 text-xl font-bold text-white">{audience.name}</h1>
+        <span className="text-white/85 text-sm">{audience.member_count} recipients</span>
       </div>
 
       <div className="flex justify-center gap-2.5 mt-4 mx-4">
@@ -121,14 +94,7 @@ export default function GroupChatInfo() {
           <Search size={18} />
           <span>Search</span>
         </button>
-        <button
-          className={ACTION_BTN}
-          type="button"
-          onClick={() => {
-            setShowAddPanel(true);
-            handleAddSearch("");
-          }}
-        >
+        <button className={ACTION_BTN} type="button" onClick={() => setShowAddPanel(true)}>
           <UserPlus size={18} />
           <span>Add Member</span>
         </button>
@@ -140,7 +106,7 @@ export default function GroupChatInfo() {
           <input
             className="flex-1 border-none outline-none bg-transparent font-[inherit] text-[#1a1a1a] dark:text-[#e9edef]"
             autoFocus
-            placeholder="Search members..."
+            placeholder="Search recipients..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -151,29 +117,27 @@ export default function GroupChatInfo() {
         <button
           className={`${ROW_BASE} border-b border-[#eef1ee] dark:border-[#232d3a]`}
           type="button"
-          onClick={handleToggleMedia}
+          onClick={handleToggleStats}
         >
-          <Images size={19} className={ROW_ICON} />
-          <span className={ROW_LABEL}>Media, Links &amp; Docs</span>
-          <ChevronRight size={18} className={`${ROW_CHEVRON}${showMedia ? " rotate-90" : ""}`} />
+          <BarChart3 size={19} className={ROW_ICON} />
+          <span className={ROW_LABEL}>Delivery Stats</span>
+          <ChevronRight size={18} className={`${ROW_CHEVRON}${showStats ? " rotate-90" : ""}`} />
         </button>
 
-        {showMedia && (
-          <div className="px-4 pb-2 border-t border-[#eef1ee] dark:border-[#232d3a]">
-            {media === null ? (
+        {showStats && (
+          <div className="px-4 pb-4 pt-3 border-t border-[#eef1ee] dark:border-[#232d3a]">
+            {stats === null ? (
               <p className={EMPTY_TEXT}>Loading…</p>
-            ) : media.length === 0 ? (
-              <p className={EMPTY_TEXT}>No media shared yet.</p>
             ) : (
-              <div className="grid grid-cols-3 gap-1.5 py-3">
-                {media.map((m) => (
-                  <img
-                    key={m.id}
-                    className="w-full aspect-square object-cover rounded-md"
-                    src={m.product_image!}
-                    alt=""
-                  />
-                ))}
+              <div className="grid grid-cols-2 gap-2.5">
+                <Stat label="Broadcasts Sent" value={stats.total_broadcasts} />
+                <Stat
+                  label="Delivered"
+                  value={stats.total_recipients_reached}
+                  sub={`${stats.delivery_rate}%`}
+                />
+                <Stat label="Read" value={stats.total_read} sub={`${stats.read_rate}%`} />
+                <Stat label="Failed" value={stats.total_failed} accent={stats.total_failed > 0} />
               </div>
             )}
           </div>
@@ -206,6 +170,13 @@ export default function GroupChatInfo() {
                     </div>
                   )}
                 </div>
+                <button
+                  className="flex border-none bg-transparent text-[#d92d20] cursor-pointer p-1.5 shrink-0"
+                  onClick={() => handleRemove(m.id)}
+                  aria-label={`Remove ${m.name}`}
+                >
+                  <X size={16} />
+                </button>
               </div>
             ))}
           </div>
@@ -213,14 +184,36 @@ export default function GroupChatInfo() {
       </div>
 
       {showAddPanel && (
-        <AddCustomerPanel
-          candidates={candidates}
-          onSearch={handleAddSearch}
+        <AddAudienceMemberPanel
+          excludeIds={audience.member_ids}
           onAdd={handleAdd}
-          onAddNew={handleAddNew}
           onClose={() => setShowAddPanel(false)}
         />
       )}
+    </div>
+  );
+}
+
+function Stat({
+  label,
+  value,
+  sub,
+  accent,
+}: {
+  label: string;
+  value: string | number;
+  sub?: string;
+  accent?: boolean;
+}) {
+  return (
+    <div className="bg-[#f6fbf7] dark:bg-[#10161f] border border-[#eef1ee] dark:border-[#232d3a] rounded-xl p-3">
+      <div className="text-[#8b8f8c] dark:text-[#8b96a5] text-[13px]">{label}</div>
+      <div
+        className={`text-xl font-bold ${accent ? "text-[#e5484d]" : "text-[#1a1a1a] dark:text-[#e9edef]"}`}
+      >
+        {value}
+      </div>
+      {sub && <div className="text-[#0f9d6e] dark:text-[#22c789] text-xs font-semibold">{sub}</div>}
     </div>
   );
 }

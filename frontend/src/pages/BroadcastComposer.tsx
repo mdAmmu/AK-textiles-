@@ -60,7 +60,7 @@ export default function BroadcastComposer() {
   }
 
   return (
-    <div className="relative flex flex-col h-screen bg-[linear-gradient(180deg,#eaf7ee_0%,#f6fbf7_40%,#ffffff_75%)] dark:bg-[#10161f]">
+    <div className="relative flex flex-col h-dvh bg-[linear-gradient(180deg,#eaf7ee_0%,#f6fbf7_40%,#ffffff_75%)] dark:bg-[#10161f]">
       <header className="flex items-center gap-3 pt-[1.125rem] px-4 pb-2 shrink-0">
         <button
           className="flex border-none bg-transparent text-[#1a1a1a] dark:text-[#e9edef] cursor-pointer p-1.5"

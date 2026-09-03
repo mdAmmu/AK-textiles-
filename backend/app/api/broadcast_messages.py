@@ -19,7 +19,9 @@ from app.models.user import User, UserRole
 from app.schemas.broadcast_message import (
     BroadcastAudienceCreate,
     BroadcastAudienceDetailOut,
+    BroadcastAudienceMemberOut,
     BroadcastAudienceOut,
+    BroadcastAudienceStatsOut,
     BroadcastAudienceUpdate,
     BroadcastCreateRequest,
     BroadcastDetailOut,
@@ -63,9 +65,45 @@ def get_audience(
     audience_id: str, db: Session = Depends(get_db), admin: User = Depends(require_admin)
 ):
     audience = _get_audience_or_404(db, admin, audience_id)
+    contact_ids = [m.contact_id for m in audience.members]
+    users = db.query(User).filter(User.id.in_(contact_ids)).all() if contact_ids else []
+    users_by_id = {str(u.id): u for u in users}
     return BroadcastAudienceDetailOut(
         **_audience_out(audience).model_dump(),
         member_ids=[str(m.contact_id) for m in audience.members],
+        members=[
+            BroadcastAudienceMemberOut(
+                id=str(m.contact_id),
+                name=users_by_id[str(m.contact_id)].name,
+                phone=users_by_id[str(m.contact_id)].phone,
+                email=users_by_id[str(m.contact_id)].email,
+            )
+            for m in audience.members
+            if str(m.contact_id) in users_by_id
+        ],
+    )
+
+
+@router.get("/audiences/{audience_id}/stats", response_model=BroadcastAudienceStatsOut)
+def get_audience_stats(
+    audience_id: str, db: Session = Depends(get_db), admin: User = Depends(require_admin)
+):
+    _get_audience_or_404(db, admin, audience_id)
+    broadcasts = service.list_broadcasts(db, admin, None, audience_id)
+    read_counts = service.get_read_counts(db, [str(b.id) for b in broadcasts])
+
+    total_recipients_reached = sum(b.sent_count for b in broadcasts)
+    total_read = sum(read_counts.get(str(b.id), 0) for b in broadcasts)
+    total_failed = sum(b.failed_count for b in broadcasts)
+    total_attempted = sum(b.total_recipients for b in broadcasts)
+
+    return BroadcastAudienceStatsOut(
+        total_broadcasts=len(broadcasts),
+        total_recipients_reached=total_recipients_reached,
+        total_read=total_read,
+        total_failed=total_failed,
+        delivery_rate=round((total_recipients_reached / total_attempted) * 100) if total_attempted else 0,
+        read_rate=round((total_read / total_recipients_reached) * 100) if total_recipients_reached else 0,
     )
 
 

@@ -22,7 +22,7 @@ export default function Products() {
   }, [products, search]);
 
   return (
-    <div className="flex flex-col h-screen">
+    <div className="flex flex-col h-dvh">
       <header className="flex items-center justify-between py-5 px-4 bg-[var(--wa-header)] shrink-0">
         <h1 className="m-0 text-2xl text-white">Products</h1>
         <Link
@@ -32,17 +32,17 @@ export default function Products() {
           <Plus size={16} /> Create Product
         </Link>
       </header>
-      <div className="flex gap-2.5 py-3.5 px-4 bg-white border-b border-[var(--wa-border)] shrink-0">
-        <div className="flex-1 flex items-center gap-2 bg-[var(--wa-panel-bg)] rounded-lg py-2.5 px-3.5 text-[var(--wa-text-secondary)]">
+      <div className="flex gap-2.5 py-3.5 px-4 bg-white border-b border-[var(--wa-border)] shrink-0 min-w-0">
+        <div className="flex-1 min-w-0 flex items-center gap-2 bg-[var(--wa-panel-bg)] rounded-lg py-2.5 px-3.5 text-[var(--wa-text-secondary)]">
           <Search size={18} />
           <input
-            className="flex-1 border-none outline-none bg-transparent font-[inherit] text-[var(--wa-text)]"
+            className="flex-1 min-w-0 border-none outline-none bg-transparent font-[inherit] text-[var(--wa-text)]"
             placeholder="Search products..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
-        <button className="flex items-center gap-1.5 border border-[var(--wa-border)] bg-white rounded-lg px-3.5 font-[inherit] font-semibold text-[var(--wa-text)] cursor-pointer">
+        <button className="flex items-center gap-1.5 border border-[var(--wa-border)] bg-white rounded-lg px-3.5 font-[inherit] font-semibold text-[var(--wa-text)] cursor-pointer shrink-0">
           <SlidersHorizontal size={16} /> Filter
         </button>
       </div>

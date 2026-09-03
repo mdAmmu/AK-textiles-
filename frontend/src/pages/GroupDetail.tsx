@@ -64,7 +64,7 @@ export default function GroupDetail() {
   const active = group.customer_count > 0;
 
   return (
-    <div className="flex flex-col min-h-screen bg-[var(--wa-panel-bg)]">
+    <div className="flex flex-col min-h-dvh bg-[var(--wa-panel-bg)]">
       <header className="flex items-center gap-3 py-[1.125rem] px-4 bg-[var(--wa-header)] shrink-0">
         <button className={HEADER_BTN} onClick={() => navigate("/admin/groups")} aria-label="Back">
           <ArrowLeft size={20} />

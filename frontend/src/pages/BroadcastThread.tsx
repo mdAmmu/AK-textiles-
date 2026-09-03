@@ -24,6 +24,14 @@ import LoadingScreen from "../components/common/LoadingScreen";
 import MessageInput, { MESSAGE_INPUT_ICON_CLASS } from "../components/chat/MessageInput";
 import ForwardPicker from "../components/chat/ForwardPicker";
 import ForwardPreviewBar, { type StagedImage } from "../components/chat/ForwardPreviewBar";
+import { MAX_GRID_TILES, TILE_GRID_BASE, TILE_GRID_COUNT } from "../components/chat/ImageGroupBubble";
+import {
+  BUBBLE_IMAGE,
+  BUBBLE_ROW_BASE,
+  BUBBLE_ROW_OWN,
+  IMAGE_TIME,
+  IMAGE_WRAP,
+} from "../components/chat/MessageBubble";
 import { randomUUID } from "../utils/uuid";
 import {
   CHAT_BODY,
@@ -40,6 +48,7 @@ import {
 
 const IN_FLIGHT = new Set(["queued", "processing"]);
 const LONG_PRESS_MS = 450;
+const MOVE_CANCEL_PX = 10;
 
 const STATUS_LABEL: Record<string, string> = {
   queued: "Sending…",
@@ -55,6 +64,41 @@ function replyLabel(s: BroadcastMessage): string {
   if (s.message_type === "image") return "📷 Photo";
   if (s.message_type === "document") return s.file_name ?? "📄 Document";
   return s.text ?? "";
+}
+
+type BroadcastListItem =
+  | { kind: "single"; send: BroadcastMessage }
+  | { kind: "group"; sends: BroadcastMessage[] };
+
+// Multiple images sent together share an image_group_id (set both by the
+// backend and by the optimistic staged-send below) — fold consecutive ones
+// into a single grid bubble, matching how the personal/group chat renders
+// multi-image sends (see components/chat/MessageList.tsx groupMessages).
+function groupSends(sends: BroadcastMessage[]): BroadcastListItem[] {
+  const items: BroadcastListItem[] = [];
+  let i = 0;
+  while (i < sends.length) {
+    const s = sends[i];
+    if (s.message_type === "image" && s.image_group_id) {
+      const groupId = s.image_group_id;
+      const group: BroadcastMessage[] = [s];
+      let j = i + 1;
+      while (
+        j < sends.length &&
+        sends[j].message_type === "image" &&
+        sends[j].image_group_id === groupId
+      ) {
+        group.push(sends[j]);
+        j++;
+      }
+      items.push({ kind: "group", sends: group });
+      i = j;
+    } else {
+      items.push({ kind: "single", send: s });
+      i++;
+    }
+  }
+  return items;
 }
 
 export default function BroadcastThread() {
@@ -310,7 +354,10 @@ export default function BroadcastThread() {
           <button className={CHAT_HEADER_ICON_BTN} onClick={() => navigate("/admin/broadcast")} aria-label="Back">
             <ArrowLeft size={22} />
           </button>
-          <div className={CHAT_HEADER_IDENTITY}>
+          <button
+            className={CHAT_HEADER_IDENTITY}
+            onClick={() => navigate(`/admin/broadcast/${audienceId}/info`)}
+          >
             <span className="w-9 h-9 rounded-full bg-[#e3f7ec] flex items-center justify-center shrink-0">
               <Radio size={18} color="#0f9d6e" />
             </span>
@@ -318,11 +365,11 @@ export default function BroadcastThread() {
               <div className={CHAT_HEADER_TITLE}>{audience.name}</div>
               <div className={CHAT_HEADER_SUBTITLE}>{audience.member_count} recipients</div>
             </div>
-          </div>
+          </button>
         </header>
       )}
 
-      <div className={`${CHAT_BODY} overflow-y-auto px-3.5 py-3 gap-2 flex flex-col`}>
+      <div className={CHAT_BODY}>
         {sends.length === 0 ? (
           <div className="flex-1 flex flex-col items-center justify-center gap-2 text-center text-[var(--chat-text-secondary)] px-8">
             <Radio size={36} />
@@ -332,19 +379,44 @@ export default function BroadcastThread() {
             </p>
           </div>
         ) : (
-          sends.map((s) => (
-            <BroadcastBubble
-              key={s.id}
-              send={s}
-              selected={selectedIds.has(s.id)}
-              selectionMode={selectionMode}
-              onOpen={() =>
-                !s.id.startsWith("temp-") && navigate(`/admin/broadcast/${audienceId}/message/${s.id}`)
+          <div className="flex-1 overflow-y-auto py-3 flex flex-col gap-1">
+            {groupSends(sends).map((item) => {
+              if (item.kind === "group") {
+                const last = item.sends[item.sends.length - 1];
+                return (
+                  <div key={item.sends[0].id} className={`${BUBBLE_ROW_BASE} ${BUBBLE_ROW_OWN}`}>
+                    <BroadcastImageGroupBubble
+                      sends={item.sends}
+                      selected={item.sends.every((s) => selectedIds.has(s.id))}
+                      selectionMode={selectionMode}
+                      onOpen={() =>
+                        !last.id.startsWith("temp-") &&
+                        navigate(`/admin/broadcast/${audienceId}/message/${last.id}`)
+                      }
+                      onToggleSelect={() => item.sends.forEach((s) => toggleSelect(s.id))}
+                      onLongPress={() => setSelectedIds(new Set(item.sends.map((s) => s.id)))}
+                    />
+                  </div>
+                );
               }
-              onToggleSelect={() => toggleSelect(s.id)}
-              onLongPress={() => setSelectedIds(new Set([s.id]))}
-            />
-          ))
+              const s = item.send;
+              return (
+                <div key={s.id} className={`${BUBBLE_ROW_BASE} ${BUBBLE_ROW_OWN}`}>
+                  <BroadcastBubble
+                    send={s}
+                    selected={selectedIds.has(s.id)}
+                    selectionMode={selectionMode}
+                    onOpen={() =>
+                      !s.id.startsWith("temp-") &&
+                      navigate(`/admin/broadcast/${audienceId}/message/${s.id}`)
+                    }
+                    onToggleSelect={() => toggleSelect(s.id)}
+                    onLongPress={() => setSelectedIds(new Set([s.id]))}
+                  />
+                </div>
+              );
+            })}
+          </div>
         )}
       </div>
 
@@ -431,9 +503,12 @@ interface BubbleProps {
 function BroadcastBubble({ send, selected, selectionMode, onOpen, onToggleSelect, onLongPress }: BubbleProps) {
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const firedRef = useRef(false);
+  const movedRef = useRef(false);
+  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
 
   function startPress() {
     firedRef.current = false;
+    movedRef.current = false;
     timerRef.current = setTimeout(() => {
       firedRef.current = true;
       onLongPress();
@@ -453,21 +528,49 @@ function BroadcastBubble({ send, selected, selectionMode, onOpen, onToggleSelect
       firedRef.current = false;
       return;
     }
+    // A scroll/drag gesture, not a tap — don't treat it as open/select.
+    if (movedRef.current) {
+      movedRef.current = false;
+      return;
+    }
     if (selectionMode) onToggleSelect();
     else onOpen();
   }
 
+  function handleTouchStart(e: React.TouchEvent) {
+    const touch = e.touches[0];
+    touchStartRef.current = { x: touch.clientX, y: touch.clientY };
+    startPress();
+  }
+
+  function handleTouchMove(e: React.TouchEvent) {
+    const start = touchStartRef.current;
+    if (!start) return;
+    const touch = e.touches[0];
+    const dx = Math.abs(touch.clientX - start.x);
+    const dy = Math.abs(touch.clientY - start.y);
+    if (dx > MOVE_CANCEL_PX || dy > MOVE_CANCEL_PX) {
+      movedRef.current = true;
+      cancelPress();
+    }
+  }
+
+  function handleTouchEnd() {
+    touchStartRef.current = null;
+    endPress();
+  }
+
   return (
-    <button
+    <div
+      role="button"
+      tabIndex={0}
       onMouseDown={startPress}
       onMouseUp={endPress}
       onMouseLeave={cancelPress}
-      onTouchStart={startPress}
-      onTouchEnd={(e) => {
-        e.preventDefault();
-        endPress();
-      }}
-      className={`self-end max-w-[85%] text-left bg-[#dcf8c6] dark:bg-[#0b3d24] rounded-xl rounded-tr-sm py-2 px-2.5 border-none cursor-pointer overflow-hidden select-none ${
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+      className={`max-w-[85%] text-left bg-[#dcf8c6] dark:bg-[#0b3d24] rounded-xl rounded-tr-sm py-2 px-2.5 border-none cursor-pointer overflow-hidden select-none ${
         selected ? "outline outline-2 outline-[#0f9d6e] outline-offset-2" : ""
       }`}
     >
@@ -494,11 +597,130 @@ function BroadcastBubble({ send, selected, selectionMode, onOpen, onToggleSelect
       <div className="flex items-center justify-end gap-2 mt-1 px-1">
         <span className="text-[#4f7a5f] dark:text-[#7fbf9c] text-[11px]">
           {STATUS_LABEL[send.status] ?? send.status}
-          {send.status === "completed" || send.status === "partially_completed"
-            ? ` · ${send.sent_count}/${send.total_recipients} sent`
-            : ""}
         </span>
       </div>
-    </button>
+    </div>
+  );
+}
+
+interface GroupBubbleProps {
+  sends: BroadcastMessage[];
+  selected: boolean;
+  selectionMode: boolean;
+  onOpen: () => void;
+  onToggleSelect: () => void;
+  onLongPress: () => void;
+}
+
+function BroadcastImageGroupBubble({
+  sends,
+  selected,
+  selectionMode,
+  onOpen,
+  onToggleSelect,
+  onLongPress,
+}: GroupBubbleProps) {
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const firedRef = useRef(false);
+  const movedRef = useRef(false);
+  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
+
+  function startPress() {
+    firedRef.current = false;
+    movedRef.current = false;
+    timerRef.current = setTimeout(() => {
+      firedRef.current = true;
+      onLongPress();
+    }, LONG_PRESS_MS);
+  }
+
+  function cancelPress() {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+  }
+
+  function endPress() {
+    cancelPress();
+    if (firedRef.current) {
+      firedRef.current = false;
+      return;
+    }
+    if (movedRef.current) {
+      movedRef.current = false;
+      return;
+    }
+    if (selectionMode) onToggleSelect();
+    else onOpen();
+  }
+
+  function handleTouchStart(e: React.TouchEvent) {
+    const touch = e.touches[0];
+    touchStartRef.current = { x: touch.clientX, y: touch.clientY };
+    startPress();
+  }
+
+  function handleTouchMove(e: React.TouchEvent) {
+    const start = touchStartRef.current;
+    if (!start) return;
+    const touch = e.touches[0];
+    const dx = Math.abs(touch.clientX - start.x);
+    const dy = Math.abs(touch.clientY - start.y);
+    if (dx > MOVE_CANCEL_PX || dy > MOVE_CANCEL_PX) {
+      movedRef.current = true;
+      cancelPress();
+    }
+  }
+
+  function handleTouchEnd() {
+    touchStartRef.current = null;
+    endPress();
+  }
+
+  const last = sends[sends.length - 1];
+  const count = sends.length;
+  const tileCount = Math.min(count, MAX_GRID_TILES);
+  const visible = sends.slice(0, MAX_GRID_TILES);
+  const remaining = count - MAX_GRID_TILES;
+
+  return (
+    <div
+      role="button"
+      tabIndex={0}
+      onMouseDown={startPress}
+      onMouseUp={endPress}
+      onMouseLeave={cancelPress}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+      className={`max-w-[85%] text-left bg-[#dcf8c6] dark:bg-[#0b3d24] rounded-xl rounded-tr-sm border-none cursor-pointer overflow-hidden select-none ${BUBBLE_IMAGE} ${
+        selected ? "outline outline-2 outline-[#0f9d6e] outline-offset-2" : ""
+      }`}
+    >
+      <div className={IMAGE_WRAP}>
+        <div className={`${TILE_GRID_BASE} ${TILE_GRID_COUNT[tileCount]}`}>
+          {visible.map((s, index) => (
+            <div
+              className={`relative overflow-hidden${tileCount === 3 && index === 0 ? " row-span-2" : ""}`}
+              key={s.id}
+            >
+              <img
+                className="block w-full h-full object-cover"
+                src={s.media_url ?? undefined}
+                alt=""
+                draggable={false}
+              />
+              {index === MAX_GRID_TILES - 1 && remaining > 0 && (
+                <div className="absolute inset-0 bg-black/45 text-white text-2xl font-semibold flex items-center justify-center">
+                  +{remaining}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+        <span className={IMAGE_TIME}>{STATUS_LABEL[last.status] ?? last.status}</span>
+      </div>
+    </div>
   );
 }

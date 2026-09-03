@@ -22,8 +22,7 @@ export const BUBBLE_BASE =
   "max-w-[75%] bg-[var(--chat-bubble-other)] text-[var(--chat-text)] rounded-lg py-1.5 px-2 shadow-[0_1px_0.5px_rgba(0,0,0,0.13)] relative";
 export const BUBBLE_OWN = "bg-[var(--chat-bubble-own)]";
 export const BUBBLE_SELECTED = "outline outline-2 outline-[var(--chat-accent)] outline-offset-2";
-export const BUBBLE_IMAGE = "p-[3px] overflow-hidden";
-
+export const BUBBLE_IMAGE = "px-[3px] py-[3px] overflow-hidden";
 export const IMAGE_WRAP = "relative leading-none";
 export const IMAGE_TIME =
   "absolute bottom-1.5 right-1.5 flex items-center gap-0.5 bg-black/45 text-white text-[11px] py-[0.0625rem] px-1.5 rounded-lg [line-height:normal]";

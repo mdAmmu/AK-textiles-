@@ -53,8 +53,8 @@ export default function BroadcastConfirm() {
 
   if (result) {
     return (
-      <div className="min-h-screen bg-[var(--wa-panel-bg)]">
-        <div className="flex flex-col items-center justify-center h-screen text-center gap-2">
+      <div className="min-h-dvh bg-[var(--wa-panel-bg)]">
+        <div className="flex flex-col items-center justify-center h-dvh text-center gap-2">
           <CheckCircle2 size={48} color="#0f9d58" />
           <p>Product sent successfully</p>
           <p className="text-[#667781]">{result.total_sent} customers received the product.</p>
@@ -70,7 +70,7 @@ export default function BroadcastConfirm() {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--wa-panel-bg)]">
+    <div className="min-h-dvh bg-[var(--wa-panel-bg)]">
       <header className="flex items-center gap-3 py-[1.125rem] px-4 bg-[var(--wa-header)]">
         <button
           className="flex border-none bg-transparent text-white cursor-pointer"

@@ -2,7 +2,7 @@
 // container), used by UserChat, AdminChat, and GroupChat — these three
 // pages render the same WhatsApp-style chat layout.
 
-export const CHAT_PAGE = "flex flex-col h-screen bg-[var(--chat-bg)]";
+export const CHAT_PAGE = "flex flex-col h-dvh bg-[var(--chat-bg)]";
 
 export const CHAT_HEADER_BASE =
   "fixed top-0 left-0 right-0 flex items-center gap-2 py-4 px-4 bg-[var(--chat-header-bg)] text-[var(--chat-text)] border-b border-[var(--chat-border)] shrink-0 z-10";

@@ -11,6 +11,7 @@ import AdminBroadcastHome from "./pages/AdminBroadcastHome";
 import BroadcastComposer from "./pages/BroadcastComposer";
 import BroadcastThread from "./pages/BroadcastThread";
 import BroadcastDetail from "./pages/BroadcastDetail";
+import BroadcastAudienceInfo from "./pages/BroadcastAudienceInfo";
 import AdminChat from "./pages/AdminChat";
 import Groups from "./pages/Groups";
 import GroupDetail from "./pages/GroupDetail";
@@ -22,6 +23,7 @@ import EditProduct from "./pages/EditProduct";
 import ProductDetail from "./pages/ProductDetail";
 import BroadcastConfirm from "./pages/BroadcastConfirm";
 import WhatsAppSend from "./pages/WhatsAppSend";
+import ComingSoon from "./pages/ComingSoon";
 import ProtectedRoute from "./components/common/ProtectedRoute";
 import { ThemeProvider } from "./contexts/ThemeContext";
 
@@ -111,6 +113,14 @@ function App() {
           }
         />
         <Route
+          path="/admin/broadcast/:audienceId/info"
+          element={
+            <ProtectedRoute role="ADMIN">
+              <BroadcastAudienceInfo />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/admin/chats/:conversationId"
           element={
             <ProtectedRoute role="ADMIN">
@@ -195,6 +205,38 @@ function App() {
           element={
             <ProtectedRoute role="ADMIN">
               <WhatsAppSend />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/campaign"
+          element={
+            <ProtectedRoute role="ADMIN">
+              <ComingSoon title="Campaign" />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/templates"
+          element={
+            <ProtectedRoute role="ADMIN">
+              <ComingSoon title="Template" />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/balance"
+          element={
+            <ProtectedRoute role="ADMIN">
+              <ComingSoon title="Balance" />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/orders"
+          element={
+            <ProtectedRoute role="ADMIN">
+              <ComingSoon title="Order" />
             </ProtectedRoute>
           }
         />

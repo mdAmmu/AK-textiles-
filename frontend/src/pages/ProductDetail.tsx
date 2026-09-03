@@ -31,7 +31,7 @@ export default function ProductDetail() {
   );
 
   return (
-    <div className="min-h-screen bg-[var(--wa-panel-bg)] pb-4">
+    <div className="min-h-dvh bg-[var(--wa-panel-bg)] pb-4">
       <header className="flex items-center gap-3 py-[1.125rem] px-4 bg-[var(--wa-header)]">
         <button
           className="border-none bg-transparent text-white text-lg cursor-pointer"

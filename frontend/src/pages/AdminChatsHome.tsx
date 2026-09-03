@@ -1,6 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
-import { MessageCircle, Search } from "lucide-react";
+import { MessageCircle } from "lucide-react";
 import BottomNav from "../components/admin/BottomNav";
+import AdminHomeHeader from "../components/admin/AdminHomeHeader";
+import AdminAccountPanel from "../components/admin/AdminAccountPanel";
+import AdminProfileScreen from "../components/admin/AdminProfileScreen";
 import LoadingScreen from "../components/common/LoadingScreen";
 import ChatListItem from "../components/admin/ChatListItem";
 import { fetchConversations } from "../services/chat";
@@ -12,6 +15,8 @@ export default function AdminChatsHome() {
   const { user } = useCurrentUser();
   const [conversations, setConversations] = useState<ConversationSummary[] | null>(null);
   const [search, setSearch] = useState("");
+  const [showAccount, setShowAccount] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
 
   useEffect(() => {
     fetchConversations().then(setConversations);
@@ -51,22 +56,15 @@ export default function AdminChatsHome() {
   }, [conversations, search]);
 
   return (
-    <div className="relative flex flex-col h-screen bg-[linear-gradient(180deg,#eaf7ee_0%,#f6fbf7_40%,#ffffff_75%)] dark:bg-[#10161f]">
-      <header className="pt-[1.125rem] px-5 shrink-0">
-        <h1 className="text-2xl font-bold text-[#1a1a1a] dark:text-[#e9edef]">Chat</h1>
-      </header>
-
-      <div className="flex items-center gap-2.5 mx-[1.125rem] mt-3.5 mb-2 py-[0.8125rem] px-[1.125rem] bg-white dark:bg-[#1e2530] rounded-2xl shadow-[0_4px_18px_rgba(15,157,110,0.08)] dark:shadow-none dark:border dark:border-[#232d3a] shrink-0">
-        <span className="flex text-[#7c827e] dark:text-[#8b96a5]">
-          <Search size={18} />
-        </span>
-        <input
-          className="flex-1 border-none outline-none bg-transparent p-0 font-[inherit] text-[#1a1a1a] dark:text-[#e9edef] placeholder:text-[#b7bcb9]"
-          placeholder="Search chats..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-      </div>
+    <div className="relative flex flex-col h-dvh bg-[linear-gradient(180deg,#eaf7ee_0%,#f6fbf7_40%,#ffffff_75%)] dark:bg-[#10161f]">
+      <AdminHomeHeader
+        adminName={user?.name}
+        onMenuClick={() => setShowAccount(true)}
+        onProfileClick={() => setShowProfile(true)}
+        searchValue={search}
+        onSearchChange={setSearch}
+        searchPlaceholder="Search chats..."
+      />
 
       <main className="flex-1 overflow-y-auto pt-2 px-5 pb-24">
         {filtered === null ? (
@@ -90,6 +88,17 @@ export default function AdminChatsHome() {
       </main>
 
       <BottomNav />
+
+      {showProfile && user && <AdminProfileScreen admin={user} onClose={() => setShowProfile(false)} />}
+
+      {showAccount && user && (
+        <AdminAccountPanel
+          admin={user}
+          onClose={() => setShowAccount(false)}
+          onGroupCreated={() => {}}
+          onGroupDeleted={() => {}}
+        />
+      )}
     </div>
   );
 }

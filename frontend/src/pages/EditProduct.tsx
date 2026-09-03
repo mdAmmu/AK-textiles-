@@ -40,7 +40,7 @@ export default function EditProduct() {
   if (!product) return <LoadingScreen />;
 
   return (
-    <div className="min-h-screen bg-[var(--wa-panel-bg)]">
+    <div className="min-h-dvh bg-[var(--wa-panel-bg)]">
       <header className="flex items-center gap-3 py-[1.125rem] px-4 bg-[var(--wa-header)]">
         <button
           className="flex border-none bg-transparent text-white cursor-pointer"

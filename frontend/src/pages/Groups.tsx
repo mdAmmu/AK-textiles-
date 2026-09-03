@@ -21,7 +21,7 @@ export default function Groups() {
   }, [groups, search]);
 
   return (
-    <div className="flex flex-col h-screen">
+    <div className="flex flex-col h-dvh">
       <header className="flex items-center justify-between py-5 px-4 bg-[var(--wa-header)] shrink-0">
         <h1 className="m-0 text-2xl text-white">Groups</h1>
         <button

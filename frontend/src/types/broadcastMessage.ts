@@ -54,6 +54,23 @@ export interface BroadcastAudience {
   updated_at: string;
 }
 
+export interface BroadcastAudienceMember {
+  id: string;
+  name: string;
+  phone?: string | null;
+  email?: string | null;
+}
+
 export interface BroadcastAudienceDetail extends BroadcastAudience {
   member_ids: string[];
+  members: BroadcastAudienceMember[];
+}
+
+export interface BroadcastAudienceStats {
+  total_broadcasts: number;
+  total_recipients_reached: number;
+  total_read: number;
+  total_failed: number;
+  delivery_rate: number;
+  read_rate: number;
 }
