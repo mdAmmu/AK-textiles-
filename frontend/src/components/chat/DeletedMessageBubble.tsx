@@ -1,7 +1,12 @@
 import { Ban } from "lucide-react";
 import type { Message } from "../../types/message";
-import "./MessageBubble.css";
-import "./DeletedMessageBubble.css";
+import {
+  BUBBLE_BASE,
+  BUBBLE_OWN,
+  BUBBLE_ROW_BASE,
+  BUBBLE_ROW_OWN,
+  BUBBLE_TIME,
+} from "./MessageBubble";
 
 interface Props {
   message: Message;
@@ -15,13 +20,15 @@ export default function DeletedMessageBubble({ message, isOwn }: Props) {
   });
 
   return (
-    <div className={`message-bubble-row${isOwn ? " message-bubble-row--own" : ""}`}>
-      <div className={`message-bubble deleted-message-bubble${isOwn ? " message-bubble--own" : ""}`}>
-        <Ban size={15} className="deleted-message-bubble__icon" />
-        <p className="deleted-message-bubble__text">
+    <div className={`${BUBBLE_ROW_BASE}${isOwn ? ` ${BUBBLE_ROW_OWN}` : ""}`}>
+      <div
+        className={`${BUBBLE_BASE}${isOwn ? ` ${BUBBLE_OWN}` : ""} flex items-center gap-1.5 italic text-[var(--chat-text-secondary)]`}
+      >
+        <Ban size={15} className="shrink-0 opacity-80" />
+        <p className="m-0 py-0.5">
           {isOwn ? "You deleted this message" : "This message was deleted"}
         </p>
-        <span className="message-bubble__time">{time}</span>
+        <span className={`${BUBBLE_TIME} m-0 pr-0`}>{time}</span>
       </div>
     </div>
   );

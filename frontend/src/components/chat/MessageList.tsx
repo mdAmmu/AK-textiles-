@@ -4,7 +4,9 @@ import MessageBubble from "./MessageBubble";
 import ImageGroupBubble from "./ImageGroupBubble";
 import DeletedMessageBubble from "./DeletedMessageBubble";
 import EmptyMessages from "./EmptyMessages";
-import "./MessageList.css";
+
+const LIST_BASE =
+  "flex-1 overflow-y-auto py-3 flex flex-col gap-1 bg-[var(--chat-bg)] [background-image:radial-gradient(rgba(0,0,0,0.04)_1px,transparent_1px)] [background-size:18px_18px]";
 
 interface Props {
   messages: Message[];
@@ -64,17 +66,19 @@ export default function MessageList({
 
   if (messages.length === 0) {
     return (
-      <div className="message-list message-list--empty">
+      <div className={LIST_BASE}>
         <EmptyMessages onSendClick={onEmptySendClick} />
       </div>
     );
   }
 
   return (
-    <div className="message-list">
+    <div className={LIST_BASE}>
       {messages.length > 0 && (
-        <div className="message-list__date-divider">
-          <span>Today</span>
+        <div className="flex justify-center mb-2 pt-[25px]">
+          <span className="bg-[var(--chat-date-chip-bg)] text-[var(--chat-date-chip-text)] text-xs py-[0.3rem] px-3 rounded-lg shadow-[0_1px_3px_rgba(0,0,0,0.08)]">
+            Today
+          </span>
         </div>
       )}
       {items.map((item) => {

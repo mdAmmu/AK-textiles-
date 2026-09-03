@@ -1,6 +1,8 @@
 import { useRef } from "react";
 import { ImagePlus } from "lucide-react";
-import "./ImageUploadGrid.css";
+
+const SLOT_BASE =
+  "aspect-square rounded-lg bg-[var(--wa-panel-bg)] flex flex-col items-center justify-center text-[var(--wa-text-secondary)] text-2xl overflow-hidden p-0";
 
 interface Props {
   images: (string | null | undefined)[];
@@ -20,22 +22,22 @@ export default function ImageUploadGrid({ images, onUpload, uploading }: Props) 
   }
 
   return (
-    <div className="image-upload-grid">
+    <div className="grid grid-cols-2 gap-3 p-4">
       {slots.map((src, i) =>
         src ? (
-          <div key={i} className="image-upload-grid__slot image-upload-grid__slot--filled">
-            <img src={src} alt={`Product ${i + 1}`} />
+          <div key={i} className={`${SLOT_BASE} border-none cursor-default`}>
+            <img src={src} alt={`Product ${i + 1}`} className="w-full h-full object-cover" />
           </div>
         ) : (
           <button
             key={i}
             type="button"
-            className="image-upload-grid__slot"
+            className={`${SLOT_BASE} border-2 border-dashed border-[var(--wa-border)] cursor-pointer`}
             disabled={uploading || filledCount >= 4}
             onClick={() => inputRef.current?.click()}
           >
             <ImagePlus size={22} />
-            <span>Image</span>
+            <span className="text-xs mt-1">Image</span>
           </button>
         ),
       )}

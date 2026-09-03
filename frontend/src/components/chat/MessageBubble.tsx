@@ -3,7 +3,29 @@ import { Check, CheckCheck, Clock } from "lucide-react";
 import type { Message } from "../../types/message";
 import ProductMessage from "./ProductMessage";
 import ImageMessage, { type ImageMessageHandle } from "./ImageMessage";
-import "./MessageBubble.css";
+
+export const BUBBLE_ROW_BASE = "flex py-0.5 px-3 select-none";
+export const BUBBLE_ROW_OWN = "justify-end";
+export const BUBBLE_ROW_SELECTED = "bg-[rgba(15,157,110,0.12)]";
+export const BUBBLE_ROW_PENDING = "opacity-60";
+
+export const BUBBLE_BASE =
+  "max-w-[75%] bg-[var(--chat-bubble-other)] text-[var(--chat-text)] rounded-lg py-1.5 px-2 shadow-[0_1px_0.5px_rgba(0,0,0,0.13)] relative";
+export const BUBBLE_OWN = "bg-[var(--chat-bubble-own)]";
+export const BUBBLE_SELECTED = "outline outline-2 outline-[var(--chat-accent)] outline-offset-2";
+export const BUBBLE_IMAGE = "p-[3px] overflow-hidden";
+
+export const IMAGE_WRAP = "relative leading-none";
+export const IMAGE_TIME =
+  "absolute bottom-1.5 right-1.5 flex items-center gap-0.5 bg-black/45 text-white text-[11px] py-[0.0625rem] px-1.5 rounded-lg [line-height:normal]";
+
+export const BUBBLE_TEXT = "m-0 py-0.5 px-1 whitespace-pre-wrap break-words";
+export const BUBBLE_TIME =
+  "flex items-center justify-end text-[11px] text-[var(--chat-text-secondary)] mt-0.5 pr-1";
+export const BUBBLE_EDITED = "italic mr-1";
+export const BUBBLE_TICK = "flex ml-1 text-[var(--chat-text-secondary)]";
+export const BUBBLE_TICK_READ = "text-[var(--chat-tick-read)]";
+export const BUBBLE_TICK_IN_IMAGE = "flex ml-1 text-white";
 
 interface Props {
   message: Message;
@@ -38,7 +60,13 @@ export default function MessageBubble({
   const isImage = message.message_type === "IMAGE";
 
   const tick = isOwn && (
-    <span className={`message-bubble__tick${message.read_at ? " message-bubble__tick--read" : ""}`}>
+    <span
+      className={
+        isImage
+          ? BUBBLE_TICK_IN_IMAGE
+          : `${BUBBLE_TICK}${message.read_at ? ` ${BUBBLE_TICK_READ}` : ""}`
+      }
+    >
       {message._pending ? (
         <Clock size={12} />
       ) : message.read_at ? (
@@ -113,7 +141,7 @@ export default function MessageBubble({
 
   return (
     <div
-      className={`message-bubble-row${isOwn ? " message-bubble-row--own" : ""}${selected ? " message-bubble-row--selected" : ""}${message._pending ? " message-bubble-row--pending" : ""}`}
+      className={`${BUBBLE_ROW_BASE}${isOwn ? ` ${BUBBLE_ROW_OWN}` : ""}${selected ? ` ${BUBBLE_ROW_SELECTED}` : ""}${message._pending ? ` ${BUBBLE_ROW_PENDING}` : ""}`}
       onMouseDown={startPress}
       onMouseUp={endPress}
       onMouseLeave={cancelPress}
@@ -122,12 +150,12 @@ export default function MessageBubble({
       onTouchEnd={handleTouchEnd}
     >
       <div
-        className={`message-bubble${isOwn ? " message-bubble--own" : ""}${isImage ? " message-bubble--image" : ""}${selected ? " message-bubble--selected" : ""}`}
+        className={`${BUBBLE_BASE}${isOwn ? ` ${BUBBLE_OWN}` : ""}${isImage ? ` ${BUBBLE_IMAGE}` : ""}${selected ? ` ${BUBBLE_SELECTED}` : ""}`}
       >
         {isImage ? (
-          <div className="message-bubble__image-wrap">
+          <div className={IMAGE_WRAP}>
             <ImageMessage ref={imageRef} message={message} selectionMode={selectionMode} />
-            <span className="message-bubble__image-time">
+            <span className={IMAGE_TIME}>
               {time}
               {tick}
             </span>
@@ -137,10 +165,10 @@ export default function MessageBubble({
             {message.message_type === "PRODUCT" ? (
               <ProductMessage message={message} />
             ) : (
-              <p className="message-bubble__text">{message.text}</p>
+              <p className={BUBBLE_TEXT}>{message.text}</p>
             )}
-            <span className="message-bubble__time">
-              {message.is_edited && <span className="message-bubble__edited">Edited</span>}
+            <span className={BUBBLE_TIME}>
+              {message.is_edited && <span className={BUBBLE_EDITED}>Edited</span>}
               {time}
               {tick}
             </span>

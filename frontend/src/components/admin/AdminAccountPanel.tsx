@@ -7,7 +7,16 @@ import type { Group } from "../../types/group";
 import { createGroup, deleteGroup, fetchGroups } from "../../services/groups";
 import Avatar from "../common/Avatar";
 import GroupIcon from "./GroupIcon";
-import "./AdminAccountPanel.css";
+
+const SECTION = "border-t-8 border-[var(--wa-panel-bg)] p-4";
+const ADD_GROUP_BTN =
+  "flex items-center justify-center gap-2 w-full py-3 border-none rounded-lg bg-[var(--wa-accent)] text-white font-semibold text-[15px] cursor-pointer no-underline";
+const LABEL = "font-semibold text-sm mt-3 text-[var(--wa-text)]";
+const INPUT = "py-2.5 px-3 border border-[var(--wa-border)] rounded-lg font-[inherit] bg-[var(--wa-panel-bg)]";
+const CANCEL_BTN =
+  "flex-1 py-3 border border-[var(--wa-border)] rounded-lg bg-transparent text-[var(--wa-text)] font-semibold cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed";
+const SUBMIT_BTN =
+  "flex-1 py-3 border-none rounded-lg bg-[var(--wa-accent)] text-white font-semibold cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed";
 
 interface Props {
   admin: User;
@@ -68,57 +77,59 @@ export default function AdminAccountPanel({
   }
 
   return (
-    <div className="admin-account-panel">
-      <div className="admin-account-panel__header">
-        <button onClick={onClose} aria-label="Back">
+    <div className="fixed inset-0 bg-white dark:bg-[#131a24] flex flex-col z-10">
+      <div className="flex items-center gap-3 py-3.5 px-4 shrink-0">
+        <button
+          className="flex border-none bg-transparent text-[var(--wa-text)] cursor-pointer p-1"
+          onClick={onClose}
+          aria-label="Back"
+        >
           <ArrowLeft size={20} />
         </button>
-        <span className="admin-account-panel__title">Account</span>
+        <span className="font-semibold text-[17px]">Account</span>
       </div>
 
-      <div className="admin-account-panel__hero">
+      <div className="flex flex-col items-center gap-2 pt-2 px-4 pb-5 text-center">
         <Avatar name={admin.name} size={96} />
-        <h1>{admin.name}</h1>
+        <h1 className="mt-1 mb-0 text-[1.375rem]">{admin.name}</h1>
         {(admin.phone || admin.email) && (
-          <span className="admin-account-panel__meta">{admin.phone ?? admin.email}</span>
+          <span className="text-[var(--wa-text-secondary)] text-sm">
+            {admin.phone ?? admin.email}
+          </span>
         )}
       </div>
 
-      <div className="admin-account-panel__section">
-        <Link to="/admin/whatsapp-send" className="admin-account-panel__add-group-btn">
+      <div className={SECTION}>
+        <Link to="/admin/whatsapp-send" className={ADD_GROUP_BTN}>
           <MessageCircle size={18} /> Send WhatsApp Message
         </Link>
       </div>
 
-      <div className="admin-account-panel__section">
+      <div className={SECTION}>
         {!showAddGroup ? (
-          <button className="admin-account-panel__add-group-btn" onClick={() => setShowAddGroup(true)}>
+          <button className={ADD_GROUP_BTN} onClick={() => setShowAddGroup(true)}>
             <Plus size={18} /> Add Group
           </button>
         ) : (
-          <form className="admin-account-panel__form" onSubmit={handleCreateGroup}>
-            <label className="admin-account-panel__label">Group Name</label>
+          <form className="flex flex-col gap-1" onSubmit={handleCreateGroup}>
+            <label className={LABEL}>Group Name</label>
             <input
-              className="admin-account-panel__input"
+              className={INPUT}
               value={name}
               onChange={(e) => setName(e.target.value)}
               autoFocus
               required
             />
 
-            <label className="admin-account-panel__label">Description (optional)</label>
-            <input
-              className="admin-account-panel__input"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-            />
+            <label className={LABEL}>Description (optional)</label>
+            <input className={INPUT} value={description} onChange={(e) => setDescription(e.target.value)} />
 
-            {error && <p className="admin-account-panel__error">{error}</p>}
+            {error && <p className="mt-2 mb-0 text-[#d92d20] text-[13px]">{error}</p>}
 
-            <div className="admin-account-panel__form-actions">
+            <div className="flex gap-2.5 mt-6">
               <button
                 type="button"
-                className="admin-account-panel__cancel-btn"
+                className={CANCEL_BTN}
                 onClick={() => {
                   setShowAddGroup(false);
                   setError(null);
@@ -126,7 +137,7 @@ export default function AdminAccountPanel({
               >
                 Cancel
               </button>
-              <button className="admin-account-panel__submit-btn" type="submit" disabled={creating}>
+              <button className={SUBMIT_BTN} type="submit" disabled={creating}>
                 {creating ? "Creating..." : "Create"}
               </button>
             </div>
@@ -134,23 +145,28 @@ export default function AdminAccountPanel({
         )}
       </div>
 
-      <div className="admin-account-panel__section admin-account-panel__section--groups">
-        <div className="admin-account-panel__section-label">Groups</div>
+      <div className={`${SECTION} flex-1 overflow-y-auto`}>
+        <div className="text-[var(--wa-text-secondary)] font-semibold text-[15px] mb-3">Groups</div>
         {groups === null ? (
-          <p className="admin-account-panel__empty">Loading...</p>
+          <p className="text-[var(--wa-text-secondary)] text-sm">Loading...</p>
         ) : groups.length === 0 ? (
-          <p className="admin-account-panel__empty">No groups yet.</p>
+          <p className="text-[var(--wa-text-secondary)] text-sm">No groups yet.</p>
         ) : (
-          <div className="admin-account-panel__group-list">
+          <div className="flex flex-col">
             {groups.map((g) => (
-              <div key={g.id} className="admin-account-panel__group-row">
+              <div
+                key={g.id}
+                className="flex items-center gap-3 py-2.5 border-b border-[var(--wa-border)]"
+              >
                 <GroupIcon name={g.name} size={40} />
-                <div className="admin-account-panel__group-body">
-                  <span className="admin-account-panel__group-name">{g.name}</span>
-                  <span className="admin-account-panel__group-count">{g.customer_count} members</span>
+                <div className="flex flex-col flex-1 min-w-0">
+                  <span className="font-medium">{g.name}</span>
+                  <span className="text-[var(--wa-text-secondary)] text-[13px] mt-0.5">
+                    {g.customer_count} members
+                  </span>
                 </div>
                 <button
-                  className="admin-account-panel__delete-btn"
+                  className="flex border-none bg-transparent text-[#d92d20] cursor-pointer p-1.5 shrink-0"
                   onClick={() => setPendingDelete(g)}
                   aria-label={`Delete ${g.name}`}
                 >
@@ -163,23 +179,19 @@ export default function AdminAccountPanel({
       </div>
 
       {pendingDelete && (
-        <div className="admin-account-panel__confirm-overlay">
-          <div className="admin-account-panel__confirm-dialog">
-            <h2>Delete "{pendingDelete.name}"?</h2>
-            <p>
+        <div className="fixed inset-0 bg-black/45 flex items-center justify-center p-6 z-20">
+          <div className="bg-white dark:bg-[#1e2530] rounded-xl p-5 max-w-[320px] w-full">
+            <h2 className="mt-0 mb-2 text-[17px]">Delete "{pendingDelete.name}"?</h2>
+            <p className="m-0 text-[var(--wa-text-secondary)] text-sm leading-[1.4]">
               This will permanently delete the group and its chat. All members of this group will
               be logged out.
             </p>
-            <div className="admin-account-panel__confirm-actions">
-              <button
-                className="admin-account-panel__cancel-btn"
-                onClick={() => setPendingDelete(null)}
-                disabled={deleting}
-              >
+            <div className="flex gap-2.5 mt-5">
+              <button className={CANCEL_BTN} onClick={() => setPendingDelete(null)} disabled={deleting}>
                 Cancel
               </button>
               <button
-                className="admin-account-panel__delete-confirm-btn"
+                className="flex-1 py-3 border-none rounded-lg bg-[#d92d20] text-white font-semibold cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
                 onClick={handleConfirmDelete}
                 disabled={deleting}
               >
@@ -189,7 +201,6 @@ export default function AdminAccountPanel({
           </div>
         </div>
       )}
-
     </div>
   );
 }

@@ -1,5 +1,4 @@
 import { Building2, Home, Landmark, Mountain, Users } from "lucide-react";
-import "./GroupIcon.css";
 
 const STYLE_BY_GROUP: Record<string, { Icon: typeof Users; bg: string; color: string }> = {
   dubai: { Icon: Building2, bg: "#d9f2e3", color: "#0f9d58" },
@@ -21,7 +20,11 @@ export default function GroupIcon({ name, size = 48, variant = "default" }: Prop
   const isHero = variant === "hero";
   return (
     <div
-      className={`group-icon${isHero ? " group-icon--hero" : ""}`}
+      className={
+        isHero
+          ? "rounded-full flex items-center justify-center shrink-0 bg-white/[0.22] border-[3px] border-white/[0.55] mt-5"
+          : "rounded-xl flex items-center justify-center shrink-0"
+      }
       style={{ width: size, height: size, background: isHero ? undefined : bg }}
     >
       <Icon size={size * 0.5} color={isHero ? "#fff" : color} strokeWidth={2} />

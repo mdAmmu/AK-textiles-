@@ -1,6 +1,5 @@
 import type { ConversationSummary } from "../../services/chat";
 import ChatListItem from "./ChatListItem";
-import "./ChatList.css";
 
 interface Props {
   conversations: ConversationSummary[];
@@ -8,11 +7,11 @@ interface Props {
 
 export default function ChatList({ conversations }: Props) {
   if (conversations.length === 0) {
-    return <p className="chat-list__empty">No conversations yet.</p>;
+    return <p className="p-4 text-[#8b8798]">No conversations yet.</p>;
   }
 
   return (
-    <div className="chat-list">
+    <div className="flex flex-col gap-2.5">
       {conversations.map((c) => (
         <ChatListItem key={c.id} conversation={c} />
       ))}

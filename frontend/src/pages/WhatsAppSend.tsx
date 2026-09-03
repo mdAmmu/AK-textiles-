@@ -8,7 +8,17 @@ import {
   uploadWhatsAppImage,
 } from "../services/whatsapp";
 import type { CarouselCardCount, CarouselStatusByCount, WhatsAppMessageType } from "../services/whatsapp";
-import "./WhatsAppSend.css";
+
+const LABEL = "font-semibold text-sm text-[var(--wa-text-secondary)]";
+const INPUT = "py-2.5 px-3 border border-[#dcdfe3] rounded-lg font-[inherit] mb-2";
+const TOGGLE_ROW = "flex gap-2 mb-2";
+const TOGGLE_BTN_BASE =
+  "flex-1 py-2 border border-[#dcdfe3] rounded-lg bg-white font-semibold text-sm cursor-pointer";
+const TOGGLE_BTN_ACTIVE = "bg-[var(--wa-accent)] border-[var(--wa-accent)] text-white";
+const IMAGE_SLOT = "relative";
+const IMAGE_SLOT_IMG = "w-full aspect-square max-h-[200px] object-cover rounded-lg block";
+const IMAGE_SLOT_REMOVE =
+  "absolute top-1.5 right-1.5 w-[22px] h-[22px] rounded-full border-none bg-black/55 text-white flex items-center justify-center cursor-pointer";
 
 export default function WhatsAppSend() {
   const navigate = useNavigate();
@@ -149,43 +159,46 @@ export default function WhatsAppSend() {
   }
 
   return (
-    <div className="whatsapp-send-page">
-      <header className="whatsapp-send-page__header">
-        <button onClick={() => navigate("/admin")}>
+    <div className="min-h-screen bg-[var(--wa-panel-bg)]">
+      <header className="flex items-center gap-3 py-[1.125rem] px-4 bg-[var(--wa-header)]">
+        <button
+          className="flex border-none bg-transparent text-white cursor-pointer"
+          onClick={() => navigate("/admin")}
+        >
           <ArrowLeft size={20} />
         </button>
-        <h1>Send WhatsApp Message</h1>
+        <h1 className="m-0 text-xl text-white">Send WhatsApp Message</h1>
       </header>
 
-      <div className="whatsapp-send-page__content">
-        <label className="whatsapp-send-page__label">WhatsApp Number</label>
+      <div className="bg-white m-3.5 p-4 rounded-xl flex flex-col gap-2">
+        <label className={LABEL}>WhatsApp Number</label>
         <input
-          className="whatsapp-send-page__input"
+          className={INPUT}
           type="text"
           value={phoneNumber}
           onChange={(e) => setPhoneNumber(e.target.value)}
           placeholder="919876543210"
         />
 
-        <label className="whatsapp-send-page__label">Message Type</label>
-        <div className="whatsapp-send-page__type-toggle">
+        <label className={LABEL}>Message Type</label>
+        <div className={TOGGLE_ROW}>
           <button
             type="button"
-            className={messageType === "text" ? "active" : ""}
+            className={`${TOGGLE_BTN_BASE} ${messageType === "text" ? TOGGLE_BTN_ACTIVE : ""}`}
             onClick={() => setMessageType("text")}
           >
             Text
           </button>
           <button
             type="button"
-            className={messageType === "image" ? "active" : ""}
+            className={`${TOGGLE_BTN_BASE} ${messageType === "image" ? TOGGLE_BTN_ACTIVE : ""}`}
             onClick={() => setMessageType("image")}
           >
             Image
           </button>
           <button
             type="button"
-            className={messageType === "carousel" ? "active" : ""}
+            className={`${TOGGLE_BTN_BASE} ${messageType === "carousel" ? TOGGLE_BTN_ACTIVE : ""}`}
             onClick={() => setMessageType("carousel")}
           >
             Carousel
@@ -194,18 +207,23 @@ export default function WhatsAppSend() {
 
         {messageType === "image" && (
           <>
-            <label className="whatsapp-send-page__label">Image</label>
+            <label className={LABEL}>Image</label>
             {imageUrl ? (
-              <div className="whatsapp-send-page__image-slot">
-                <img src={imageUrl} alt="Selected" />
-                <button type="button" onClick={() => setImageUrl("")} aria-label="Remove image">
+              <div className={IMAGE_SLOT}>
+                <img className={IMAGE_SLOT_IMG} src={imageUrl} alt="Selected" />
+                <button
+                  className={IMAGE_SLOT_REMOVE}
+                  type="button"
+                  onClick={() => setImageUrl("")}
+                  aria-label="Remove image"
+                >
                   <X size={14} />
                 </button>
               </div>
             ) : (
               <button
                 type="button"
-                className="whatsapp-send-page__image-pick"
+                className="flex items-center justify-center gap-2 p-5 border border-dashed border-[#dcdfe3] rounded-lg bg-[var(--wa-panel-bg)] text-[var(--wa-text-secondary)] text-sm cursor-pointer mb-2 disabled:opacity-60 disabled:cursor-not-allowed"
                 onClick={() => imageInputRef.current?.click()}
                 disabled={uploading}
               >
@@ -225,13 +243,13 @@ export default function WhatsAppSend() {
 
         {messageType === "carousel" && (
           <>
-            <label className="whatsapp-send-page__label">Number of Photos</label>
-            <div className="whatsapp-send-page__type-toggle">
+            <label className={LABEL}>Number of Photos</label>
+            <div className={TOGGLE_ROW}>
               {CAROUSEL_CARD_COUNTS.map((count) => (
                 <button
                   key={count}
                   type="button"
-                  className={cardCount === count ? "active" : ""}
+                  className={`${TOGGLE_BTN_BASE} ${cardCount === count ? TOGGLE_BTN_ACTIVE : ""}`}
                   onClick={() => changeCardCount(count)}
                 >
                   {count}
@@ -239,15 +257,16 @@ export default function WhatsAppSend() {
               ))}
             </div>
 
-            <label className="whatsapp-send-page__label">
+            <label className={LABEL}>
               Images ({carouselUrls.filter(Boolean).length}/{cardCount})
             </label>
-            <div className="whatsapp-send-page__carousel-grid">
+            <div className="grid grid-cols-3 gap-2 mb-2">
               {carouselUrls.map((url, i) =>
                 url ? (
-                  <div key={i} className="whatsapp-send-page__image-slot">
-                    <img src={url} alt={`Card ${i + 1}`} />
+                  <div key={i} className={IMAGE_SLOT}>
+                    <img className={IMAGE_SLOT_IMG} src={url} alt={`Card ${i + 1}`} />
                     <button
+                      className={IMAGE_SLOT_REMOVE}
                       type="button"
                       onClick={() => removeCarouselImage(i)}
                       aria-label={`Remove image ${i + 1}`}
@@ -259,7 +278,7 @@ export default function WhatsAppSend() {
                   <button
                     key={i}
                     type="button"
-                    className="whatsapp-send-page__carousel-slot"
+                    className="aspect-square flex flex-col items-center justify-center gap-1 border border-dashed border-[#dcdfe3] rounded-lg bg-[var(--wa-panel-bg)] text-[var(--wa-text-secondary)] text-[0.72rem] cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
                     onClick={() => pickCarouselSlot(i)}
                     disabled={uploading}
                   >
@@ -278,7 +297,7 @@ export default function WhatsAppSend() {
             />
 
             {carouselStatus && carouselStatus !== "APPROVED" && (
-              <p className="whatsapp-send-page__notice">
+              <p className="m-0 mb-2 py-2.5 px-3 rounded-lg bg-[#fff4e5] text-[#96551c] text-[13px] leading-[1.4]">
                 {carouselStatus === "NOT_CREATED" &&
                   "The carousel template hasn't been created yet. Sending now will submit it to Meta for one-time approval — delivery only starts working once Meta approves it."}
                 {carouselStatus === "PENDING" &&
@@ -290,22 +309,26 @@ export default function WhatsAppSend() {
           </>
         )}
 
-        <label className="whatsapp-send-page__label">
+        <label className={LABEL}>
           {messageType === "image" ? "Caption" : messageType === "carousel" ? "Description" : "Message"}
         </label>
         <textarea
-          className="whatsapp-send-page__input"
+          className={INPUT}
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           placeholder="Write your message..."
           rows={5}
         />
 
-        <button className="whatsapp-send-page__submit" onClick={sendMessage} disabled={loading}>
+        <button
+          className="py-3 bg-[var(--wa-accent)] text-white border-none rounded-lg font-semibold cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+          onClick={sendMessage}
+          disabled={loading}
+        >
           {loading ? "Sending..." : "Send WhatsApp"}
         </button>
 
-        {status && <p className="whatsapp-send-page__status">{status}</p>}
+        {status && <p className="m-0 text-sm">{status}</p>}
       </div>
     </div>
   );

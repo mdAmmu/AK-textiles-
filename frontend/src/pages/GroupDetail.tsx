@@ -14,7 +14,8 @@ import GroupIcon from "../components/admin/GroupIcon";
 import CustomerRow from "../components/admin/CustomerRow";
 import AddCustomerPanel from "../components/admin/AddCustomerPanel";
 import LoadingScreen from "../components/common/LoadingScreen";
-import "./GroupDetail.css";
+
+const HEADER_BTN = "flex border-none bg-transparent text-white cursor-pointer p-1";
 
 export default function GroupDetail() {
   const { groupId } = useParams<{ groupId: string }>();
@@ -63,44 +64,46 @@ export default function GroupDetail() {
   const active = group.customer_count > 0;
 
   return (
-    <div className="group-detail-page">
-      <header className="group-detail-page__header">
-        <button onClick={() => navigate("/admin/groups")} aria-label="Back">
+    <div className="flex flex-col min-h-screen bg-[var(--wa-panel-bg)]">
+      <header className="flex items-center gap-3 py-[1.125rem] px-4 bg-[var(--wa-header)] shrink-0">
+        <button className={HEADER_BTN} onClick={() => navigate("/admin/groups")} aria-label="Back">
           <ArrowLeft size={20} />
         </button>
-        <div className="group-detail-page__header-info">
-          <h1>{group.name}</h1>
-          <span>{group.customer_count} Customers</span>
+        <div className="flex-1 flex flex-col">
+          <h1 className="m-0 text-xl text-white">{group.name}</h1>
+          <span className="text-xs text-white/85">{group.customer_count} Customers</span>
         </div>
-        <button aria-label="Edit">
+        <button className={HEADER_BTN} aria-label="Edit">
           <Pencil size={18} />
         </button>
-        <button aria-label="More options">
+        <button className={HEADER_BTN} aria-label="More options">
           <MoreVertical size={20} />
         </button>
       </header>
 
-      <div className="group-detail-page__hero">
+      <div className="flex items-center gap-3.5 bg-white m-3.5 p-4 rounded-xl">
         <GroupIcon name={group.name} />
-        <div className="group-detail-page__hero-info">
-          <div className="group-detail-page__hero-top">
-            <span className="group-detail-page__hero-name">{group.name}</span>
+        <div className="flex-1">
+          <div className="flex items-center gap-2">
+            <span className="font-bold text-[17px]">{group.name}</span>
             <span
-              className={`group-detail-page__hero-status${active ? " group-detail-page__hero-status--active" : ""}`}
+              className={`text-[11px] font-semibold py-[3px] px-2 rounded-[20px] ${
+                active ? "bg-[#e3f7ec] text-[#0f9d58]" : "bg-[#eceff1] text-[var(--wa-text-secondary)]"
+              }`}
             >
               {active ? "Active" : "Inactive"}
             </span>
           </div>
-          <div className="group-detail-page__hero-count">
+          <div className="flex items-center gap-1.5 text-[var(--wa-text-secondary)] text-[13px] mt-1">
             <UserIcon size={14} /> {group.customer_count} Customers
           </div>
         </div>
       </div>
 
-      <div className="group-detail-page__members-header">
-        <span>Members</span>
+      <div className="flex items-center justify-between px-3.5 mb-1.5">
+        <span className="font-bold">Members</span>
         <button
-          className="group-detail-page__add-link"
+          className="flex items-center gap-1 border-none bg-transparent text-[var(--wa-accent)] font-semibold text-sm cursor-pointer"
           onClick={() => {
             setShowAddPanel(true);
             handleSearch("");
@@ -110,15 +113,17 @@ export default function GroupDetail() {
         </button>
       </div>
 
-      <div className="group-detail-page__list">
-        {customers.length === 0 && <p className="group-detail-page__empty">No customers yet.</p>}
+      <div className="flex-1 px-3.5">
+        {customers.length === 0 && (
+          <p className="p-4 text-[var(--wa-text-secondary)]">No customers yet.</p>
+        )}
         {customers.map((c) => (
           <CustomerRow key={c.id} customer={c} onRemove={handleRemove} />
         ))}
       </div>
 
       <button
-        className="group-detail-page__add"
+        className="flex items-center justify-center gap-2 m-3.5 p-3.5 bg-[var(--wa-header)] text-white border-none rounded-[10px] font-semibold cursor-pointer"
         onClick={() => {
           setShowAddPanel(true);
           handleSearch("");

@@ -18,16 +18,28 @@ import { useCurrentUser } from "../hooks/useCurrentUser";
 import { useChatSocket } from "../hooks/useChatSocket";
 import GroupIcon from "../components/admin/GroupIcon";
 import MessageList from "../components/chat/MessageList";
-import MessageInput, { type MessageInputHandle } from "../components/chat/MessageInput";
+import MessageInput, {
+  MESSAGE_INPUT_ICON_CLASS,
+  type MessageInputHandle,
+} from "../components/chat/MessageInput";
 import GroupProductComposer from "../components/chat/GroupProductComposer";
 import ForwardPicker from "../components/chat/ForwardPicker";
 import ForwardPreviewBar, { type StagedImage } from "../components/chat/ForwardPreviewBar";
 import EditingMessageBar from "../components/chat/EditingMessageBar";
 import LoadingScreen from "../components/common/LoadingScreen";
 import { randomUUID } from "../utils/uuid";
-import "./UserChat.css";
-import "./GroupChat.css";
-import "./AdminChat.css";
+import {
+  CHAT_BODY,
+  CHAT_HEADER_BASE,
+  CHAT_HEADER_ICON_BTN,
+  CHAT_HEADER_IDENTITY,
+  CHAT_HEADER_INFO,
+  CHAT_HEADER_SELECTION_COUNT,
+  CHAT_HEADER_SELECTION_SPACER,
+  CHAT_HEADER_SUBTITLE,
+  CHAT_HEADER_TITLE,
+  CHAT_PAGE,
+} from "./chatShellStyles";
 
 interface PendingForwardState {
   sourceGroupId: string;
@@ -350,61 +362,57 @@ export default function GroupChat() {
   if (group === null || messages === null || !user) return <LoadingScreen />;
 
   return (
-    <div className="user-chat-page admin-chat-page">
+    <div className={CHAT_PAGE}>
       {selectionMode ? (
-        <header className="group-chat-header group-chat-header--selection">
+        <header className={CHAT_HEADER_BASE}>
           <button
-            className="group-chat-header__icon-btn"
+            className={CHAT_HEADER_ICON_BTN}
             onClick={() => setSelectedIds(new Set())}
             aria-label="Cancel selection"
           >
             <X size={22} />
           </button>
-          <span className="group-chat-header__selection-count">{selectedIds.size}</span>
-          <div className="group-chat-header__selection-spacer" />
+          <span className={CHAT_HEADER_SELECTION_COUNT}>{selectedIds.size}</span>
+          <div className={CHAT_HEADER_SELECTION_SPACER} />
           <button
-            className="group-chat-header__icon-btn"
+            className={CHAT_HEADER_ICON_BTN}
             onClick={() => setShowForward(true)}
             aria-label="Forward"
           >
             <Forward size={20} />
           </button>
           {canEditSelection && (
-            <button
-              className="group-chat-header__icon-btn"
-              onClick={handleEditSelected}
-              aria-label="Edit"
-            >
+            <button className={CHAT_HEADER_ICON_BTN} onClick={handleEditSelected} aria-label="Edit">
               <Pencil size={19} />
             </button>
           )}
-          <button className="group-chat-header__icon-btn" onClick={handleDelete} aria-label="Delete">
+          <button className={CHAT_HEADER_ICON_BTN} onClick={handleDelete} aria-label="Delete">
             <Trash2 size={20} />
           </button>
         </header>
       ) : (
-        <header className="group-chat-header">
+        <header className={CHAT_HEADER_BASE}>
           <button
-            className="group-chat-header__icon-btn"
+            className={CHAT_HEADER_ICON_BTN}
             onClick={() => navigate("/admin")}
             aria-label="Back"
           >
             <ArrowLeft size={22} />
           </button>
           <button
-            className="group-chat-header__identity"
+            className={CHAT_HEADER_IDENTITY}
             onClick={() => navigate(`/admin/groups/${groupId}/chat/info`)}
           >
             <GroupIcon name={group.name} size={36} />
-            <div className="group-chat-header__info">
-              <div className="group-chat-header__title">{group.name}</div>
-              <div className="group-chat-header__subtitle">{group.customer_count} members</div>
+            <div className={CHAT_HEADER_INFO}>
+              <div className={CHAT_HEADER_TITLE}>{group.name}</div>
+              <div className={CHAT_HEADER_SUBTITLE}>{group.customer_count} members</div>
             </div>
           </button>
         </header>
       )}
 
-      <div className="group-chat__body">
+      <div className={CHAT_BODY}>
         <MessageList
           messages={messages}
           currentUserId={user.id}
@@ -427,16 +435,8 @@ export default function GroupChat() {
         canSubmitEmpty={stagedImages.length > 0}
         extraAction={
           <>
-            {/* <span
-              className="message-input__icon"
-              onClick={() => setShowPicker(true)}
-              role="button"
-              aria-label="Send a product"
-            >
-              <Package size={20} />
-            </span> */}
             <span
-              className="message-input__icon"
+              className={MESSAGE_INPUT_ICON_CLASS}
               onClick={() => cameraInputRef.current?.click()}
               role="button"
               aria-label="Take a photo"

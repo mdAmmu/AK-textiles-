@@ -13,11 +13,10 @@ import { useChatSocket } from "../hooks/useChatSocket";
 import type { Message } from "../types/message";
 import ChatHeader from "../components/chat/ChatHeader";
 import MessageList from "../components/chat/MessageList";
-import MessageInput from "../components/chat/MessageInput";
+import MessageInput, { MESSAGE_INPUT_ICON_CLASS } from "../components/chat/MessageInput";
 import ProductPicker from "../components/chat/ProductPicker";
 import LoadingScreen from "../components/common/LoadingScreen";
-import "./UserChat.css";
-import "./AdminChat.css";
+import { CHAT_PAGE } from "./chatShellStyles";
 
 export default function AdminChat() {
   const { conversationId } = useParams<{ conversationId: string }>();
@@ -83,7 +82,7 @@ export default function AdminChat() {
   if (messages === null || !user) return <LoadingScreen />;
 
   return (
-    <div className="user-chat-page admin-chat-page">
+    <div className={CHAT_PAGE}>
       <ChatHeader title={customerName} subtitle="Online" onBack={() => navigate("/admin")} />
       <MessageList messages={messages} currentUserId={user.id} />
       <MessageInput
@@ -91,7 +90,7 @@ export default function AdminChat() {
         extraAction={
           <>
             <span
-              className="message-input__icon"
+              className={MESSAGE_INPUT_ICON_CLASS}
               onClick={() => setShowPicker(true)}
               role="button"
               aria-label="Send a product"
@@ -99,7 +98,7 @@ export default function AdminChat() {
               <Package size={20} />
             </span>
             <span
-              className="message-input__icon"
+              className={MESSAGE_INPUT_ICON_CLASS}
               onClick={() => cameraInputRef.current?.click()}
               role="button"
               aria-label="Take a photo"

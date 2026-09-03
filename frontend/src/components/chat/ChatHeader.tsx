@@ -1,6 +1,7 @@
 import { ArrowLeft, MoreVertical } from "lucide-react";
 import Avatar from "../common/Avatar";
-import "./ChatHeader.css";
+
+const ICON_BTN = "flex border-none bg-transparent text-[var(--chat-accent)] cursor-pointer p-1 leading-none";
 
 interface Props {
   title: string;
@@ -10,25 +11,23 @@ interface Props {
 
 export default function ChatHeader({ title, subtitle, onBack }: Props) {
   return (
-    <header className="chat-header">
+    <header className="flex items-center gap-3 py-2.5 px-4 bg-[var(--chat-header-bg)] text-[var(--chat-text)] border-b border-[var(--chat-border)] shrink-0">
       {onBack && (
-        <button className="chat-header__icon-btn chat-header__back" onClick={onBack} aria-label="Back">
+        <button className={ICON_BTN} onClick={onBack} aria-label="Back">
           <ArrowLeft size={22} />
         </button>
       )}
       <Avatar name={title} online={subtitle === "Online"} size={36} />
-      <div className="chat-header__info">
-        <div className="chat-header__title">{title}</div>
-        {subtitle && <div className="chat-header__subtitle">{subtitle}</div>}
+      <div className="flex-1 min-w-0">
+        <div className="font-semibold text-[17px] whitespace-nowrap overflow-hidden text-ellipsis">
+          {title}
+        </div>
+        {subtitle && (
+          <div className="text-xs text-[var(--chat-accent)] font-semibold">{subtitle}</div>
+        )}
       </div>
-      <div className="chat-header__actions">
-        {/* <button className="chat-header__icon-btn" aria-label="Video call">
-          <Video size={20} />
-        </button>
-        <button className="chat-header__icon-btn" aria-label="Call">
-          <Phone size={18} />
-        </button> */}
-        <button className="chat-header__icon-btn" aria-label="More options">
+      <div className="flex items-center gap-4">
+        <button className={ICON_BTN} aria-label="More options">
           <MoreVertical size={20} />
         </button>
       </div>

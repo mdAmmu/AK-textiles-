@@ -6,7 +6,6 @@ import type { Product, ProductInput } from "../types/product";
 import ProductForm from "../components/admin/ProductForm";
 import ImageUploadGrid from "../components/admin/ImageUploadGrid";
 import LoadingScreen from "../components/common/LoadingScreen";
-import "./CreateProduct.css";
 
 export default function EditProduct() {
   const { productId } = useParams<{ productId: string }>();
@@ -41,16 +40,19 @@ export default function EditProduct() {
   if (!product) return <LoadingScreen />;
 
   return (
-    <div className="create-product-page">
-      <header className="create-product-page__header">
-        <button onClick={() => navigate("/admin/products")}>
+    <div className="min-h-screen bg-[var(--wa-panel-bg)]">
+      <header className="flex items-center gap-3 py-[1.125rem] px-4 bg-[var(--wa-header)]">
+        <button
+          className="flex border-none bg-transparent text-white cursor-pointer"
+          onClick={() => navigate("/admin/products")}
+        >
           <ArrowLeft size={20} />
         </button>
-        <h1>Edit Product</h1>
+        <h1 className="m-0 text-xl text-white">Edit Product</h1>
       </header>
 
-      <div className="create-product-page__images">
-        <p>Images</p>
+      <div className="bg-white m-3.5 rounded-xl overflow-hidden">
+        <p className="pt-3.5 px-4 text-[var(--wa-text-secondary)] font-semibold text-sm">Images</p>
         <ImageUploadGrid
           images={[product.image_1, product.image_2, product.image_3, product.image_4]}
           onUpload={handleUpload}

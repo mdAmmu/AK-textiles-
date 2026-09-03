@@ -19,7 +19,6 @@ import BroadcastConfirm from "./pages/BroadcastConfirm";
 import WhatsAppSend from "./pages/WhatsAppSend";
 import ProtectedRoute from "./components/common/ProtectedRoute";
 import { ThemeProvider } from "./contexts/ThemeContext";
-import "./App.css";
 
 const InstallAppBanner = lazy(() => import("./components/common/InstallAppBanner"));
 

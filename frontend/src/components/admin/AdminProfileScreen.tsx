@@ -16,7 +16,6 @@ import { logout } from "../../services/auth";
 import Avatar from "../common/Avatar";
 import ThemeToggle from "../common/ThemeToggle";
 import logo from "../../assets/ak-logo.png";
-import "./AdminProfileScreen.css";
 
 interface Props {
   admin: User;
@@ -28,6 +27,14 @@ const ROWS = [
   { icon: Bell, label: "Notifications" },
   { icon: Clock, label: "Storage and Data" },
 ];
+
+const ROW =
+  "flex items-center gap-3.5 py-3.5 px-1.5 border-none border-b border-[#eef1ee] dark:border-[#232d3a] bg-transparent font-[inherit] text-left cursor-pointer text-[#1a1a1a] dark:text-[#e9edef]";
+const ROW_ICON = "text-[#6b7069] dark:text-[#8b96a5] shrink-0";
+const ROW_LABEL = "flex-1 font-medium";
+const ROW_CHEVRON = "text-[#c2c6c3] dark:text-[#6b7480] shrink-0";
+const CANCEL_BTN =
+  "flex-1 py-3 border border-[#e2e6e3] dark:border-[#2a3341] rounded-lg bg-transparent text-[#1a1a1a] dark:text-[#e9edef] font-semibold cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed";
 
 export default function AdminProfileScreen({ admin, onClose }: Props) {
   const { theme } = useTheme();
@@ -47,58 +54,65 @@ export default function AdminProfileScreen({ admin, onClose }: Props) {
   }
 
   return (
-    <div className="admin-profile-screen">
-      <div className="admin-profile-screen__hero">
-        <div className="admin-profile-screen__hero-header">
-          <button onClick={onClose} aria-label="Back">
+    <div className="fixed inset-0 bg-[#eef2f0] dark:bg-[#10161f] flex flex-col z-10 overflow-y-auto">
+      <div className="relative shrink-0 mx-3 mt-3 pb-7 bg-[linear-gradient(135deg,#0f9d6e,#4fc98a)] rounded-t-3xl">
+        <div className="flex items-center gap-2.5 py-8 px-[1.125rem] text-white font-bold text-[17px]">
+          <button
+            className="flex border-none bg-transparent text-white cursor-pointer p-1"
+            onClick={onClose}
+            aria-label="Back"
+          >
             <ArrowLeft size={20} />
           </button>
           <span>Profile</span>
-          {/* <button aria-label="Edit profile">
-            <Pencil size={18} />
-          </button> */}
         </div>
-        <div className="admin-profile-screen__avatar-wrap">
-          <Avatar name={admin.name} imageUrl={logo} size={92} />
+        <div className="flex justify-center absolute left-0 right-0 bottom-0 translate-y-1/2">
+          <Avatar name={admin.name} imageUrl={logo} size={92} className="border-4 border-white" />
         </div>
       </div>
 
-      <div className="admin-profile-screen__body">
-        <div className="admin-profile-screen__identity">
-          <h1>{admin.name}</h1>
-          {(admin.phone || admin.email) && <span>{admin.phone ?? admin.email}</span>}
-          <p>Hey there! I am using this app.</p>
+      <div className="flex-1 mx-3 mb-3 bg-white dark:bg-[#1e2530] rounded-b-3xl shadow-[0_4px_20px_rgba(15,157,110,0.08)] dark:shadow-none">
+        <div className="flex flex-col items-center text-center pt-16 px-6">
+          <h1 className="text-xl font-bold text-[#1a1a1a] dark:text-[#e9edef]">{admin.name}</h1>
+          {(admin.phone || admin.email) && (
+            <span className="mt-1 text-[#6b7069] dark:text-[#8b96a5] text-[15px]">
+              {admin.phone ?? admin.email}
+            </span>
+          )}
+          <p className="mt-1.5 text-[#9a9e9b] dark:text-[#6b7480] text-sm">
+            Hey there! I am using this app.
+          </p>
         </div>
 
-        <div className="admin-profile-screen__list">
-          <div className="admin-profile-screen__row admin-profile-screen__row--theme">
-            <Moon size={19} className="admin-profile-screen__row-icon" />
-            <span className="admin-profile-screen__row-label">
+        <div className="flex flex-col mt-6 px-[1.125rem] pb-8">
+          <div className={`${ROW} cursor-default`}>
+            <Moon size={19} className={ROW_ICON} />
+            <span className={ROW_LABEL}>
               Theme
-              <span className="admin-profile-screen__row-sublabel">
+              <span className="block mt-0.5 text-xs font-normal text-[#9a9e9b] dark:text-[#6b7480]">
                 {theme === "dark" ? "Dark" : "Light"}
               </span>
             </span>
             <ThemeToggle />
           </div>
 
-          <button type="button" className="admin-profile-screen__row">
-            <UserIcon size={19} className="admin-profile-screen__row-icon" />
-            <span className="admin-profile-screen__row-label">Account</span>
-            <ChevronRight size={18} className="admin-profile-screen__row-chevron" />
+          <button type="button" className={ROW}>
+            <UserIcon size={19} className={ROW_ICON} />
+            <span className={ROW_LABEL}>Account</span>
+            <ChevronRight size={18} className={ROW_CHEVRON} />
           </button>
 
           {ROWS.map(({ icon: Icon, label }) => (
-            <button key={label} type="button" className="admin-profile-screen__row">
-              <Icon size={19} className="admin-profile-screen__row-icon" />
-              <span className="admin-profile-screen__row-label">{label}</span>
-              <ChevronRight size={18} className="admin-profile-screen__row-chevron" />
+            <button key={label} type="button" className={ROW}>
+              <Icon size={19} className={ROW_ICON} />
+              <span className={ROW_LABEL}>{label}</span>
+              <ChevronRight size={18} className={ROW_CHEVRON} />
             </button>
           ))}
 
           <button
             type="button"
-            className="admin-profile-screen__logout-btn"
+            className="flex items-center justify-center gap-2 w-full mt-5 py-3 border-none rounded-lg bg-[#fdecea] dark:bg-[#3a1c1c] text-[#d92d20] dark:text-[#ff8177] font-semibold text-[15px] cursor-pointer"
             onClick={() => setShowLogoutConfirm(true)}
           >
             <LogOut size={18} /> Logout
@@ -107,20 +121,18 @@ export default function AdminProfileScreen({ admin, onClose }: Props) {
       </div>
 
       {showLogoutConfirm && (
-        <div className="admin-profile-screen__confirm-overlay">
-          <div className="admin-profile-screen__confirm-dialog">
-            <h2>Logout?</h2>
-            <p>You'll need to sign in again to access the admin panel.</p>
-            <div className="admin-profile-screen__confirm-actions">
-              <button
-                className="admin-profile-screen__cancel-btn"
-                onClick={() => setShowLogoutConfirm(false)}
-                disabled={loggingOut}
-              >
+        <div className="fixed inset-0 bg-black/45 flex items-center justify-center p-6 z-20">
+          <div className="bg-white dark:bg-[#1e2530] rounded-xl p-5 max-w-[320px] w-full">
+            <h2 className="mt-0 mb-2 text-[17px] text-[#1a1a1a] dark:text-[#e9edef]">Logout?</h2>
+            <p className="m-0 text-[#6b7069] dark:text-[#8b96a5] text-sm leading-[1.4]">
+              You'll need to sign in again to access the admin panel.
+            </p>
+            <div className="flex gap-2.5 mt-5">
+              <button className={CANCEL_BTN} onClick={() => setShowLogoutConfirm(false)} disabled={loggingOut}>
                 Cancel
               </button>
               <button
-                className="admin-profile-screen__logout-confirm-btn"
+                className="flex-1 py-3 border-none rounded-lg bg-[#d92d20] text-white font-semibold cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
                 onClick={handleConfirmLogout}
                 disabled={loggingOut}
               >

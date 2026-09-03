@@ -11,8 +11,16 @@ import type { Group } from "../types/group";
 import GroupIcon from "../components/admin/GroupIcon";
 import MessageList from "../components/chat/MessageList";
 import LoadingScreen from "../components/common/LoadingScreen";
-import "./UserChat.css";
-import "./GroupChat.css";
+import {
+  CHAT_BODY,
+  CHAT_HEADER_BASE,
+  CHAT_HEADER_ICON_BTN,
+  CHAT_HEADER_INFO,
+  CHAT_HEADER_SELECTION_COUNT,
+  CHAT_HEADER_SELECTION_SPACER,
+  CHAT_HEADER_TITLE,
+  CHAT_PAGE,
+} from "./chatShellStyles";
 
 export default function UserChat() {
   const navigate = useNavigate();
@@ -122,42 +130,42 @@ export default function UserChat() {
   }
 
   return (
-    <div className="user-chat-page">
+    <div className={CHAT_PAGE}>
       {selectionMode ? (
-        <header className="group-chat-header group-chat-header--selection">
+        <header className={CHAT_HEADER_BASE}>
           <button
-            className="group-chat-header__icon-btn"
+            className={CHAT_HEADER_ICON_BTN}
             onClick={() => setSelectedIds(new Set())}
             aria-label="Cancel selection"
           >
             <X size={22} />
           </button>
-          <span className="group-chat-header__selection-count">{selectedIds.size}</span>
-          <div className="group-chat-header__selection-spacer" />
+          <span className={CHAT_HEADER_SELECTION_COUNT}>{selectedIds.size}</span>
+          <div className={CHAT_HEADER_SELECTION_SPACER} />
           <button
-            className="group-chat-header__icon-btn"
+            className={CHAT_HEADER_ICON_BTN}
             onClick={handleShare}
             disabled={isSharing}
             aria-label="Share"
           >
             {isSharing ? (
-              <span className="user-chat-page__share-spinner" />
+              <span className="block w-[1.1rem] h-[1.1rem] rounded-full border-2 border-white/40 border-t-white animate-[spin_0.7s_linear_infinite]" />
             ) : (
               <Share2 size={20} />
             )}
           </button>
-          <button className="group-chat-header__icon-btn" onClick={handleDelete} aria-label="Delete">
+          <button className={CHAT_HEADER_ICON_BTN} onClick={handleDelete} aria-label="Delete">
             <Trash2 size={20} />
           </button>
         </header>
       ) : (
-        <header className="group-chat-header">
+        <header className={CHAT_HEADER_BASE}>
           <GroupIcon name={groupName} size={36} />
-          <div className="group-chat-header__info">
-            <div className="group-chat-header__title">{groupName}</div>
+          <div className={CHAT_HEADER_INFO}>
+            <div className={CHAT_HEADER_TITLE}>{groupName}</div>
           </div>
           <button
-            className="group-chat-header__icon-btn"
+            className={CHAT_HEADER_ICON_BTN}
             aria-label="More options"
             onClick={() => navigate("/chat/profile")}
           >
@@ -165,7 +173,7 @@ export default function UserChat() {
           </button>
         </header>
       )}
-      <div className="user-chat-page__messages">
+      <div className={`${CHAT_BODY} pb-11`}>
         <MessageList
           messages={messages}
           currentUserId={user.id}
@@ -174,12 +182,12 @@ export default function UserChat() {
           onToggleSelectMessage={handleToggleSelect}
         />
       </div>
-      <div className="user-chat-page__readonly-bar">
-        Only <span className="user-chat-page__readonly-bar-highlight">admins</span> can send
+      <div className="fixed left-0 right-0 bottom-0 text-center py-3 px-4 bg-[var(--chat-bubble-other)] text-[var(--chat-text-secondary)] text-[13px] border-t border-[var(--chat-border)] z-10">
+        Only <span className="text-[var(--chat-accent)] font-semibold">admins</span> can send
         messages
       </div>
       {shareToast && (
-        <div className="user-chat-page__share-toast">
+        <div className="fixed left-1/2 bottom-[4.5rem] -translate-x-1/2 z-30 pointer-events-none bg-[#111] text-white text-[13px] font-medium py-2 px-4 rounded-full shadow-[0_4px_14px_rgba(0,0,0,0.25)]">
           <span>{shareToast}</span>
         </div>
       )}
