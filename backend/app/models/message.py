@@ -12,6 +12,7 @@ class MessageType(str, enum.Enum):
     TEXT = "TEXT"
     PRODUCT = "PRODUCT"
     IMAGE = "IMAGE"
+    DOCUMENT = "DOCUMENT"
 
 
 class Message(Base):
@@ -32,7 +33,14 @@ class Message(Base):
     product_image = Column(String(500), nullable=True)
     product_description = Column(Text, nullable=True)
 
+    # DOCUMENT messages reuse product_image as the generic file URL; this
+    # holds the original filename for display (e.g. "catalog.pdf").
+    file_name = Column(String(255), nullable=True)
+
     image_group_id = Column(UUID(as_uuid=True), nullable=True, index=True)
+
+    reply_to_id = Column(UUID(as_uuid=True), ForeignKey("messages.id"), nullable=True)
+    reply_to = relationship("Message", remote_side=[id], foreign_keys=[reply_to_id])
 
     is_deleted = Column(Boolean, nullable=False, default=False, server_default="false")
     is_edited = Column(Boolean, nullable=False, default=False, server_default="false")

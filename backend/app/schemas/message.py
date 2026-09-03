@@ -3,6 +3,15 @@ from datetime import datetime
 from pydantic import BaseModel
 
 
+class ReplyPreview(BaseModel):
+    id: str
+    sender_id: str
+    message_type: str
+    text: str | None = None
+    file_name: str | None = None
+    is_deleted: bool = False
+
+
 class MessageOut(BaseModel):
     id: str
     conversation_id: str | None = None
@@ -15,7 +24,9 @@ class MessageOut(BaseModel):
     product_name: str | None = None
     product_image: str | None = None
     product_description: str | None = None
+    file_name: str | None = None
     image_group_id: str | None = None
+    reply_to: ReplyPreview | None = None
     is_deleted: bool = False
     is_edited: bool = False
     created_at: datetime
@@ -24,6 +35,7 @@ class MessageOut(BaseModel):
 
 class SendMessageRequest(BaseModel):
     text: str
+    reply_to_id: str | None = None
 
 
 class EditMessageRequest(BaseModel):
@@ -42,3 +54,8 @@ class ForwardMessagesRequest(BaseModel):
     message_ids: list[str]
     group_ids: list[str]
     image_group_id: str | None = None
+
+
+class ForwardToGroupsRequest(BaseModel):
+    message_ids: list[str]
+    group_ids: list[str]

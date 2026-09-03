@@ -11,6 +11,10 @@ from app.core.database import Base
 class UserRole(str, enum.Enum):
     ADMIN = "ADMIN"
     USER = "USER"
+    # Manager/staff: interacts with the admin through the shared Group chat
+    # (like the old customer experience). Customers (USER) instead get a
+    # private 1-1/broadcast chat — see UserChat.tsx / CustomerChat.tsx.
+    STAFF = "STAFF"
 
 
 class User(Base):

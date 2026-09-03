@@ -11,16 +11,20 @@ import {
 interface Props {
   message: Message;
   isOwn: boolean;
+  highlighted?: boolean;
 }
 
-export default function DeletedMessageBubble({ message, isOwn }: Props) {
+export default function DeletedMessageBubble({ message, isOwn, highlighted }: Props) {
   const time = new Date(message.created_at).toLocaleTimeString([], {
     hour: "2-digit",
     minute: "2-digit",
   });
 
   return (
-    <div className={`${BUBBLE_ROW_BASE}${isOwn ? ` ${BUBBLE_ROW_OWN}` : ""}`}>
+    <div
+      id={`msg-${message.id}`}
+      className={`${BUBBLE_ROW_BASE}${isOwn ? ` ${BUBBLE_ROW_OWN}` : ""} transition-colors duration-500${highlighted ? " bg-[rgba(15,157,110,0.18)]" : ""}`}
+    >
       <div
         className={`${BUBBLE_BASE}${isOwn ? ` ${BUBBLE_OWN}` : ""} flex items-center gap-1.5 italic text-[var(--chat-text-secondary)]`}
       >

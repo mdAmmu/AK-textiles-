@@ -6,6 +6,11 @@ import RoleRedirect from "./pages/RoleRedirect";
 import UserChat from "./pages/UserChat";
 import UserProfile from "./pages/UserProfile";
 import AdminDashboard from "./pages/AdminDashboard";
+import AdminChatsHome from "./pages/AdminChatsHome";
+import AdminBroadcastHome from "./pages/AdminBroadcastHome";
+import BroadcastComposer from "./pages/BroadcastComposer";
+import BroadcastThread from "./pages/BroadcastThread";
+import BroadcastDetail from "./pages/BroadcastDetail";
 import AdminChat from "./pages/AdminChat";
 import Groups from "./pages/Groups";
 import GroupDetail from "./pages/GroupDetail";
@@ -44,7 +49,7 @@ function App() {
         <Route
           path="/chat"
           element={
-            <ProtectedRoute role="USER">
+            <ProtectedRoute role={["USER", "STAFF"]}>
               <UserChat />
             </ProtectedRoute>
           }
@@ -52,7 +57,7 @@ function App() {
         <Route
           path="/chat/profile"
           element={
-            <ProtectedRoute role="USER">
+            <ProtectedRoute role={["USER", "STAFF"]}>
               <UserProfile />
             </ProtectedRoute>
           }
@@ -62,6 +67,46 @@ function App() {
           element={
             <ProtectedRoute role="ADMIN">
               <AdminDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/chats"
+          element={
+            <ProtectedRoute role="ADMIN">
+              <AdminChatsHome />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/broadcast"
+          element={
+            <ProtectedRoute role="ADMIN">
+              <AdminBroadcastHome />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/broadcast/new"
+          element={
+            <ProtectedRoute role="ADMIN">
+              <BroadcastComposer />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/broadcast/:audienceId"
+          element={
+            <ProtectedRoute role="ADMIN">
+              <BroadcastThread />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/broadcast/:audienceId/message/:broadcastId"
+          element={
+            <ProtectedRoute role="ADMIN">
+              <BroadcastDetail />
             </ProtectedRoute>
           }
         />

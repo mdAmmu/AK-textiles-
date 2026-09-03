@@ -6,6 +6,7 @@ from app.core.config import settings
 
 PRODUCT_IMAGES_BUCKET = "product-images"
 CHAT_IMAGES_BUCKET = "chat-images"
+CHAT_FILES_BUCKET = "chat-files"
 
 
 @lru_cache
@@ -43,3 +44,19 @@ def upload_chat_image(filename: str, content: bytes, content_type: str) -> str:
         filename, content, {"content-type": content_type, "upsert": "true"}
     )
     return client.storage.from_(CHAT_IMAGES_BUCKET).get_public_url(filename)
+
+
+def ensure_chat_files_bucket() -> None:
+    client = get_supabase()
+    buckets = {b.name for b in client.storage.list_buckets()}
+    if CHAT_FILES_BUCKET not in buckets:
+        client.storage.create_bucket(CHAT_FILES_BUCKET, options={"public": True})
+
+
+def upload_chat_file(filename: str, content: bytes, content_type: str) -> str:
+    ensure_chat_files_bucket()
+    client = get_supabase()
+    client.storage.from_(CHAT_FILES_BUCKET).upload(
+        filename, content, {"content-type": content_type, "upsert": "true"}
+    )
+    return client.storage.from_(CHAT_FILES_BUCKET).get_public_url(filename)

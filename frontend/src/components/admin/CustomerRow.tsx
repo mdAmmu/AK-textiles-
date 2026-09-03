@@ -12,7 +12,14 @@ export default function CustomerRow({ customer, onRemove }: Props) {
     <div className="flex items-center gap-3 py-3.5 px-4 bg-white rounded-xl mb-3 shadow-[0_1px_2px_rgba(0,0,0,0.06)]">
       <Avatar name={customer.name} size={40} />
       <div className="flex-1 min-w-0">
-        <div className="font-bold">{customer.name}</div>
+        <div className="font-bold flex items-center gap-1.5">
+          {customer.name}
+          {customer.role === "STAFF" && (
+            <span className="text-[10px] font-bold uppercase tracking-wide text-[#0f9d6e] bg-[#e3f7ec] rounded-full py-0.5 px-1.5">
+              Staff
+            </span>
+          )}
+        </div>
         <div className="text-[var(--wa-text-secondary)] text-[13px]">
           {customer.email ?? customer.phone}
         </div>

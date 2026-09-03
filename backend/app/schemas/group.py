@@ -17,6 +17,7 @@ class GroupUserOut(BaseModel):
     name: str
     phone: str | None = None
     email: str | None = None
+    role: str = "USER"
 
 
 class AssignGroupRequest(BaseModel):
@@ -32,3 +33,6 @@ class CreateCustomerRequest(BaseModel):
     name: str
     phone: str
     password: str
+    # "USER" (customer, sees the private broadcast/1-1 chat) or "STAFF"
+    # (manager/staff, sees the shared group chat and can post to it).
+    role: str = "USER"

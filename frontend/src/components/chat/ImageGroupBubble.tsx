@@ -28,6 +28,7 @@ interface Props {
   isOwn: boolean;
   selectionMode?: boolean;
   selectedIds?: Set<string>;
+  highlighted?: boolean;
   onLongPressMessage?: (id: string) => void;
   onToggleSelectMessage?: (id: string) => void;
 }
@@ -41,6 +42,7 @@ export default function ImageGroupBubble({
   isOwn,
   selectionMode,
   selectedIds,
+  highlighted,
   onLongPressMessage,
   onToggleSelectMessage,
 }: Props) {
@@ -144,7 +146,8 @@ export default function ImageGroupBubble({
 
   return (
     <div
-      className={`${BUBBLE_ROW_BASE}${isOwn ? ` ${BUBBLE_ROW_OWN}` : ""}${selected ? ` ${BUBBLE_ROW_SELECTED}` : ""}`}
+      id={`msg-${messages[0].id}`}
+      className={`${BUBBLE_ROW_BASE}${isOwn ? ` ${BUBBLE_ROW_OWN}` : ""}${selected ? ` ${BUBBLE_ROW_SELECTED}` : ""} transition-colors duration-500${highlighted ? " bg-[rgba(15,157,110,0.18)]" : ""}`}
       onMouseDown={startPress}
       onMouseUp={endPress}
       onMouseLeave={cancelPress}

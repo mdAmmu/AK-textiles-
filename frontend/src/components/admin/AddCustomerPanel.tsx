@@ -17,7 +17,7 @@ interface Props {
   candidates: User[];
   onSearch: (term: string) => void;
   onAdd: (userId: string) => void;
-  onAddNew: (phone: string, name: string, password: string) => Promise<void>;
+  onAddNew: (phone: string, name: string, password: string, role: "USER" | "STAFF") => Promise<void>;
   onClose: () => void;
 }
 
@@ -30,6 +30,7 @@ export default function AddCustomerPanel({ candidates, onSearch, onAdd, onAddNew
   const [showNewModal, setShowNewModal] = useState(false);
   const [newName, setNewName] = useState("");
   const [newPassword, setNewPassword] = useState("");
+  const [newIsStaff, setNewIsStaff] = useState(false);
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -39,6 +40,7 @@ export default function AddCustomerPanel({ candidates, onSearch, onAdd, onAddNew
   function openNewModal() {
     setNewName("");
     setNewPassword("");
+    setNewIsStaff(false);
     setError(null);
     setShowNewModal(true);
   }
@@ -49,7 +51,7 @@ export default function AddCustomerPanel({ candidates, onSearch, onAdd, onAddNew
     setError(null);
     setCreating(true);
     try {
-      await onAddNew(trimmedTerm, newName.trim(), newPassword);
+      await onAddNew(trimmedTerm, newName.trim(), newPassword, newIsStaff ? "STAFF" : "USER");
       setShowNewModal(false);
     } catch (err: unknown) {
       const detail =
@@ -168,6 +170,16 @@ export default function AddCustomerPanel({ candidates, onSearch, onAdd, onAddNew
                 onChange={(e) => setNewPassword(e.target.value)}
                 required
               />
+
+              <label className="flex items-center gap-2 mt-3 text-sm text-[var(--wa-text)] cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={newIsStaff}
+                  onChange={(e) => setNewIsStaff(e.target.checked)}
+                  className="w-4 h-4 accent-[var(--wa-accent)]"
+                />
+                Add as manager/staff (sees the group chat, not a private broadcast chat)
+              </label>
 
               {error && <p className="text-[#e53e3e] text-[13px] mt-2 mb-0">{error}</p>}
 

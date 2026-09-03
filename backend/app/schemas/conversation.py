@@ -10,6 +10,7 @@ class ConversationSummary(BaseModel):
     user_id: str
     user_name: str
     last_message_text: str | None = None
+    last_message_type: str | None = None
     last_message_at: datetime | None = None
     unread_count: int = 0
 

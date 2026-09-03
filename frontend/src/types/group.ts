@@ -12,4 +12,5 @@ export interface GroupUser {
   name: string;
   phone?: string | null;
   email?: string | null;
+  role?: "USER" | "STAFF";
 }

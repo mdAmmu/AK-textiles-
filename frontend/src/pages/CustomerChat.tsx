@@ -1,45 +1,44 @@
-import { useEffect, useRef, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { Image as ImageIcon, Package, Paperclip, Reply, Forward, Trash2, X } from "lucide-react";
-import {
-  deleteConversationMessages,
-  fetchConversationMessages,
-  forwardConversationMessages,
-  markConversationRead,
-  sendAdminDocumentMessage,
-  sendAdminImageMessage,
-  sendAdminMessage,
-  sendAdminProductMessage,
-} from "../services/chat";
+import { useRef, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Image as ImageIcon, MoreVertical, Paperclip, Reply, Trash2, X } from "lucide-react";
 import { useCurrentUser } from "../hooks/useCurrentUser";
 import { useChatSocket } from "../hooks/useChatSocket";
+import {
+  deleteMyConversationMessages,
+  fetchMyConversation,
+  markMyConversationRead,
+  sendMyDocumentMessage,
+  sendMyImageMessage,
+  sendMyMessage,
+} from "../services/chat";
 import type { Message } from "../types/message";
-import ChatHeader from "../components/chat/ChatHeader";
+import GroupIcon from "../components/admin/GroupIcon";
 import MessageList from "../components/chat/MessageList";
 import MessageInput, { MESSAGE_INPUT_ICON_CLASS } from "../components/chat/MessageInput";
-import ProductPicker from "../components/chat/ProductPicker";
-import ForwardPicker from "../components/chat/ForwardPicker";
 import ForwardPreviewBar, { type StagedImage } from "../components/chat/ForwardPreviewBar";
 import ReplyPreviewBar from "../components/chat/ReplyPreviewBar";
 import LoadingScreen from "../components/common/LoadingScreen";
 import { randomUUID } from "../utils/uuid";
-import { CHAT_PAGE } from "./chatShellStyles";
+import {
+  CHAT_BODY,
+  CHAT_HEADER_BASE,
+  CHAT_HEADER_ICON_BTN,
+  CHAT_HEADER_INFO,
+  CHAT_HEADER_SELECTION_COUNT,
+  CHAT_HEADER_SELECTION_SPACER,
+  CHAT_HEADER_TITLE,
+  CHAT_PAGE,
+} from "./chatShellStyles";
 
-const SELECTION_HEADER =
-  "flex items-center gap-3 py-2.5 px-4 bg-[var(--chat-header-bg)] text-[var(--chat-text)] border-b border-[var(--chat-border)] shrink-0";
-const SELECTION_ICON_BTN =
-  "flex border-none bg-transparent text-[var(--chat-accent)] cursor-pointer p-1 leading-none";
-const SELECTION_COUNT = "text-[17px] font-semibold text-[var(--chat-text)]";
-
-export default function AdminChat() {
-  const { conversationId } = useParams<{ conversationId: string }>();
+// Every customer's home screen: their own private 1-1 conversation with the
+// business. Broadcast messages land here indistinguishably from a message
+// the admin typed directly — this is deliberate (see broadcast-working.md):
+// a broadcast is never a group thread, it's many private conversations.
+export default function CustomerChat() {
   const navigate = useNavigate();
   const { user } = useCurrentUser();
-
+  const [conversationId, setConversationId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[] | null>(null);
-  const [customerName, setCustomerName] = useState("Customer");
-  const [showPicker, setShowPicker] = useState(false);
-  const [showForward, setShowForward] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [replyTarget, setReplyTarget] = useState<Message | null>(null);
   const [stagedImages, setStagedImages] = useState<StagedImage[]>([]);
@@ -50,31 +49,29 @@ export default function AdminChat() {
   const selectionMode = selectedIds.size > 0;
 
   useEffect(() => {
-    if (conversationId) {
-      fetchConversationMessages(conversationId).then((c) => {
-        setMessages(c.messages);
-        setCustomerName(c.user_name);
-        markConversationRead(conversationId);
-      });
-    }
-  }, [conversationId]);
+    fetchMyConversation().then((c) => {
+      setConversationId(c.id);
+      setMessages(c.messages);
+      markMyConversationRead();
+    });
+  }, []);
 
   useChatSocket((event) => {
     if (event.type === "new_message") {
-      if (event.message.conversation_id !== conversationId) return;
       setMessages((prev) => {
         if (!prev || prev.some((m) => m.id === event.message.id)) return prev;
         return [...prev, event.message];
       });
-      if (conversationId) markConversationRead(conversationId);
+      markMyConversationRead();
       return;
     }
     if (event.type === "messages_read") {
       if (event.conversation_id !== conversationId) return;
-      setMessages((prev) =>
-        prev?.map((m) =>
-          event.message_ids.includes(m.id) ? { ...m, read_at: new Date().toISOString() } : m,
-        ) ?? prev,
+      setMessages(
+        (prev) =>
+          prev?.map((m) =>
+            event.message_ids.includes(m.id) ? { ...m, read_at: new Date().toISOString() } : m,
+          ) ?? prev,
       );
       return;
     }
@@ -90,19 +87,39 @@ export default function AdminChat() {
   }, !!user && !!conversationId);
 
   async function handleSend(text: string) {
-    if (!conversationId || !user) return;
+    if (!user) return;
     if (stagedImages.length > 0) {
       await handleSendStaged(text);
       return;
     }
     if (!text.trim()) return;
-    const message = await sendAdminMessage(conversationId, text, replyTarget?.id);
-    setMessages((prev) => [...(prev ?? []), message]);
+
+    const tempId = `temp-${randomUUID()}`;
+    const replyToId = replyTarget?.id;
+    setMessages((prev) => [
+      ...(prev ?? []),
+      {
+        id: tempId,
+        conversation_id: conversationId,
+        sender_id: user.id,
+        message_type: "TEXT",
+        text,
+        created_at: new Date().toISOString(),
+        _pending: true,
+      },
+    ]);
     setReplyTarget(null);
+    try {
+      const message = await sendMyMessage(text, replyToId);
+      setMessages((prev) => prev?.map((m) => (m.id === tempId ? message : m)) ?? prev);
+    } catch (err) {
+      setMessages((prev) => prev?.filter((m) => m.id !== tempId) ?? prev);
+      throw err;
+    }
   }
 
   async function handleSendStaged(text: string) {
-    if (!conversationId || !user) return;
+    if (!user) return;
     const filesToSend = stagedImages.filter((img) => img.file).map((img) => img.file as File);
     const stagedToClear = stagedImages;
     const trimmed = text.trim();
@@ -147,10 +164,10 @@ export default function AdminChat() {
     ]);
 
     try {
-      const uploaded = await sendAdminImageMessage(conversationId, filesToSend, replyToId);
+      const uploaded = await sendMyImageMessage(filesToSend, replyToId);
       const collected: Message[] = [...uploaded];
       if (tempTextId) {
-        collected.push(await sendAdminMessage(conversationId, trimmed, replyToId));
+        collected.push(await sendMyMessage(trimmed, replyToId));
       }
       setMessages((prev) => {
         const withoutTemps =
@@ -167,13 +184,6 @@ export default function AdminChat() {
         if (img.file) URL.revokeObjectURL(img.url);
       });
     }
-  }
-
-  async function handlePickProduct(productId: string) {
-    if (!conversationId) return;
-    const newMessages = await sendAdminProductMessage(conversationId, productId);
-    setMessages((prev) => [...(prev ?? []), ...newMessages]);
-    setShowPicker(false);
   }
 
   function handlePickImages(e: React.ChangeEvent<HTMLInputElement>) {
@@ -196,12 +206,30 @@ export default function AdminChat() {
     });
   }
 
-  async function handleDocumentPick(e: React.ChangeEvent<HTMLInputElement>) {
+  async function handlePickDocument(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     e.target.value = "";
-    if (!file || !conversationId) return;
-    const message = await sendAdminDocumentMessage(conversationId, file);
-    setMessages((prev) => [...(prev ?? []), message]);
+    if (!file || !user) return;
+    const tempId = `temp-${randomUUID()}`;
+    setMessages((prev) => [
+      ...(prev ?? []),
+      {
+        id: tempId,
+        conversation_id: conversationId,
+        sender_id: user.id,
+        message_type: "DOCUMENT",
+        file_name: file.name,
+        created_at: new Date().toISOString(),
+        _pending: true,
+      },
+    ]);
+    try {
+      const message = await sendMyDocumentMessage(file);
+      setMessages((prev) => prev?.map((m) => (m.id === tempId ? message : m)) ?? prev);
+    } catch (err) {
+      setMessages((prev) => prev?.filter((m) => m.id !== tempId) ?? prev);
+      throw err;
+    }
   }
 
   function handleLongPress(id: string) {
@@ -227,19 +255,12 @@ export default function AdminChat() {
   }
 
   async function handleDeleteSelected() {
-    if (!conversationId || selectedIds.size === 0) return;
+    if (selectedIds.size === 0) return;
     const ids = Array.from(selectedIds);
-    await deleteConversationMessages(conversationId, ids);
+    await deleteMyConversationMessages(ids);
     setMessages(
       (prev) => prev?.map((m) => (ids.includes(m.id) ? { ...m, is_deleted: true } : m)) ?? prev,
     );
-    setSelectedIds(new Set());
-  }
-
-  async function handleForward(groupIds: string[]) {
-    if (!conversationId || selectedIds.size === 0) return;
-    await forwardConversationMessages(conversationId, Array.from(selectedIds), groupIds);
-    setShowForward(false);
     setSelectedIds(new Set());
   }
 
@@ -248,39 +269,50 @@ export default function AdminChat() {
   return (
     <div className={CHAT_PAGE}>
       {selectionMode ? (
-        <header className={SELECTION_HEADER}>
+        <header className={CHAT_HEADER_BASE}>
           <button
-            className={SELECTION_ICON_BTN}
+            className={CHAT_HEADER_ICON_BTN}
             onClick={() => setSelectedIds(new Set())}
             aria-label="Cancel selection"
           >
             <X size={22} />
           </button>
-          <span className={SELECTION_COUNT}>{selectedIds.size}</span>
-          <div className="flex-1" />
+          <span className={CHAT_HEADER_SELECTION_COUNT}>{selectedIds.size}</span>
+          <div className={CHAT_HEADER_SELECTION_SPACER} />
           {selectedIds.size === 1 && (
-            <button className={SELECTION_ICON_BTN} onClick={handleReplySelected} aria-label="Reply">
+            <button className={CHAT_HEADER_ICON_BTN} onClick={handleReplySelected} aria-label="Reply">
               <Reply size={20} />
             </button>
           )}
-          <button className={SELECTION_ICON_BTN} onClick={() => setShowForward(true)} aria-label="Forward">
-            <Forward size={20} />
-          </button>
-          <button className={SELECTION_ICON_BTN} onClick={handleDeleteSelected} aria-label="Delete">
+          <button className={CHAT_HEADER_ICON_BTN} onClick={handleDeleteSelected} aria-label="Delete">
             <Trash2 size={20} />
           </button>
         </header>
       ) : (
-        <ChatHeader title={customerName} subtitle="Online" onBack={() => navigate("/admin")} />
+        <header className={CHAT_HEADER_BASE}>
+          <GroupIcon name="AK Textiles" size={36} />
+          <div className={CHAT_HEADER_INFO}>
+            <div className={CHAT_HEADER_TITLE}>AK Textiles</div>
+          </div>
+          <button
+            className={CHAT_HEADER_ICON_BTN}
+            aria-label="More options"
+            onClick={() => navigate("/chat/profile")}
+          >
+            <MoreVertical size={20} />
+          </button>
+        </header>
       )}
 
-      <MessageList
-        messages={messages}
-        currentUserId={user.id}
-        selectedIds={selectedIds}
-        onLongPressMessage={handleLongPress}
-        onToggleSelectMessage={handleToggleSelect}
-      />
+      <div className={CHAT_BODY}>
+        <MessageList
+          messages={messages}
+          currentUserId={user.id}
+          selectedIds={selectedIds}
+          onLongPressMessage={handleLongPress}
+          onToggleSelectMessage={handleToggleSelect}
+        />
+      </div>
 
       {replyTarget && (
         <ReplyPreviewBar
@@ -305,14 +337,6 @@ export default function AdminChat() {
         canSubmitEmpty={stagedImages.length > 0}
         extraAction={
           <>
-            <span
-              className={MESSAGE_INPUT_ICON_CLASS}
-              onClick={() => setShowPicker(true)}
-              role="button"
-              aria-label="Send a product"
-            >
-              <Package size={20} />
-            </span>
             <span
               className={MESSAGE_INPUT_ICON_CLASS}
               onClick={() => imageInputRef.current?.click()}
@@ -342,17 +366,11 @@ export default function AdminChat() {
               type="file"
               accept=".pdf,.doc,.docx,.xls,.xlsx,application/pdf,application/msword"
               hidden
-              onChange={handleDocumentPick}
+              onChange={handlePickDocument}
             />
           </>
         }
       />
-
-      {showPicker && (
-        <ProductPicker onPick={handlePickProduct} onClose={() => setShowPicker(false)} />
-      )}
-
-      {showForward && <ForwardPicker onForward={handleForward} onClose={() => setShowForward(false)} />}
     </div>
   );
 }

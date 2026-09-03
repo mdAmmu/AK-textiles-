@@ -51,9 +51,9 @@ export default function GroupDetail() {
     setShowAddPanel(false);
   }
 
-  async function handleAddNew(phone: string, name: string, password: string) {
+  async function handleAddNew(phone: string, name: string, password: string, role: "USER" | "STAFF") {
     if (!groupId) return;
-    const added = await createAndAssignCustomer(groupId, name, phone, password);
+    const added = await createAndAssignCustomer(groupId, name, phone, password, role);
     setCustomers((prev) => [...(prev ?? []), added]);
     setGroup((prev) => (prev ? { ...prev, customer_count: prev.customer_count + 1 } : prev));
     setShowAddPanel(false);

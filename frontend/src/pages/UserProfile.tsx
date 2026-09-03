@@ -5,6 +5,7 @@ import { useCurrentUser } from "../hooks/useCurrentUser";
 import { logout } from "../services/auth";
 import { useTheme } from "../contexts/ThemeContext";
 import { fetchMyGroupMessages } from "../services/groups";
+import { fetchMyConversation } from "../services/chat";
 import type { Message } from "../types/message";
 import Avatar from "../components/common/Avatar";
 import ThemeToggle from "../components/common/ThemeToggle";
@@ -18,12 +19,18 @@ export default function UserProfile() {
   const [media, setMedia] = useState<Message[] | null>(null);
 
   useEffect(() => {
-    fetchMyGroupMessages().then((messages) =>
+    if (!user) return;
+    const loadMessages =
+      user.role === "STAFF"
+        ? fetchMyGroupMessages()
+        : fetchMyConversation().then((c) => c.messages);
+    loadMessages.then((messages) =>
       setMedia(
         messages.filter((m) => m.message_type === "IMAGE" && m.product_image && !m.is_deleted),
       ),
     );
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.role]);
 
   function handleLogout() {
     logout();

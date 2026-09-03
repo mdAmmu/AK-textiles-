@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, s
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_current_user, require_admin
+from app.api.deps import get_current_user, require_admin, require_staff
 from app.core.database import get_db
 from app.core.image_utils import normalize_image
 from app.core.security import hash_password
@@ -71,6 +71,19 @@ def get_my_group_messages(db: Session = Depends(get_db), user: User = Depends(ge
     return [serialize_message(m) for m in messages]
 
 
+@router.post("/mine/messages", response_model=MessageOut)
+async def send_my_group_message(
+    body: SendMessageRequest,
+    db: Session = Depends(get_db),
+    staff: User = Depends(require_staff),
+):
+    if staff.group_id is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="You're not in a group")
+    group = _get_group_or_404(db, str(staff.group_id))
+    message = await send_group_text_message(db, group, staff.id, body.text)
+    return serialize_message(message)
+
+
 @router.post("/mine/messages/delete", response_model=list[str])
 async def delete_my_group_messages(
     body: DeleteMessagesRequest,
@@ -87,7 +100,7 @@ async def delete_my_group_messages(
 def list_groups(db: Session = Depends(get_db), admin: User = Depends(require_admin)):
     counts = dict(
         db.query(User.group_id, func.count(User.id))
-        .filter(User.group_id.isnot(None))
+        .filter(User.group_id.isnot(None), User.role == UserRole.USER)
         .group_by(User.group_id)
         .all()
     )
@@ -188,12 +201,13 @@ def list_group_users(
     _get_group_or_404(db, group_id)
     users = (
         db.query(User)
-        .filter(User.group_id == group_id, User.role == UserRole.USER)
+        .filter(User.group_id == group_id, User.role.in_([UserRole.USER, UserRole.STAFF]))
         .order_by(User.name)
         .all()
     )
     return [
-        GroupUserOut(id=str(u.id), name=u.name, phone=u.phone, email=u.email) for u in users
+        GroupUserOut(id=str(u.id), name=u.name, phone=u.phone, email=u.email, role=u.role.value)
+        for u in users
     ]
 
 
@@ -215,17 +229,21 @@ def create_and_assign_customer(
     if db.query(User).filter(User.phone == phone).first() is not None:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Phone number already registered")
 
+    role = UserRole.STAFF if body.role == "STAFF" else UserRole.USER
+
     user = User(
         name=name,
         phone=phone,
         password_hash=hash_password(body.password),
-        role=UserRole.USER,
+        role=role,
         group_id=group.id,
     )
     db.add(user)
     db.commit()
     db.refresh(user)
-    return GroupUserOut(id=str(user.id), name=user.name, phone=user.phone, email=user.email)
+    return GroupUserOut(
+        id=str(user.id), name=user.name, phone=user.phone, email=user.email, role=user.role.value
+    )
 
 
 @router.get("/{group_id}/messages", response_model=list[MessageOut])

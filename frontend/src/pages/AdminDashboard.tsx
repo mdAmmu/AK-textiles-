@@ -8,6 +8,7 @@ import GroupChatListItem from "../components/admin/GroupChatListItem";
 import AdminAccountPanel from "../components/admin/AdminAccountPanel";
 import AdminProfileScreen from "../components/admin/AdminProfileScreen";
 import LoadingScreen from "../components/common/LoadingScreen";
+import BottomNav from "../components/admin/BottomNav";
 import logo from "../assets/ak-logo.png";
 
 export default function AdminDashboard() {
@@ -91,6 +92,8 @@ export default function AdminDashboard() {
           </>
         )}
       </main>
+
+      <BottomNav />
 
       {showProfile && user && (
         <AdminProfileScreen

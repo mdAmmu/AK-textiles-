@@ -48,11 +48,13 @@ export async function createAndAssignCustomer(
   name: string,
   phone: string,
   password: string,
+  role: "USER" | "STAFF" = "USER",
 ): Promise<GroupUser> {
   const { data } = await api.post<GroupUser>(`/groups/${groupId}/customers`, {
     name,
     phone,
     password,
+    role,
   });
   return data;
 }
@@ -69,6 +71,11 @@ export async function fetchGroupMessages(groupId: string): Promise<Message[]> {
 
 export async function sendGroupMessage(groupId: string, text: string): Promise<Message> {
   const { data } = await api.post<Message>(`/groups/${groupId}/messages`, { text });
+  return data;
+}
+
+export async function sendMyGroupMessage(text: string): Promise<Message> {
+  const { data } = await api.post<Message>("/groups/mine/messages", { text });
   return data;
 }
 

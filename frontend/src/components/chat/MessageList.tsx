@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { Message } from "../../types/message";
 import MessageBubble from "./MessageBubble";
 import ImageGroupBubble from "./ImageGroupBubble";
@@ -59,10 +59,24 @@ export default function MessageList({
   const bottomRef = useRef<HTMLDivElement>(null);
   const selectionMode = !!selectedIds && selectedIds.size > 0;
   const items = useMemo(() => groupMessages(messages), [messages]);
+  const [highlightedId, setHighlightedId] = useState<string | null>(null);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages.length]);
+
+  function handleJumpToReply(targetId: string) {
+    // A reply may quote one image from an image-group bubble — that whole
+    // group renders under its first message's DOM id, so resolve to that.
+    const group = items.find(
+      (item) => item.kind === "group" && item.messages.some((m) => m.id === targetId),
+    );
+    const domId = group && group.kind === "group" ? group.messages[0].id : targetId;
+
+    document.getElementById(`msg-${domId}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+    setHighlightedId(domId);
+    setTimeout(() => setHighlightedId((current) => (current === domId ? null : current)), 1600);
+  }
 
   if (messages.length === 0) {
     return (
@@ -86,7 +100,12 @@ export default function MessageList({
           const isOwn = item.messages[0].sender_id === currentUserId;
           if (item.messages.every((m) => m.is_deleted)) {
             return (
-              <DeletedMessageBubble key={item.messages[0].id} message={item.messages[0]} isOwn={isOwn} />
+              <DeletedMessageBubble
+                key={item.messages[0].id}
+                message={item.messages[0]}
+                isOwn={isOwn}
+                highlighted={highlightedId === item.messages[0].id}
+              />
             );
           }
           return (
@@ -96,6 +115,7 @@ export default function MessageList({
               isOwn={isOwn}
               selectionMode={selectionMode}
               selectedIds={selectedIds}
+              highlighted={highlightedId === item.messages[0].id}
               onLongPressMessage={onLongPressMessage}
               onToggleSelectMessage={onToggleSelectMessage}
             />
@@ -104,7 +124,14 @@ export default function MessageList({
 
         const isOwn = item.message.sender_id === currentUserId;
         if (item.message.is_deleted) {
-          return <DeletedMessageBubble key={item.message.id} message={item.message} isOwn={isOwn} />;
+          return (
+            <DeletedMessageBubble
+              key={item.message.id}
+              message={item.message}
+              isOwn={isOwn}
+              highlighted={highlightedId === item.message.id}
+            />
+          );
         }
         return (
           <MessageBubble
@@ -113,6 +140,8 @@ export default function MessageList({
             isOwn={isOwn}
             selectionMode={selectionMode}
             selected={selectedIds?.has(item.message.id)}
+            highlighted={highlightedId === item.message.id}
+            onJumpToReply={handleJumpToReply}
             onLongPress={onLongPressMessage ? () => onLongPressMessage(item.message.id) : undefined}
             onToggleSelect={
               onToggleSelectMessage ? () => onToggleSelectMessage(item.message.id) : undefined

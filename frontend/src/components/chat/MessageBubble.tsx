@@ -1,8 +1,17 @@
 import { useRef } from "react";
-import { Check, CheckCheck, Clock } from "lucide-react";
+import { Check, CheckCheck, Clock, Download, FileText } from "lucide-react";
 import type { Message } from "../../types/message";
+import { downloadImage } from "../../utils/shareImage";
 import ProductMessage from "./ProductMessage";
 import ImageMessage, { type ImageMessageHandle } from "./ImageMessage";
+
+export const DOCUMENT_ROW = "flex items-center gap-2 py-1 px-1 min-w-[200px]";
+export const DOCUMENT_OPEN_BTN =
+  "flex items-center gap-2.5 flex-1 min-w-0 border-none bg-transparent p-0 cursor-pointer text-inherit text-left";
+export const DOCUMENT_ICON =
+  "flex items-center justify-center w-10 h-10 rounded-lg bg-black/[0.06] dark:bg-white/10 shrink-0";
+export const DOCUMENT_DOWNLOAD_BTN =
+  "flex items-center justify-center w-8 h-8 rounded-full border-none bg-black/[0.06] dark:bg-white/10 cursor-pointer shrink-0 text-inherit";
 
 export const BUBBLE_ROW_BASE = "flex py-0.5 px-3 select-none";
 export const BUBBLE_ROW_OWN = "justify-end";
@@ -19,6 +28,11 @@ export const IMAGE_WRAP = "relative leading-none";
 export const IMAGE_TIME =
   "absolute bottom-1.5 right-1.5 flex items-center gap-0.5 bg-black/45 text-white text-[11px] py-[0.0625rem] px-1.5 rounded-lg [line-height:normal]";
 
+export const QUOTE_BLOCK =
+  "mb-1 py-1.5 pl-2 pr-2 rounded-md bg-black/[0.06] dark:bg-white/10 border-l-[3px] border-[var(--chat-accent)]";
+export const QUOTE_TEXT =
+  "text-[13px] text-[var(--chat-text-secondary)] truncate m-0";
+
 export const BUBBLE_TEXT = "m-0 py-0.5 px-1 whitespace-pre-wrap break-words";
 export const BUBBLE_TIME =
   "flex items-center justify-end text-[11px] text-[var(--chat-text-secondary)] mt-0.5 pr-1";
@@ -32,8 +46,10 @@ interface Props {
   isOwn: boolean;
   selectionMode?: boolean;
   selected?: boolean;
+  highlighted?: boolean;
   onLongPress?: () => void;
   onToggleSelect?: () => void;
+  onJumpToReply?: (messageId: string) => void;
 }
 
 const LONG_PRESS_MS = 450;
@@ -44,8 +60,10 @@ export default function MessageBubble({
   isOwn,
   selectionMode,
   selected,
+  highlighted,
   onLongPress,
   onToggleSelect,
+  onJumpToReply,
 }: Props) {
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const firedRef = useRef(false);
@@ -58,6 +76,31 @@ export default function MessageBubble({
     minute: "2-digit",
   });
   const isImage = message.message_type === "IMAGE";
+
+  const quote = message.reply_to && (
+    <button
+      type="button"
+      data-quote-reply="true"
+      className={`${QUOTE_BLOCK} block w-full text-left border-none cursor-pointer`}
+      onClick={(e) => {
+        e.stopPropagation();
+        if (!message.reply_to) return;
+        onJumpToReply?.(message.reply_to.id);
+      }}
+    >
+      <p className={QUOTE_TEXT}>
+        {message.reply_to.is_deleted
+          ? "This message was deleted"
+          : message.reply_to.message_type === "IMAGE"
+            ? "📷 Photo"
+            : message.reply_to.message_type === "DOCUMENT"
+              ? (message.reply_to.file_name ?? "📄 Document")
+              : message.reply_to.message_type === "PRODUCT"
+                ? "📦 Product"
+                : message.reply_to.text}
+      </p>
+    </button>
+  );
 
   const tick = isOwn && (
     <span
@@ -126,22 +169,55 @@ export default function MessageBubble({
     }
   }
 
+  function openDocument() {
+    if (message.product_image) window.open(message.product_image, "_blank", "noopener,noreferrer");
+  }
+
+  async function downloadDocument() {
+    if (!message.product_image) return;
+    try {
+      await downloadImage(message.product_image, message.file_name ?? "document");
+    } catch {
+      openDocument();
+    }
+  }
+
   function handleTouchEnd(e: React.TouchEvent) {
     // Prevent the browser's synthetic mouse/click events from firing a
     // second (conflicting) endPress() right after this one. Since that also
-    // suppresses the image's own onClick, open it here directly on a tap.
+    // suppresses the quote/image/document's own onClick, handle those taps
+    // here directly instead of relying on the (never-fired) click event.
     const wasTap = !firedRef.current && !movedRef.current;
+    const target = e.target as HTMLElement;
+    const quoteTapped = target.closest('[data-quote-reply="true"]');
+    const docOpenTapped = target.closest('[data-doc-open="true"]');
+    const docDownloadTapped = target.closest('[data-doc-download="true"]');
     e.preventDefault();
     touchStartRef.current = null;
     endPress();
-    if (wasTap && isImage && !selectionMode) {
-      imageRef.current?.open();
+    if (wasTap && !selectionMode) {
+      if (quoteTapped && message.reply_to) {
+        onJumpToReply?.(message.reply_to.id);
+        return;
+      }
+      if (docDownloadTapped) {
+        downloadDocument();
+        return;
+      }
+      if (docOpenTapped) {
+        openDocument();
+        return;
+      }
+      if (isImage) {
+        imageRef.current?.open();
+      }
     }
   }
 
   return (
     <div
-      className={`${BUBBLE_ROW_BASE}${isOwn ? ` ${BUBBLE_ROW_OWN}` : ""}${selected ? ` ${BUBBLE_ROW_SELECTED}` : ""}${message._pending ? ` ${BUBBLE_ROW_PENDING}` : ""}`}
+      id={`msg-${message.id}`}
+      className={`${BUBBLE_ROW_BASE}${isOwn ? ` ${BUBBLE_ROW_OWN}` : ""}${selected ? ` ${BUBBLE_ROW_SELECTED}` : ""}${message._pending ? ` ${BUBBLE_ROW_PENDING}` : ""} transition-colors duration-500${highlighted ? " bg-[rgba(15,157,110,0.18)]" : ""}`}
       onMouseDown={startPress}
       onMouseUp={endPress}
       onMouseLeave={cancelPress}
@@ -154,6 +230,7 @@ export default function MessageBubble({
       >
         {isImage ? (
           <div className={IMAGE_WRAP}>
+            {quote && <div className="px-1 pt-1">{quote}</div>}
             <ImageMessage ref={imageRef} message={message} selectionMode={selectionMode} />
             <span className={IMAGE_TIME}>
               {time}
@@ -162,8 +239,40 @@ export default function MessageBubble({
           </div>
         ) : (
           <>
+            {quote}
             {message.message_type === "PRODUCT" ? (
               <ProductMessage message={message} />
+            ) : message.message_type === "DOCUMENT" ? (
+              <div className={DOCUMENT_ROW}>
+                <button
+                  type="button"
+                  data-doc-open="true"
+                  className={DOCUMENT_OPEN_BTN}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    openDocument();
+                  }}
+                >
+                  <span className={DOCUMENT_ICON}>
+                    <FileText size={20} />
+                  </span>
+                  <span className="min-w-0 truncate text-sm font-medium">
+                    {message.file_name ?? "Document"}
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  data-doc-download="true"
+                  className={DOCUMENT_DOWNLOAD_BTN}
+                  aria-label="Download"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    downloadDocument();
+                  }}
+                >
+                  <Download size={16} />
+                </button>
+              </div>
             ) : (
               <p className={BUBBLE_TEXT}>{message.text}</p>
             )}
