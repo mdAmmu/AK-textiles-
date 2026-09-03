@@ -261,7 +261,7 @@ async def edit_group_message(db: Session, group: Group, message_id: str, text: s
 
 async def delete_group(db: Session, group: Group) -> list[str]:
     """Deletes a group along with its messages, and unassigns + kicks out its members."""
-    members = db.query(User).filter(User.group_id == group.id, User.role == UserRole.USER).all()
+    members = db.query(User).filter(User.group_id == group.id).all()
     member_ids = [str(m.id) for m in members]
 
     db.query(Message).filter(Message.group_id == group.id).delete(synchronize_session=False)
@@ -293,9 +293,7 @@ async def delete_group_messages(db: Session, group: Group, message_ids: list[str
     db.commit()
 
     if deleted_ids:
-        members = (
-            db.query(User).filter(User.group_id == group.id, User.role == UserRole.USER).all()
-        )
+        members = db.query(User).filter(User.group_id == group.id).all()
         payload = {
             "type": "group_messages_deleted",
             "group_id": str(group.id),
@@ -352,14 +350,21 @@ async def forward_group_messages(
 async def _notify_group_members(
     db: Session, group: Group, message: Message, event_type: str = "new_group_message"
 ) -> None:
-    members = db.query(User).filter(User.group_id == group.id, User.role == UserRole.USER).all()
+    """Real group chat: every member of the group (any role) sees every
+    message, and every admin sees it live too — not just USER-role members.
+    """
+    members = db.query(User).filter(User.group_id == group.id).all()
+    admins = db.query(User).filter(User.role == UserRole.ADMIN).all()
+    recipient_ids = {str(u.id) for u in members} | {str(a.id) for a in admins}
+    recipient_ids.discard(str(message.sender_id))
+
     payload = {
         "type": event_type,
         "group_id": str(group.id),
         "message": serialize_message(message).model_dump(mode="json"),
     }
-    for member in members:
-        await manager.send_to_user(str(member.id), payload)
+    for recipient_id in recipient_ids:
+        await manager.send_to_user(recipient_id, payload)
 
 
 async def mark_conversation_read(db: Session, conversation: Conversation, reader_id) -> list[Message]:

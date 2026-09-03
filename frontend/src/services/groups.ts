@@ -79,6 +79,28 @@ export async function sendMyGroupMessage(text: string): Promise<Message> {
   return data;
 }
 
+export async function sendMyGroupImageMessage(
+  files: File[],
+  imageGroupId?: string,
+): Promise<Message[]> {
+  const formData = new FormData();
+  files.forEach((file) => formData.append("files", file));
+  if (imageGroupId) formData.append("image_group_id", imageGroupId);
+  const { data } = await api.post<Message[]>("/groups/mine/messages/image", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return data;
+}
+
+export async function sendMyGroupDocumentMessage(file: File): Promise<Message> {
+  const formData = new FormData();
+  formData.append("file", file);
+  const { data } = await api.post<Message>("/groups/mine/messages/document", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return data;
+}
+
 export async function editGroupMessage(
   groupId: string,
   messageId: string,

@@ -4,11 +4,11 @@ from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, s
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_current_user, require_admin, require_staff
+from app.api.deps import get_current_user, require_admin
 from app.core.database import get_db
 from app.core.image_utils import normalize_image
 from app.core.security import hash_password
-from app.core.supabase_client import upload_chat_image
+from app.core.supabase_client import upload_chat_file, upload_chat_image
 from app.models.group import Group
 from app.models.group_read import GroupRead
 from app.models.message import Message
@@ -34,11 +34,14 @@ from app.services.chat_service import (
     delete_group_messages,
     edit_group_message,
     forward_group_messages,
+    send_group_document_message,
     send_group_image_message,
     send_group_product_message,
     send_group_text_message,
     serialize_message,
 )
+
+MAX_DOCUMENT_BYTES = 20 * 1024 * 1024  # 20 MB
 
 router = APIRouter(prefix="/groups", tags=["groups"])
 
@@ -62,12 +65,11 @@ def get_my_group(db: Session = Depends(get_db), user: User = Depends(get_current
 def get_my_group_messages(db: Session = Depends(get_db), user: User = Depends(get_current_user)):
     if user.group_id is None:
         return []
-    messages = (
-        db.query(Message)
-        .filter(Message.group_id == user.group_id)
-        .order_by(Message.created_at)
-        .all()
-    )
+    query = db.query(Message).filter(Message.group_id == user.group_id)
+    if user.group_joined_at is not None:
+        # WhatsApp-style: no history from before this member joined the group.
+        query = query.filter(Message.created_at >= user.group_joined_at)
+    messages = query.order_by(Message.created_at).all()
     return [serialize_message(m) for m in messages]
 
 
@@ -75,12 +77,62 @@ def get_my_group_messages(db: Session = Depends(get_db), user: User = Depends(ge
 async def send_my_group_message(
     body: SendMessageRequest,
     db: Session = Depends(get_db),
-    staff: User = Depends(require_staff),
+    user: User = Depends(get_current_user),
 ):
-    if staff.group_id is None:
+    if user.group_id is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="You're not in a group")
-    group = _get_group_or_404(db, str(staff.group_id))
-    message = await send_group_text_message(db, group, staff.id, body.text)
+    group = _get_group_or_404(db, str(user.group_id))
+    message = await send_group_text_message(db, group, user.id, body.text)
+    return serialize_message(message)
+
+
+@router.post("/mine/messages/image", response_model=list[MessageOut])
+async def send_my_group_image_message(
+    files: list[UploadFile] = File(...),
+    image_group_id: str | None = Form(None),
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    if user.group_id is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="You're not in a group")
+    group = _get_group_or_404(db, str(user.group_id))
+
+    parsed_group_id = (
+        uuid.UUID(image_group_id) if image_group_id else (uuid.uuid4() if len(files) > 1 else None)
+    )
+
+    messages = []
+    for file in files:
+        content = await file.read()
+        content, content_type, extension = normalize_image(content, file.content_type, file.filename)
+        filename = f"{group.id}/{uuid.uuid4()}.{extension}"
+        url = upload_chat_image(filename, content, content_type)
+
+        message = await send_group_image_message(db, group, user.id, url, parsed_group_id)
+        messages.append(serialize_message(message))
+    return messages
+
+
+@router.post("/mine/messages/document", response_model=MessageOut)
+async def send_my_group_document_message(
+    file: UploadFile,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    if user.group_id is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="You're not in a group")
+    group = _get_group_or_404(db, str(user.group_id))
+    original_name = file.filename or "document"
+
+    content = await file.read()
+    if len(content) > MAX_DOCUMENT_BYTES:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="File is too large (max 20MB)")
+
+    extension = original_name.rsplit(".", 1)[-1] if "." in original_name else "bin"
+    storage_name = f"{group.id}/{uuid.uuid4()}.{extension}"
+    url = upload_chat_file(storage_name, content, file.content_type or "application/octet-stream")
+
+    message = await send_group_document_message(db, group, user.id, url, original_name)
     return serialize_message(message)
 
 
@@ -237,6 +289,7 @@ def create_and_assign_customer(
         password_hash=hash_password(body.password),
         role=role,
         group_id=group.id,
+        group_joined_at=func.now(),
     )
     db.add(user)
     db.commit()
@@ -381,6 +434,10 @@ def assign_user_group(
         _get_group_or_404(db, body.group_id)
 
     user.group_id = body.group_id
+    # Re-joining (or joining a different group) resets the history cutoff —
+    # only messages from this moment onward are visible, same as a brand
+    # new member. Leaving a group clears it back to no-group state.
+    user.group_joined_at = func.now() if body.group_id is not None else None
     db.commit()
     db.refresh(user)
     return GroupUserOut(id=str(user.id), name=user.name, phone=user.phone, email=user.email)

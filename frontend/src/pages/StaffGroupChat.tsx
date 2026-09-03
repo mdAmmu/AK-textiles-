@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { MoreVertical, Share2, Trash2, X } from "lucide-react";
+import { Image as ImageIcon, MoreVertical, Paperclip, Share2, Trash2, X } from "lucide-react";
 import { useCurrentUser } from "../hooks/useCurrentUser";
 import { logout } from "../services/auth";
 import { useChatSocket } from "../hooks/useChatSocket";
@@ -8,6 +8,8 @@ import {
   deleteMyGroupMessages,
   fetchMyGroup,
   fetchMyGroupMessages,
+  sendMyGroupDocumentMessage,
+  sendMyGroupImageMessage,
   sendMyGroupMessage,
 } from "../services/groups";
 import { downloadImage, shareImageFiles } from "../utils/shareImage";
@@ -15,7 +17,8 @@ import type { Message } from "../types/message";
 import type { Group } from "../types/group";
 import GroupIcon from "../components/admin/GroupIcon";
 import MessageList from "../components/chat/MessageList";
-import MessageInput from "../components/chat/MessageInput";
+import MessageInput, { MESSAGE_INPUT_ICON_CLASS } from "../components/chat/MessageInput";
+import ForwardPreviewBar, { type StagedImage } from "../components/chat/ForwardPreviewBar";
 import LoadingScreen from "../components/common/LoadingScreen";
 import { randomUUID } from "../utils/uuid";
 import {
@@ -29,9 +32,10 @@ import {
   CHAT_PAGE,
 } from "./chatShellStyles";
 
-// Manager/staff home screen: the shared Group thread, where staff can post
-// alongside the admin — unlike customers, who only ever see their own
-// private/broadcast conversation (see CustomerChat.tsx).
+// Home screen for anyone assigned to a Group: a real multi-member group
+// chat — every member (any role) sees every other member's text/image/file
+// messages, like a normal WhatsApp group. Only members with no group at all
+// get their own private 1-1/broadcast conversation (see CustomerChat.tsx).
 export default function StaffGroupChat() {
   const navigate = useNavigate();
   const { user } = useCurrentUser();
@@ -40,6 +44,10 @@ export default function StaffGroupChat() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isSharing, setIsSharing] = useState(false);
   const [shareToast, setShareToast] = useState<string | null>(null);
+  const [stagedImages, setStagedImages] = useState<StagedImage[]>([]);
+  const [draftText, setDraftText] = useState("");
+  const imageInputRef = useRef<HTMLInputElement>(null);
+  const documentInputRef = useRef<HTMLInputElement>(null);
 
   const selectionMode = selectedIds.size > 0;
 
@@ -134,7 +142,13 @@ export default function StaffGroupChat() {
   }
 
   async function handleSend(text: string) {
-    if (!text.trim() || !user || !group) return;
+    if (!user || !group) return;
+    if (stagedImages.length > 0) {
+      await handleSendStaged(text);
+      return;
+    }
+    if (!text.trim()) return;
+
     const tempId = `temp-${randomUUID()}`;
     setMessages((prev) => [
       ...(prev ?? []),
@@ -150,6 +164,118 @@ export default function StaffGroupChat() {
     ]);
     try {
       const message = await sendMyGroupMessage(text);
+      setMessages((prev) => prev?.map((m) => (m.id === tempId ? message : m)) ?? prev);
+    } catch (err) {
+      setMessages((prev) => prev?.filter((m) => m.id !== tempId) ?? prev);
+      throw err;
+    }
+  }
+
+  async function handleSendStaged(text: string) {
+    if (!user || !group) return;
+    const filesToSend = stagedImages.filter((img) => img.file).map((img) => img.file as File);
+    const stagedToClear = stagedImages;
+    const trimmed = text.trim();
+
+    setStagedImages([]);
+    setDraftText("");
+
+    const now = new Date().toISOString();
+    const tempImageIds = stagedToClear.map((img) => `temp-${img.key}`);
+    const tempTextId = trimmed ? `temp-${randomUUID()}` : null;
+    const batchImageGroupId = filesToSend.length > 1 ? randomUUID() : undefined;
+
+    setMessages((prev) => [
+      ...(prev ?? []),
+      ...stagedToClear.map(
+        (img, i): Message => ({
+          id: tempImageIds[i],
+          group_id: group.id,
+          sender_id: user.id,
+          message_type: "IMAGE",
+          product_image: img.url,
+          image_group_id: batchImageGroupId ?? null,
+          created_at: now,
+          _pending: true,
+        }),
+      ),
+      ...(tempTextId
+        ? [
+            {
+              id: tempTextId,
+              group_id: group.id,
+              sender_id: user.id,
+              message_type: "TEXT" as const,
+              text: trimmed,
+              created_at: now,
+              _pending: true,
+            },
+          ]
+        : []),
+    ]);
+
+    try {
+      const uploaded = await sendMyGroupImageMessage(filesToSend, batchImageGroupId);
+      const collected: Message[] = [...uploaded];
+      if (tempTextId) {
+        collected.push(await sendMyGroupMessage(trimmed));
+      }
+      setMessages((prev) => {
+        const withoutTemps =
+          prev?.filter((m) => !tempImageIds.includes(m.id) && m.id !== tempTextId) ?? [];
+        return [...withoutTemps, ...collected];
+      });
+    } catch (err) {
+      setMessages(
+        (prev) => prev?.filter((m) => !tempImageIds.includes(m.id) && m.id !== tempTextId) ?? prev,
+      );
+      throw err;
+    } finally {
+      stagedToClear.forEach((img) => {
+        if (img.file) URL.revokeObjectURL(img.url);
+      });
+    }
+  }
+
+  function handlePickImages(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = e.target.files ? Array.from(e.target.files) : [];
+    e.target.value = "";
+    if (files.length === 0) return;
+    const newItems: StagedImage[] = files.map((file) => ({
+      key: `new-${randomUUID()}`,
+      url: URL.createObjectURL(file),
+      file,
+    }));
+    setStagedImages((prev) => [...prev, ...newItems]);
+  }
+
+  function handleRemoveStagedImage(key: string) {
+    setStagedImages((prev) => {
+      const target = prev.find((img) => img.key === key);
+      if (target?.file) URL.revokeObjectURL(target.url);
+      return prev.filter((img) => img.key !== key);
+    });
+  }
+
+  async function handlePickDocument(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file || !user || !group) return;
+    const tempId = `temp-${randomUUID()}`;
+    setMessages((prev) => [
+      ...(prev ?? []),
+      {
+        id: tempId,
+        group_id: group.id,
+        sender_id: user.id,
+        message_type: "DOCUMENT",
+        file_name: file.name,
+        created_at: new Date().toISOString(),
+        _pending: true,
+      },
+    ]);
+    try {
+      const message = await sendMyGroupDocumentMessage(file);
       setMessages((prev) => prev?.map((m) => (m.id === tempId ? message : m)) ?? prev);
     } catch (err) {
       setMessages((prev) => prev?.filter((m) => m.id !== tempId) ?? prev);
@@ -210,7 +336,51 @@ export default function StaffGroupChat() {
           onToggleSelectMessage={handleToggleSelect}
         />
       </div>
-      <MessageInput onSend={handleSend} disabled={!group} />
+
+      <ForwardPreviewBar images={stagedImages} onRemove={handleRemoveStagedImage} />
+
+      <MessageInput
+        onSend={handleSend}
+        value={draftText}
+        onChange={setDraftText}
+        canSubmitEmpty={stagedImages.length > 0}
+        disabled={!group}
+        extraAction={
+          <>
+            <span
+              className={MESSAGE_INPUT_ICON_CLASS}
+              onClick={() => imageInputRef.current?.click()}
+              role="button"
+              aria-label="Send images"
+            >
+              <ImageIcon size={20} />
+            </span>
+            <span
+              className={MESSAGE_INPUT_ICON_CLASS}
+              onClick={() => documentInputRef.current?.click()}
+              role="button"
+              aria-label="Send a document"
+            >
+              <Paperclip size={20} />
+            </span>
+            <input
+              ref={imageInputRef}
+              type="file"
+              accept="image/*"
+              multiple
+              hidden
+              onChange={handlePickImages}
+            />
+            <input
+              ref={documentInputRef}
+              type="file"
+              accept=".pdf,.doc,.docx,.xls,.xlsx,application/pdf,application/msword"
+              hidden
+              onChange={handlePickDocument}
+            />
+          </>
+        }
+      />
       {shareToast && (
         <div className="fixed left-1/2 bottom-[4.5rem] -translate-x-1/2 z-30 pointer-events-none bg-[#111] text-white text-[13px] font-medium py-2 px-4 rounded-full shadow-[0_4px_14px_rgba(0,0,0,0.25)]">
           <span>{shareToast}</span>
