@@ -5,7 +5,6 @@ import { createProduct, uploadProductImage } from "../services/products";
 import type { Product, ProductInput } from "../types/product";
 import ProductForm from "../components/admin/ProductForm";
 import ImageUploadGrid from "../components/admin/ImageUploadGrid";
-import "./CreateProduct.css";
 
 export default function CreateProduct() {
   const navigate = useNavigate();
@@ -29,26 +28,31 @@ export default function CreateProduct() {
   }
 
   return (
-    <div className="create-product-page">
-      <header className="create-product-page__header">
-        <button onClick={() => navigate("/admin/products")}>
+    <div className="min-h-dvh bg-[var(--wa-panel-bg)]">
+      <header className="flex items-center gap-3 py-[1.125rem] px-4 bg-[var(--wa-header)]">
+        <button
+          className="flex border-none bg-transparent text-white cursor-pointer"
+          onClick={() => navigate("/admin/products")}
+        >
           <ArrowLeft size={20} />
         </button>
-        <h1>Create Product</h1>
+        <h1 className="m-0 text-xl text-white">Create Product</h1>
       </header>
 
       {!product ? (
         <ProductForm submitLabel="Create Product" onSubmit={handleCreate} />
       ) : (
-        <div className="create-product-page__images">
-          <p>Now add up to 4 images</p>
+        <div className="bg-white m-3.5 rounded-xl overflow-hidden">
+          <p className="pt-3.5 px-4 text-[var(--wa-text-secondary)] font-semibold text-sm">
+            Now add up to 4 images
+          </p>
           <ImageUploadGrid
             images={[product.image_1, product.image_2, product.image_3, product.image_4]}
             onUpload={handleUpload}
             uploading={uploading}
           />
           <button
-            className="create-product-page__done"
+            className="block mx-3.5 mt-2 mb-4 p-3 w-[calc(100%-1.75rem)] bg-[var(--wa-accent)] text-white border-none rounded-lg font-semibold cursor-pointer"
             onClick={() => navigate("/admin/products")}
           >
             Done

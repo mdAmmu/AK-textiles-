@@ -2,14 +2,34 @@ import { useRef, useState } from "react";
 import { Check, CheckCheck } from "lucide-react";
 import type { Message } from "../../types/message";
 import ImageViewerModal from "./ImageViewerModal";
-import "./MessageBubble.css";
-import "./ImageGroupBubble.css";
+import {
+  BUBBLE_BASE,
+  BUBBLE_IMAGE,
+  BUBBLE_OWN,
+  BUBBLE_ROW_BASE,
+  BUBBLE_ROW_OWN,
+  BUBBLE_ROW_SELECTED,
+  BUBBLE_SELECTED,
+  BUBBLE_TICK_IN_IMAGE,
+  IMAGE_TIME,
+  IMAGE_WRAP,
+} from "./MessageBubble";
+
+export const TILE_GRID_BASE = "grid gap-[2px] w-[260px] h-[260px] max-w-full rounded-md overflow-hidden";
+export const TILE_GRID_COUNT: Record<number, string> = {
+  1: "grid-cols-1 grid-rows-1",
+  2: "grid-cols-2 grid-rows-1",
+  3: "grid-cols-2 grid-rows-2",
+  4: "grid-cols-2 grid-rows-2",
+};
+export const MAX_GRID_TILES = 4;
 
 interface Props {
   messages: Message[];
   isOwn: boolean;
   selectionMode?: boolean;
   selectedIds?: Set<string>;
+  highlighted?: boolean;
   onLongPressMessage?: (id: string) => void;
   onToggleSelectMessage?: (id: string) => void;
 }
@@ -23,6 +43,7 @@ export default function ImageGroupBubble({
   isOwn,
   selectionMode,
   selectedIds,
+  highlighted,
   onLongPressMessage,
   onToggleSelectMessage,
 }: Props) {
@@ -38,7 +59,7 @@ export default function ImageGroupBubble({
     minute: "2-digit",
   });
   const tick = isOwn && (
-    <span className={`message-bubble__tick${last.read_at ? " message-bubble__tick--read" : ""}`}>
+    <span className={BUBBLE_TICK_IN_IMAGE}>
       {last.read_at ? <CheckCheck size={14} /> : <Check size={14} />}
     </span>
   );
@@ -122,9 +143,12 @@ export default function ImageGroupBubble({
     setViewerIndex(index);
   }
 
+  const tileCount = Math.min(count, MAX_TILES);
+
   return (
     <div
-      className={`message-bubble-row${isOwn ? " message-bubble-row--own" : ""}${selected ? " message-bubble-row--selected" : ""}`}
+      id={`msg-${messages[0].id}`}
+      className={`${BUBBLE_ROW_BASE}${isOwn ? ` ${BUBBLE_ROW_OWN}` : ""}${selected ? ` ${BUBBLE_ROW_SELECTED}` : ""} transition-colors duration-500${highlighted ? " bg-[rgba(37,99,235,0.18)]" : ""}`}
       onMouseDown={startPress}
       onMouseUp={endPress}
       onMouseLeave={cancelPress}
@@ -133,30 +157,32 @@ export default function ImageGroupBubble({
       onTouchEnd={handleTouchEnd}
     >
       <div
-        className={`message-bubble message-bubble--image${isOwn ? " message-bubble--own" : ""}${selected ? " message-bubble--selected" : ""}`}
+        className={`${BUBBLE_BASE} ${BUBBLE_IMAGE}${isOwn ? ` ${BUBBLE_OWN}` : ""}${selected ? ` ${BUBBLE_SELECTED}` : ""}`}
       >
-        <div className="message-bubble__image-wrap">
-          <div className={`image-group image-group--count-${Math.min(count, MAX_TILES)}`}>
+        <div className={IMAGE_WRAP}>
+          <div className={`${TILE_GRID_BASE} ${TILE_GRID_COUNT[tileCount]}`}>
             {visible.map((m, index) => (
               <div
-                className="image-group__tile"
+                className={`relative overflow-hidden cursor-pointer${tileCount === 3 && index === 0 ? " row-span-2" : ""}`}
                 key={m.id}
                 data-tile-index={index}
                 onClick={() => handleTileClick(index)}
               >
                 <img
-                  className="image-group__img"
+                  className="block w-full h-full object-cover"
                   src={m.product_image ?? undefined}
                   alt="Product"
                   draggable={false}
                 />
                 {index === MAX_TILES - 1 && remaining > 0 && (
-                  <div className="image-group__overlay">+{remaining}</div>
+                  <div className="absolute inset-0 bg-black/45 text-white text-2xl font-semibold flex items-center justify-center">
+                    +{remaining}
+                  </div>
                 )}
               </div>
             ))}
           </div>
-          <span className="message-bubble__image-time">
+          <span className={IMAGE_TIME}>
             {time}
             {tick}
           </span>

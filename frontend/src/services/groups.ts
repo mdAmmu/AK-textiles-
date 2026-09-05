@@ -36,9 +36,17 @@ export async function assignUserGroup(userId: string, groupId: string | null): P
   return data;
 }
 
-export async function fetchUnassignedUsers(search?: string): Promise<User[]> {
+export async function fetchUnassignedUsers(
+  search?: string,
+  role: "USER" | "STAFF" = "USER",
+): Promise<User[]> {
+  // With no search term, only show people not already in a group (a clean
+  // "pick someone" list). Once the admin searches, broaden to everyone
+  // matching — including people already in another group — so a searched
+  // phone number that's already assigned surfaces with `group_name` set,
+  // instead of silently not matching anything.
   const { data } = await api.get<User[]>("/users", {
-    params: { unassigned_only: true, search },
+    params: { unassigned_only: !search, search, role },
   });
   return data;
 }
@@ -48,11 +56,13 @@ export async function createAndAssignCustomer(
   name: string,
   phone: string,
   password: string,
+  role: "USER" | "STAFF" = "USER",
 ): Promise<GroupUser> {
   const { data } = await api.post<GroupUser>(`/groups/${groupId}/customers`, {
     name,
     phone,
     password,
+    role,
   });
   return data;
 }
@@ -69,6 +79,33 @@ export async function fetchGroupMessages(groupId: string): Promise<Message[]> {
 
 export async function sendGroupMessage(groupId: string, text: string): Promise<Message> {
   const { data } = await api.post<Message>(`/groups/${groupId}/messages`, { text });
+  return data;
+}
+
+export async function sendMyGroupMessage(text: string): Promise<Message> {
+  const { data } = await api.post<Message>("/groups/mine/messages", { text });
+  return data;
+}
+
+export async function sendMyGroupImageMessage(
+  files: File[],
+  imageGroupId?: string,
+): Promise<Message[]> {
+  const formData = new FormData();
+  files.forEach((file) => formData.append("files", file));
+  if (imageGroupId) formData.append("image_group_id", imageGroupId);
+  const { data } = await api.post<Message[]>("/groups/mine/messages/image", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return data;
+}
+
+export async function sendMyGroupDocumentMessage(file: File): Promise<Message> {
+  const formData = new FormData();
+  formData.append("file", file);
+  const { data } = await api.post<Message>("/groups/mine/messages/document", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
   return data;
 }
 
@@ -100,6 +137,15 @@ export async function sendGroupImageMessage(
   files.forEach((file) => formData.append("files", file));
   if (imageGroupId) formData.append("image_group_id", imageGroupId);
   const { data } = await api.post<Message[]>(`/groups/${groupId}/messages/image`, formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return data;
+}
+
+export async function sendGroupDocumentMessage(groupId: string, file: File): Promise<Message> {
+  const formData = new FormData();
+  formData.append("file", file);
+  const { data } = await api.post<Message>(`/groups/${groupId}/messages/document`, formData, {
     headers: { "Content-Type": "multipart/form-data" },
   });
   return data;

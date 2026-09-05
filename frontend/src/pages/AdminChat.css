@@ -1,4 +1,0 @@
-/* Admin chat screens (1:1 and group) now share the same base chat styling
-   as the customer chat (see ChatHeader.css / GroupChat.css / MessageBubble.css
-   etc.), which is theme-aware via the CSS vars in index.css. Nothing to
-   override here anymore. */

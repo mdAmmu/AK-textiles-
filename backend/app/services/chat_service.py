@@ -4,10 +4,11 @@ from sqlalchemy.orm import Session
 
 from app.models.conversation import Conversation
 from app.models.group import Group
+from app.models.group_read import GroupRead
 from app.models.message import Message, MessageType
 from app.models.product import Product
 from app.models.user import User, UserRole
-from app.schemas.message import MessageOut
+from app.schemas.message import MessageOut, ReplyPreview
 from app.websocket.manager import manager
 
 
@@ -28,13 +29,14 @@ def get_or_create_conversation(db: Session, user: User) -> Conversation:
 
 
 async def send_text_message(
-    db: Session, conversation: Conversation, sender_id, text: str
+    db: Session, conversation: Conversation, sender_id, text: str, reply_to_id=None
 ) -> Message:
     message = Message(
         conversation_id=conversation.id,
         sender_id=sender_id,
         message_type=MessageType.TEXT,
         text=text,
+        reply_to_id=reply_to_id,
     )
     db.add(message)
     db.commit()
@@ -96,13 +98,39 @@ async def send_product_message(
 
 
 async def send_image_message(
-    db: Session, conversation: Conversation, sender_id, image_url: str
+    db: Session,
+    conversation: Conversation,
+    sender_id,
+    image_url: str,
+    reply_to_id=None,
+    image_group_id=None,
 ) -> Message:
     message = Message(
         conversation_id=conversation.id,
         sender_id=sender_id,
         message_type=MessageType.IMAGE,
         product_image=image_url,
+        reply_to_id=reply_to_id,
+        image_group_id=image_group_id,
+    )
+    db.add(message)
+    db.commit()
+    db.refresh(message)
+
+    await _notify_other_party(conversation, sender_id, message)
+    return message
+
+
+async def send_document_message(
+    db: Session, conversation: Conversation, sender_id, file_url: str, file_name: str, reply_to_id=None
+) -> Message:
+    message = Message(
+        conversation_id=conversation.id,
+        sender_id=sender_id,
+        message_type=MessageType.DOCUMENT,
+        product_image=file_url,
+        file_name=file_name,
+        reply_to_id=reply_to_id,
     )
     db.add(message)
     db.commit()
@@ -191,6 +219,24 @@ async def send_group_image_message(
     return message
 
 
+async def send_group_document_message(
+    db: Session, group: Group, sender_id, file_url: str, file_name: str
+) -> Message:
+    message = Message(
+        group_id=group.id,
+        sender_id=sender_id,
+        message_type=MessageType.DOCUMENT,
+        product_image=file_url,
+        file_name=file_name,
+    )
+    db.add(message)
+    db.commit()
+    db.refresh(message)
+
+    await _notify_group_members(db, group, message)
+    return message
+
+
 async def edit_group_message(db: Session, group: Group, message_id: str, text: str) -> Message:
     message = (
         db.query(Message)
@@ -216,10 +262,11 @@ async def edit_group_message(db: Session, group: Group, message_id: str, text: s
 
 async def delete_group(db: Session, group: Group) -> list[str]:
     """Deletes a group along with its messages, and unassigns + kicks out its members."""
-    members = db.query(User).filter(User.group_id == group.id, User.role == UserRole.USER).all()
+    members = db.query(User).filter(User.group_id == group.id).all()
     member_ids = [str(m.id) for m in members]
 
     db.query(Message).filter(Message.group_id == group.id).delete(synchronize_session=False)
+    db.query(GroupRead).filter(GroupRead.group_id == group.id).delete(synchronize_session=False)
     db.query(User).filter(User.group_id == group.id).update(
         {User.group_id: None}, synchronize_session=False
     )
@@ -248,9 +295,7 @@ async def delete_group_messages(db: Session, group: Group, message_ids: list[str
     db.commit()
 
     if deleted_ids:
-        members = (
-            db.query(User).filter(User.group_id == group.id, User.role == UserRole.USER).all()
-        )
+        members = db.query(User).filter(User.group_id == group.id).all()
         payload = {
             "type": "group_messages_deleted",
             "group_id": str(group.id),
@@ -289,6 +334,7 @@ async def forward_group_messages(
                 product_name=source.product_name,
                 product_image=source.product_image,
                 product_description=source.product_description,
+                file_name=source.file_name,
                 image_group_id=(
                     image_group_id
                     if image_group_id is not None and source.message_type == MessageType.IMAGE
@@ -306,14 +352,21 @@ async def forward_group_messages(
 async def _notify_group_members(
     db: Session, group: Group, message: Message, event_type: str = "new_group_message"
 ) -> None:
-    members = db.query(User).filter(User.group_id == group.id, User.role == UserRole.USER).all()
+    """Real group chat: every member of the group (any role) sees every
+    message, and every admin sees it live too — not just USER-role members.
+    """
+    members = db.query(User).filter(User.group_id == group.id).all()
+    admins = db.query(User).filter(User.role == UserRole.ADMIN).all()
+    recipient_ids = {str(u.id) for u in members} | {str(a.id) for a in admins}
+    recipient_ids.discard(str(message.sender_id))
+
     payload = {
         "type": event_type,
         "group_id": str(group.id),
         "message": serialize_message(message).model_dump(mode="json"),
     }
-    for member in members:
-        await manager.send_to_user(str(member.id), payload)
+    for recipient_id in recipient_ids:
+        await manager.send_to_user(recipient_id, payload)
 
 
 async def mark_conversation_read(db: Session, conversation: Conversation, reader_id) -> list[Message]:
@@ -361,6 +414,18 @@ async def _notify_other_party(conversation: Conversation, sender_id, message: Me
 
 
 def serialize_message(message: Message) -> MessageOut:
+    reply_to = None
+    if message.reply_to_id and message.reply_to is not None:
+        r = message.reply_to
+        reply_to = ReplyPreview(
+            id=str(r.id),
+            sender_id=str(r.sender_id),
+            message_type=r.message_type.value,
+            text=r.text,
+            file_name=r.file_name,
+            is_deleted=r.is_deleted,
+        )
+
     return MessageOut(
         id=str(message.id),
         conversation_id=str(message.conversation_id) if message.conversation_id else None,
@@ -373,9 +438,76 @@ def serialize_message(message: Message) -> MessageOut:
         product_name=message.product_name,
         product_image=message.product_image,
         product_description=message.product_description,
+        file_name=message.file_name,
         image_group_id=str(message.image_group_id) if message.image_group_id else None,
+        reply_to=reply_to,
         is_deleted=message.is_deleted,
         is_edited=message.is_edited,
         created_at=message.created_at,
         read_at=message.read_at,
     )
+
+
+async def delete_conversation_messages(
+    db: Session, conversation: Conversation, message_ids: list[str], deleter_id
+) -> list[str]:
+    messages = (
+        db.query(Message)
+        .filter(Message.conversation_id == conversation.id, Message.id.in_(message_ids))
+        .all()
+    )
+    deleted_ids = [str(m.id) for m in messages]
+    for message in messages:
+        message.is_deleted = True
+    db.commit()
+
+    if deleted_ids:
+        other_party_id = (
+            str(conversation.admin_id)
+            if str(deleter_id) == str(conversation.user_id)
+            else str(conversation.user_id)
+        )
+        await manager.send_to_user(
+            other_party_id,
+            {
+                "type": "conversation_messages_deleted",
+                "conversation_id": str(conversation.id),
+                "message_ids": deleted_ids,
+            },
+        )
+
+    return deleted_ids
+
+
+async def forward_messages_to_groups(
+    db: Session,
+    source_messages: list[Message],
+    target_groups: list[Group],
+    sender_id,
+) -> list[Message]:
+    """Forwards messages (from a 1-1 conversation or another group) into one
+    or more groups, as fresh copies — never re-parented, never carrying the
+    original reply_to across (the quoted message may not exist in the
+    target group).
+    """
+    forwarded: list[Message] = []
+    for target_group in target_groups:
+        for source in source_messages:
+            copy = Message(
+                group_id=target_group.id,
+                sender_id=sender_id,
+                message_type=source.message_type,
+                text=source.text,
+                product_id=source.product_id,
+                price=source.price,
+                product_name=source.product_name,
+                product_image=source.product_image,
+                product_description=source.product_description,
+                file_name=source.file_name,
+            )
+            db.add(copy)
+            db.commit()
+            db.refresh(copy)
+            await _notify_group_members(db, target_group, copy)
+            forwarded.append(copy)
+    return forwarded

@@ -4,7 +4,9 @@ import { ArrowLeft, Pencil, Send, Trash2 } from "lucide-react";
 import { deleteProduct, fetchProduct } from "../services/products";
 import type { Product } from "../types/product";
 import LoadingScreen from "../components/common/LoadingScreen";
-import "./ProductDetail.css";
+
+const ACTION_BTN =
+  "flex-1 flex items-center justify-center gap-1.5 border-none rounded-[10px] p-3 font-semibold cursor-pointer";
 
 export default function ProductDetail() {
   const { productId } = useParams<{ productId: string }>();
@@ -29,74 +31,95 @@ export default function ProductDetail() {
   );
 
   return (
-    <div className="product-detail-page">
-      <header className="product-detail-page__header">
-        <button onClick={() => navigate("/admin/products")} aria-label="Back">
+    <div className="min-h-dvh bg-[var(--wa-panel-bg)] pb-4">
+      <header className="flex items-center gap-3 py-[1.125rem] px-4 bg-[var(--wa-header)]">
+        <button
+          className="border-none bg-transparent text-white text-lg cursor-pointer"
+          onClick={() => navigate("/admin/products")}
+          aria-label="Back"
+        >
           <ArrowLeft size={20} />
         </button>
-        <h1>Product</h1>
+        <h1 className="m-0 text-xl text-white">Product</h1>
       </header>
 
-      <div className="product-detail-page__gallery">
-        <div className="product-detail-page__main-image">
+      <div className="bg-white m-3.5 rounded-xl overflow-hidden">
+        <div className="aspect-square bg-[var(--wa-panel-bg)]">
           {images.length > 0 ? (
-            <img src={images[activeImage]} alt={product.name} />
+            <img
+              className="w-full h-full object-cover block"
+              src={images[activeImage]}
+              alt={product.name}
+            />
           ) : (
-            <div className="product-detail-page__no-image">No image</div>
+            <div className="h-full flex items-center justify-center text-[var(--wa-text-secondary)]">
+              No image
+            </div>
           )}
         </div>
         {images.length > 1 && (
-          <div className="product-detail-page__thumbs">
+          <div className="flex gap-2 p-2.5 overflow-x-auto">
             {images.map((img, i) => (
               <button
                 key={img}
-                className={`product-detail-page__thumb${i === activeImage ? " product-detail-page__thumb--active" : ""}`}
+                className={`w-14 h-14 shrink-0 rounded-lg overflow-hidden border-2 p-0 cursor-pointer ${
+                  i === activeImage ? "border-[var(--wa-accent)]" : "border-transparent"
+                }`}
                 onClick={() => setActiveImage(i)}
               >
-                <img src={img} alt={`${product.name} ${i + 1}`} />
+                <img
+                  className="w-full h-full object-cover block"
+                  src={img}
+                  alt={`${product.name} ${i + 1}`}
+                />
               </button>
             ))}
           </div>
         )}
       </div>
 
-      <div className="product-detail-page__card">
-        <h2>{product.name}</h2>
-        {product.description && <p className="product-detail-page__description">{product.description}</p>}
+      <div className="bg-white m-3.5 p-4 rounded-xl">
+        <h2 className="mt-0 mb-1.5 text-lg">{product.name}</h2>
+        {product.description && (
+          <p className="text-[var(--wa-text-secondary)] text-sm mt-0 mb-3.5">
+            {product.description}
+          </p>
+        )}
 
-        <div className="product-detail-page__prices">
-          <div className="product-detail-page__price-cell">
-            <span>India</span> ₹{product.india_price ?? "-"}
+        <div className="grid grid-cols-2 border-t border-[var(--wa-border)]">
+          <div className="py-2.5 px-2 text-[13px] border-b border-r border-[var(--wa-border)] flex flex-col gap-0.5">
+            <span className="text-[var(--wa-text-secondary)] text-xs">India</span> ₹
+            {product.india_price ?? "-"}
           </div>
-          <div className="product-detail-page__price-cell">
-            <span>Dubai</span> ₹{product.dubai_price ?? "-"}
+          <div className="py-2.5 px-2 text-[13px] border-b border-[var(--wa-border)] flex flex-col gap-0.5">
+            <span className="text-[var(--wa-text-secondary)] text-xs">Dubai</span> ₹
+            {product.dubai_price ?? "-"}
           </div>
-          <div className="product-detail-page__price-cell">
-            <span>South Africa</span> ₹{product.south_africa_price ?? "-"}
+          <div className="py-2.5 px-2 text-[13px] border-b border-r border-[var(--wa-border)] flex flex-col gap-0.5">
+            <span className="text-[var(--wa-text-secondary)] text-xs">South Africa</span> ₹
+            {product.south_africa_price ?? "-"}
           </div>
-          <div className="product-detail-page__price-cell">
-            <span>Local</span> ₹{product.local_price ?? "-"}
+          <div className="py-2.5 px-2 text-[13px] border-b border-[var(--wa-border)] flex flex-col gap-0.5">
+            <span className="text-[var(--wa-text-secondary)] text-xs">Local</span> ₹
+            {product.local_price ?? "-"}
           </div>
         </div>
       </div>
 
-      <div className="product-detail-page__actions">
+      <div className="flex gap-2.5 m-3.5">
         <button
-          className="product-detail-page__action product-detail-page__action--send"
+          className={`${ACTION_BTN} bg-[#e5edfb] text-[#2563eb]`}
           onClick={() => navigate(`/admin/products/${product.id}/send`)}
         >
           <Send size={16} /> Send
         </button>
         <button
-          className="product-detail-page__action product-detail-page__action--edit"
+          className={`${ACTION_BTN} bg-[#e6edff] text-[#2563eb]`}
           onClick={() => navigate(`/admin/products/${product.id}/edit`)}
         >
           <Pencil size={16} /> Edit
         </button>
-        <button
-          className="product-detail-page__action product-detail-page__action--delete"
-          onClick={handleDelete}
-        >
+        <button className={`${ACTION_BTN} bg-[#fdeaea] text-[#e53935]`} onClick={handleDelete}>
           <Trash2 size={16} /> Delete
         </button>
       </div>

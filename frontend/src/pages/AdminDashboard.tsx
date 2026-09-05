@@ -1,15 +1,19 @@
 import { useEffect, useMemo, useState } from "react";
+<<<<<<< HEAD
 import { Menu, Search } from "lucide-react";
+=======
+import { MoreVertical, Users } from "lucide-react";
+>>>>>>> ccd7184f1889bee3b6a69ae543e2ebc2b5af1e81
 import { fetchGroups } from "../services/groups";
 import type { Group } from "../types/group";
 import { useCurrentUser } from "../hooks/useCurrentUser";
-import Avatar from "../components/common/Avatar";
+import AdminHomeHeader from "../components/admin/AdminHomeHeader";
 import GroupChatListItem from "../components/admin/GroupChatListItem";
 import AdminAccountPanel from "../components/admin/AdminAccountPanel";
 import AdminProfileScreen from "../components/admin/AdminProfileScreen";
+import GroupManagementPanel from "../components/admin/GroupManagementPanel";
 import LoadingScreen from "../components/common/LoadingScreen";
-import logo from "../assets/ak-logo.png";
-import "./AdminDashboard.css";
+import BottomNav from "../components/admin/BottomNav";
 
 export default function AdminDashboard() {
   const { user } = useCurrentUser();
@@ -17,6 +21,7 @@ export default function AdminDashboard() {
   const [search, setSearch] = useState("");
   const [showAccount, setShowAccount] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
+  const [showGroupManagement, setShowGroupManagement] = useState(false);
 
   useEffect(() => {
     fetchGroups().then(setGroups);
@@ -29,57 +34,49 @@ export default function AdminDashboard() {
     return groups.filter((g) => g.name.toLowerCase().includes(term));
   }, [groups, search]);
 
-  const firstName = user?.name?.split(" ")[0] ?? "Admin";
-
   return (
-    <div className="admin-dashboard-page">
-      <header className="admin-dashboard-page__header">
-        <button
-          className="admin-dashboard-page__icon-btn"
-          aria-label="Menu"
-          onClick={() => setShowAccount(true)}
-        >
-          <Menu size={20} />
-        </button>
-        <div className="admin-dashboard-page__spacer" />
-        <button
-          className="admin-dashboard-page__avatar-btn"
-          aria-label="Profile"
-          onClick={() => setShowProfile(true)}
-        >
-          <Avatar name={user?.name ?? "Admin"} imageUrl={logo} size={44} />
-        </button>
-      </header>
+    <div className="relative flex flex-col h-dvh bg-[linear-gradient(180deg,#eaf0ff_0%,#f5f8ff_40%,#ffffff_75%)] dark:bg-[#10161f]">
+      <AdminHomeHeader
+        adminName={user?.name}
+        onMenuClick={() => setShowAccount(true)}
+        onProfileClick={() => setShowProfile(true)}
+        searchValue={search}
+        onSearchChange={setSearch}
+        searchPlaceholder="Search groups..."
+      />
 
-      <div className="admin-dashboard-page__greeting">
-        <h1>
-          Hello, {firstName} <span className="admin-dashboard-page__wave">👋</span>
-        </h1>
-        <p>Good to see you again!</p>
-      </div>
-
-      <div className="admin-dashboard-page__search-row">
-        <span className="admin-dashboard-page__search-icon">
-          <Search size={18} />
-        </span>
-        <input
-          className="admin-dashboard-page__search"
-          placeholder="Search groups..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-      </div>
-
-      <main className="admin-dashboard-page__content">
+      <main className="flex-1 overflow-y-auto bg-transparent text-[#7c827e] dark:text-[#8b96a5] pt-2 px-[1.125rem] pb-24">
         {filtered === null ? (
           <LoadingScreen />
         ) : (
           <>
-            <div className="admin-dashboard-page__section-label">Your Groups</div>
+            <div className="flex items-center justify-between py-2 px-1 pb-2.5">
+              <span className="text-sm font-bold text-[#1a1a1a] dark:text-[#e9edef]">Your Groups</span>
+              <button
+                className="flex border-none bg-transparent text-[#1a1a1a] dark:text-[#e9edef] cursor-pointer p-1"
+                aria-label="Manage groups"
+                onClick={() => setShowGroupManagement(true)}
+              >
+                <MoreVertical size={18} />
+              </button>
+            </div>
             {filtered.length === 0 ? (
-              <p className="admin-dashboard-page__empty">No groups yet.</p>
+              <div className="flex flex-col items-center justify-center gap-3 text-center text-[#7c827e] dark:text-[#8b96a5] mt-16">
+                <Users size={40} />
+                <p className="max-w-[240px]">
+                  {groups && groups.length > 0
+                    ? "No groups match your search."
+                    : "No groups yet. Create one, add staff, and manage them together — from one place."}
+                </p>
+                <button
+                  className="mt-1 border-none bg-[#2563eb] text-white font-semibold text-sm rounded-full py-2.5 px-5 cursor-pointer"
+                  onClick={() => setShowGroupManagement(true)}
+                >
+                  Create Group
+                </button>
+              </div>
             ) : (
-              <div className="admin-dashboard-page__list">
+              <div className="flex flex-col gap-2.5">
                 {filtered.map((g) => (
                   <GroupChatListItem key={g.id} group={g} />
                 ))}
@@ -89,6 +86,8 @@ export default function AdminDashboard() {
         )}
       </main>
 
+      <BottomNav />
+
       {showProfile && user && (
         <AdminProfileScreen
           admin={user}
@@ -97,9 +96,12 @@ export default function AdminDashboard() {
       )}
 
       {showAccount && user && (
-        <AdminAccountPanel
-          admin={user}
-          onClose={() => setShowAccount(false)}
+        <AdminAccountPanel admin={user} onClose={() => setShowAccount(false)} />
+      )}
+
+      {showGroupManagement && (
+        <GroupManagementPanel
+          onClose={() => setShowGroupManagement(false)}
           onGroupCreated={(group) => setGroups((prev) => [group, ...(prev ?? [])])}
           onGroupDeleted={(groupId) =>
             setGroups((prev) => prev?.filter((g) => g.id !== groupId) ?? prev)

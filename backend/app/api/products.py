@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.api.deps import require_admin
 from app.core.database import get_db
+from app.core.image_utils import normalize_image
 from app.core.supabase_client import upload_product_image
 from app.models.product import Product
 from app.models.user import User
@@ -81,9 +82,9 @@ async def upload_image(
         )
 
     content = await file.read()
-    extension = (file.filename or "").rsplit(".", 1)[-1] if "." in (file.filename or "") else "jpg"
+    content, content_type, extension = normalize_image(content, file.content_type, file.filename)
     filename = f"{product_id}/{uuid.uuid4()}.{extension}"
-    url = upload_product_image(filename, content, file.content_type or "image/jpeg")
+    url = upload_product_image(filename, content, content_type)
 
     setattr(product, slot, url)
     db.commit()

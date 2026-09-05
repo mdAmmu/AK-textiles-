@@ -1,6 +1,15 @@
 import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, Camera, Forward, Pencil, Trash2, X } from "lucide-react";
+import {
+  ArrowLeft,
+  Camera,
+  FileText,
+  Forward,
+  Image as ImageIcon,
+  Pencil,
+  Trash2,
+  X,
+} from "lucide-react";
 import {
   deleteGroupMessages,
   editGroupMessage,
@@ -8,6 +17,7 @@ import {
   fetchGroups,
   forwardGroupMessages,
   markGroupRead,
+  sendGroupDocumentMessage,
   sendGroupImageMessage,
   sendGroupMessage,
   sendGroupProductMessage,
@@ -19,15 +29,25 @@ import { useChatSocket } from "../hooks/useChatSocket";
 import GroupIcon from "../components/admin/GroupIcon";
 import MessageList from "../components/chat/MessageList";
 import MessageInput, { type MessageInputHandle } from "../components/chat/MessageInput";
+import type { AttachmentOption } from "../components/chat/AttachmentSheet";
 import GroupProductComposer from "../components/chat/GroupProductComposer";
 import ForwardPicker from "../components/chat/ForwardPicker";
 import ForwardPreviewBar, { type StagedImage } from "../components/chat/ForwardPreviewBar";
 import EditingMessageBar from "../components/chat/EditingMessageBar";
 import LoadingScreen from "../components/common/LoadingScreen";
 import { randomUUID } from "../utils/uuid";
-import "./UserChat.css";
-import "./GroupChat.css";
-import "./AdminChat.css";
+import {
+  CHAT_BODY,
+  CHAT_HEADER_BASE,
+  CHAT_HEADER_ICON_BTN,
+  CHAT_HEADER_IDENTITY,
+  CHAT_HEADER_INFO,
+  CHAT_HEADER_SELECTION_COUNT,
+  CHAT_HEADER_SELECTION_SPACER,
+  CHAT_HEADER_SUBTITLE,
+  CHAT_HEADER_TITLE,
+  CHAT_PAGE,
+} from "./chatShellStyles";
 
 interface PendingForwardState {
   sourceGroupId: string;
@@ -51,7 +71,9 @@ export default function GroupChat() {
   const [forwardSourceGroupId, setForwardSourceGroupId] = useState<string | null>(null);
   const [draftText, setDraftText] = useState("");
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
+  const documentInputRef = useRef<HTMLInputElement>(null);
   const messageInputRef = useRef<MessageInputHandle>(null);
 
   const selectionMode = selectedIds.size > 0;
@@ -257,7 +279,15 @@ export default function GroupChat() {
     setShowPicker(false);
   }
 
-  function handleCameraCapture(e: React.ChangeEvent<HTMLInputElement>) {
+  async function handleDocumentPick(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file || !groupId) return;
+    const message = await sendGroupDocumentMessage(groupId, file);
+    setMessages((prev) => [...(prev ?? []), message]);
+  }
+
+  function handlePickImages(e: React.ChangeEvent<HTMLInputElement>) {
     const files = e.target.files ? Array.from(e.target.files) : [];
     e.target.value = "";
     if (files.length === 0) return;
@@ -350,61 +380,57 @@ export default function GroupChat() {
   if (group === null || messages === null || !user) return <LoadingScreen />;
 
   return (
-    <div className="user-chat-page admin-chat-page">
+    <div className={CHAT_PAGE}>
       {selectionMode ? (
-        <header className="group-chat-header group-chat-header--selection">
+        <header className={CHAT_HEADER_BASE}>
           <button
-            className="group-chat-header__icon-btn"
+            className={CHAT_HEADER_ICON_BTN}
             onClick={() => setSelectedIds(new Set())}
             aria-label="Cancel selection"
           >
             <X size={22} />
           </button>
-          <span className="group-chat-header__selection-count">{selectedIds.size}</span>
-          <div className="group-chat-header__selection-spacer" />
+          <span className={CHAT_HEADER_SELECTION_COUNT}>{selectedIds.size}</span>
+          <div className={CHAT_HEADER_SELECTION_SPACER} />
           <button
-            className="group-chat-header__icon-btn"
+            className={CHAT_HEADER_ICON_BTN}
             onClick={() => setShowForward(true)}
             aria-label="Forward"
           >
             <Forward size={20} />
           </button>
           {canEditSelection && (
-            <button
-              className="group-chat-header__icon-btn"
-              onClick={handleEditSelected}
-              aria-label="Edit"
-            >
+            <button className={CHAT_HEADER_ICON_BTN} onClick={handleEditSelected} aria-label="Edit">
               <Pencil size={19} />
             </button>
           )}
-          <button className="group-chat-header__icon-btn" onClick={handleDelete} aria-label="Delete">
+          <button className={CHAT_HEADER_ICON_BTN} onClick={handleDelete} aria-label="Delete">
             <Trash2 size={20} />
           </button>
         </header>
       ) : (
-        <header className="group-chat-header">
+        <header className={CHAT_HEADER_BASE}>
           <button
-            className="group-chat-header__icon-btn"
+            className={CHAT_HEADER_ICON_BTN}
             onClick={() => navigate("/admin")}
             aria-label="Back"
           >
             <ArrowLeft size={22} />
           </button>
           <button
-            className="group-chat-header__identity"
+            className={CHAT_HEADER_IDENTITY}
             onClick={() => navigate(`/admin/groups/${groupId}/chat/info`)}
           >
             <GroupIcon name={group.name} size={36} />
-            <div className="group-chat-header__info">
-              <div className="group-chat-header__title">{group.name}</div>
-              <div className="group-chat-header__subtitle">{group.customer_count} members</div>
+            <div className={CHAT_HEADER_INFO}>
+              <div className={CHAT_HEADER_TITLE}>{group.name}</div>
+              <div className={CHAT_HEADER_SUBTITLE}>{group.customer_count} members</div>
             </div>
           </button>
         </header>
       )}
 
-      <div className="group-chat__body">
+      <div className={CHAT_BODY}>
         <MessageList
           messages={messages}
           currentUserId={user.id}
@@ -425,34 +451,52 @@ export default function GroupChat() {
         value={draftText}
         onChange={setDraftText}
         canSubmitEmpty={stagedImages.length > 0}
-        extraAction={
-          <>
-            {/* <span
-              className="message-input__icon"
-              onClick={() => setShowPicker(true)}
-              role="button"
-              aria-label="Send a product"
-            >
-              <Package size={20} />
-            </span> */}
-            <span
-              className="message-input__icon"
-              onClick={() => cameraInputRef.current?.click()}
-              role="button"
-              aria-label="Take a photo"
-            >
-              <Camera size={20} />
-            </span>
-            <input
-              ref={cameraInputRef}
-              type="file"
-              accept="image/*"
-              multiple
-              hidden
-              onChange={handleCameraCapture}
-            />
-          </>
-        }
+        attachmentOptions={[
+          {
+            key: "document",
+            label: "Document",
+            icon: <FileText size={24} />,
+            onClick: () => documentInputRef.current?.click(),
+          },
+          {
+            key: "camera",
+            label: "Camera",
+            icon: <Camera size={24} />,
+            onClick: () => cameraInputRef.current?.click(),
+          },
+          {
+            key: "gallery",
+            label: "Gallery",
+            icon: <ImageIcon size={24} />,
+            onClick: () => imageInputRef.current?.click(),
+          },
+          // Product picker removed from the attachment sheet for now — a
+          // better version is planned later. setShowPicker/
+          // GroupProductComposer stay wired so it's a one-line add-back.
+        ] satisfies AttachmentOption[]}
+      />
+      <input
+        ref={imageInputRef}
+        type="file"
+        accept="image/*"
+        multiple
+        hidden
+        onChange={handlePickImages}
+      />
+      <input
+        ref={cameraInputRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
+        hidden
+        onChange={handlePickImages}
+      />
+      <input
+        ref={documentInputRef}
+        type="file"
+        accept=".pdf,.doc,.docx,.xls,.xlsx,application/pdf,application/msword"
+        hidden
+        onChange={handleDocumentPick}
       />
 
       {showPicker && groupId && (

@@ -6,6 +6,12 @@ import RoleRedirect from "./pages/RoleRedirect";
 import UserChat from "./pages/UserChat";
 import UserProfile from "./pages/UserProfile";
 import AdminDashboard from "./pages/AdminDashboard";
+import AdminChatsHome from "./pages/AdminChatsHome";
+import AdminBroadcastHome from "./pages/AdminBroadcastHome";
+import BroadcastComposer from "./pages/BroadcastComposer";
+import BroadcastThread from "./pages/BroadcastThread";
+import BroadcastDetail from "./pages/BroadcastDetail";
+import BroadcastAudienceInfo from "./pages/BroadcastAudienceInfo";
 import AdminChat from "./pages/AdminChat";
 import Groups from "./pages/Groups";
 import GroupDetail from "./pages/GroupDetail";
@@ -16,9 +22,10 @@ import CreateProduct from "./pages/CreateProduct";
 import EditProduct from "./pages/EditProduct";
 import ProductDetail from "./pages/ProductDetail";
 import BroadcastConfirm from "./pages/BroadcastConfirm";
+import WhatsAppSend from "./pages/WhatsAppSend";
+import ComingSoon from "./pages/ComingSoon";
 import ProtectedRoute from "./components/common/ProtectedRoute";
 import { ThemeProvider } from "./contexts/ThemeContext";
-import "./App.css";
 
 const InstallAppBanner = lazy(() => import("./components/common/InstallAppBanner"));
 
@@ -44,7 +51,7 @@ function App() {
         <Route
           path="/chat"
           element={
-            <ProtectedRoute role="USER">
+            <ProtectedRoute role={["USER", "STAFF"]}>
               <UserChat />
             </ProtectedRoute>
           }
@@ -52,7 +59,7 @@ function App() {
         <Route
           path="/chat/profile"
           element={
-            <ProtectedRoute role="USER">
+            <ProtectedRoute role={["USER", "STAFF"]}>
               <UserProfile />
             </ProtectedRoute>
           }
@@ -62,6 +69,54 @@ function App() {
           element={
             <ProtectedRoute role="ADMIN">
               <AdminDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/chats"
+          element={
+            <ProtectedRoute role="ADMIN">
+              <AdminChatsHome />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/broadcast"
+          element={
+            <ProtectedRoute role="ADMIN">
+              <AdminBroadcastHome />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/broadcast/new"
+          element={
+            <ProtectedRoute role="ADMIN">
+              <BroadcastComposer />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/broadcast/:audienceId"
+          element={
+            <ProtectedRoute role="ADMIN">
+              <BroadcastThread />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/broadcast/:audienceId/message/:broadcastId"
+          element={
+            <ProtectedRoute role="ADMIN">
+              <BroadcastDetail />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/broadcast/:audienceId/info"
+          element={
+            <ProtectedRoute role="ADMIN">
+              <BroadcastAudienceInfo />
             </ProtectedRoute>
           }
         />
@@ -142,6 +197,46 @@ function App() {
           element={
             <ProtectedRoute role="ADMIN">
               <BroadcastConfirm />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/whatsapp-send"
+          element={
+            <ProtectedRoute role="ADMIN">
+              <WhatsAppSend />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/campaign"
+          element={
+            <ProtectedRoute role="ADMIN">
+              <ComingSoon title="Campaign" />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/templates"
+          element={
+            <ProtectedRoute role="ADMIN">
+              <ComingSoon title="Template" />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/balance"
+          element={
+            <ProtectedRoute role="ADMIN">
+              <ComingSoon title="Balance" />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/orders"
+          element={
+            <ProtectedRoute role="ADMIN">
+              <ComingSoon title="Order" />
             </ProtectedRoute>
           }
         />

@@ -8,5 +8,5 @@ export default function RoleRedirect() {
   if (loading) return <LoadingScreen />;
   if (error || !user) return <Navigate to="/login" replace />;
 
-  return <Navigate to={user.role === "ADMIN" ? "/admin" : "/chat"} replace />;
+  return <Navigate to={user.role === "ADMIN" ? "/admin/chats" : "/chat"} replace />;
 }

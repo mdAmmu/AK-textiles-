@@ -1,5 +1,3 @@
-import "./Avatar.css";
-
 const PALETTE = ["#c6f0c2", "#c9d9f7", "#ded0f7", "#ffd9b3", "#ffc2c2", "#c2f0e6"];
 
 interface Props {
@@ -7,6 +5,7 @@ interface Props {
   online?: boolean;
   size?: number;
   imageUrl?: string | null;
+  className?: string;
 }
 
 function initialsFor(name: string): string {
@@ -22,10 +21,10 @@ function colorFor(name: string): string {
   return PALETTE[Math.abs(hash) % PALETTE.length];
 }
 
-export default function Avatar({ name, online, size = 40, imageUrl }: Props) {
+export default function Avatar({ name, online, size = 40, imageUrl, className }: Props) {
   return (
     <div
-      className="avatar"
+      className={`relative rounded-full flex items-center justify-center font-semibold text-[#2b2b2b] shrink-0${className ? ` ${className}` : ""}`}
       style={{
         width: size,
         height: size,
@@ -40,7 +39,9 @@ export default function Avatar({ name, online, size = 40, imageUrl }: Props) {
       ) : (
         initialsFor(name)
       )}
-      {online && <span className="avatar__online" />}
+      {online && (
+        <span className="absolute bottom-0 right-0 w-[28%] h-[28%] min-w-[8px] min-h-[8px] bg-[#22c55e] border-2 border-white dark:border-[#10161f] rounded-full" />
+      )}
     </div>
   );
 }

@@ -4,7 +4,6 @@ import { ArrowLeft, CheckCircle2 } from "lucide-react";
 import { fetchBroadcastPreview, sendBroadcast } from "../services/broadcast";
 import type { BroadcastPreview, BroadcastResult } from "../services/broadcast";
 import LoadingScreen from "../components/common/LoadingScreen";
-import "./BroadcastConfirm.css";
 
 export default function BroadcastConfirm() {
   const { productId } = useParams<{ productId: string }>();
@@ -54,61 +53,74 @@ export default function BroadcastConfirm() {
 
   if (result) {
     return (
-      <div className="broadcast-confirm-page">
-        <div className="broadcast-confirm-page__success">
-          <CheckCircle2 size={48} color="#0f9d58" />
+      <div className="min-h-dvh bg-[var(--wa-panel-bg)]">
+        <div className="flex flex-col items-center justify-center h-dvh text-center gap-2">
+          <CheckCircle2 size={48} color="#2563eb" />
           <p>Product sent successfully</p>
-          <p className="broadcast-confirm-page__success-count">
-            {result.total_sent} customers received the product.
-          </p>
-          <button onClick={() => navigate("/admin/products")}>Done</button>
+          <p className="text-[#667781]">{result.total_sent} customers received the product.</p>
+          <button
+            className="mt-4 py-2.5 px-8 bg-[var(--wa-accent)] text-white border-none rounded-lg font-semibold cursor-pointer"
+            onClick={() => navigate("/admin/products")}
+          >
+            Done
+          </button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="broadcast-confirm-page">
-      <header className="broadcast-confirm-page__header">
-        <button onClick={() => navigate("/admin/products")}>
+    <div className="min-h-dvh bg-[var(--wa-panel-bg)]">
+      <header className="flex items-center gap-3 py-[1.125rem] px-4 bg-[var(--wa-header)]">
+        <button
+          className="flex border-none bg-transparent text-white cursor-pointer"
+          onClick={() => navigate("/admin/products")}
+        >
           <ArrowLeft size={20} />
         </button>
-        <h1>Send Product</h1>
+        <h1 className="m-0 text-xl text-white">Send Product</h1>
       </header>
 
-      <div className="broadcast-confirm-page__body">
-        <h2>{preview.product_name}</h2>
-        <p className="broadcast-confirm-page__hint">Select the groups to send this product to.</p>
+      <div className="p-4">
+        <h2 className="mt-0">{preview.product_name}</h2>
+        <p className="text-[var(--wa-text-secondary)] text-sm -mt-2 mb-3">
+          Select the groups to send this product to.
+        </p>
 
         {preview.groups.map((g) => {
           const checked = selected.has(g.group_id);
           return (
             <label
               key={g.group_id}
-              className={`broadcast-confirm-page__group${checked ? " broadcast-confirm-page__group--selected" : ""}`}
+              className={`flex items-center gap-2.5 justify-start p-3 border rounded-md mb-2 cursor-pointer ${
+                checked
+                  ? "border-[var(--wa-accent)] bg-[#e9f7f0]"
+                  : "border-transparent bg-white"
+              }`}
             >
               <input
+                className="w-[18px] h-[18px] accent-[var(--wa-accent)] shrink-0"
                 type="checkbox"
                 checked={checked}
                 onChange={() => toggleGroup(g.group_id)}
               />
-              <span className="broadcast-confirm-page__group-name">{g.group_name}</span>
+              <span className="font-semibold flex-1">{g.group_name}</span>
               <span>{g.customer_count} customers</span>
               <span>{g.price != null ? `₹${g.price}` : "No price set"}</span>
             </label>
           );
         })}
 
-        <div className="broadcast-confirm-page__actions">
+        <div className="flex flex-col gap-3 mt-6">
           <button
-            className="broadcast-confirm-page__send"
+            className="py-3 border-none rounded-lg font-semibold cursor-pointer bg-[var(--wa-accent)] text-white disabled:opacity-50 disabled:cursor-default"
             onClick={handleSendSelected}
             disabled={sending || selected.size === 0}
           >
             {sending ? "Sending..." : `Send${selected.size ? ` (${selected.size})` : ""}`}
           </button>
           <button
-            className="broadcast-confirm-page__everyone"
+            className="py-3 border rounded-lg font-semibold cursor-pointer bg-white border-[var(--wa-accent)] text-[var(--wa-accent)] disabled:opacity-50 disabled:cursor-default"
             onClick={handleSendEveryone}
             disabled={sending || preview.total_customers === 0}
           >

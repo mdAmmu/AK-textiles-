@@ -1,7 +1,11 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
 import type { ProductInput } from "../../types/product";
-import "./ProductForm.css";
+
+const INPUT_CLASS =
+  "py-2.5 px-3 border border-[var(--wa-border)] rounded-lg font-[inherit] bg-[var(--wa-panel-bg)]";
+const PRICE_INPUT_CLASS =
+  "w-[120px] py-2 px-2.5 border border-[var(--wa-border)] rounded-lg bg-[var(--wa-panel-bg)] font-[inherit]";
 
 interface Props {
   initial?: ProductInput;
@@ -32,55 +36,62 @@ export default function ProductForm({ initial, submitLabel, onSubmit }: Props) {
   }
 
   return (
-    <form className="product-form" onSubmit={handleSubmit}>
-      <label className="product-form__label">Product Name</label>
+    <form
+      className="flex flex-col p-4 gap-1 bg-white m-3.5 rounded-xl"
+      onSubmit={handleSubmit}
+    >
+      <label className="font-semibold text-sm mt-3 text-[var(--wa-text)]">Product Name</label>
       <input
-        className="product-form__input"
+        className={INPUT_CLASS}
         value={name}
         onChange={(e) => setName(e.target.value)}
         required
       />
 
-      <label className="product-form__label">Description</label>
+      <label className="font-semibold text-sm mt-3 text-[var(--wa-text)]">Description</label>
       <textarea
-        className="product-form__input"
+        className={INPUT_CLASS}
         value={description}
         onChange={(e) => setDescription(e.target.value)}
         rows={3}
       />
 
-      <label className="product-form__label">Prices</label>
-      <div className="product-form__prices">
-        <div className="product-form__price-row">
-          <span>Dubai</span>
+      <label className="font-semibold text-sm mt-3 text-[var(--wa-text)]">Prices</label>
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center justify-between gap-3">
+          <span className="text-sm">Dubai</span>
           <input
+            className={PRICE_INPUT_CLASS}
             type="number"
             step="0.01"
             value={dubaiPrice}
             onChange={(e) => setDubaiPrice(e.target.value)}
           />
         </div>
-        <div className="product-form__price-row">
-          <span>South Africa</span>
+        <div className="flex items-center justify-between gap-3">
+          <span className="text-sm">South Africa</span>
           <input
+            className={PRICE_INPUT_CLASS}
             type="number"
             step="0.01"
             value={southAfricaPrice}
             onChange={(e) => setSouthAfricaPrice(e.target.value)}
           />
         </div>
-        <div className="product-form__price-row">
-          <span>India</span>
+        <div className="flex items-center justify-between gap-3">
+          <span className="text-sm">India</span>
           <input
+            className={PRICE_INPUT_CLASS}
             type="number"
             step="0.01"
             value={indiaPrice}
             onChange={(e) => setIndiaPrice(e.target.value)}
           />
         </div>
-        <div className="product-form__price-row">
-          <span>Local</span>
+        <div className="flex items-center justify-between gap-3">
+          <span className="text-sm">Local</span>
           <input
+            className={PRICE_INPUT_CLASS}
             type="number"
             step="0.01"
             value={localPrice}
@@ -89,7 +100,10 @@ export default function ProductForm({ initial, submitLabel, onSubmit }: Props) {
         </div>
       </div>
 
-      <button className="product-form__submit" type="submit">
+      <button
+        className="mt-6 p-3 bg-[var(--wa-accent)] text-white border-none rounded-lg font-semibold cursor-pointer"
+        type="submit"
+      >
         {submitLabel}
       </button>
     </form>

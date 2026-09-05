@@ -1,7 +1,6 @@
 import { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { ArrowLeft } from "lucide-react";
-import "./ImageViewerModal.css";
 
 interface Props {
   images: string[];
@@ -19,7 +18,7 @@ export default function ImageViewerModal({ images, startIndex, onClose }: Props)
 
   return createPortal(
     <div
-      className="image-viewer"
+      className="fixed inset-0 z-[1000] bg-black flex flex-col"
       onTouchStart={(e) => e.stopPropagation()}
       onTouchMove={(e) => e.stopPropagation()}
       onTouchEnd={(e) => e.stopPropagation()}
@@ -27,25 +26,33 @@ export default function ImageViewerModal({ images, startIndex, onClose }: Props)
       onMouseUp={(e) => e.stopPropagation()}
       onClick={(e) => e.stopPropagation()}
     >
-      <header className="image-viewer__header">
-        <button className="image-viewer__back" onClick={onClose} aria-label="Close">
+      <header className="flex items-center gap-3 py-3 px-4 bg-[#1f1f1f] text-white shrink-0">
+        <button
+          className="bg-transparent border-none text-white flex items-center cursor-pointer p-0"
+          onClick={onClose}
+          aria-label="Close"
+        >
           <ArrowLeft size={22} />
         </button>
-        <div className="image-viewer__title">
-          <span className="image-viewer__title-main">You</span>
-          <span className="image-viewer__title-sub">{images.length} photos</span>
+        <div className="flex flex-col leading-tight">
+          <span className="text-base font-medium">You</span>
+          <span className="text-[13px] text-white/65">{images.length} photos</span>
         </div>
       </header>
-      <div className="image-viewer__scroll">
+      <div className="flex-1 overflow-y-auto [-webkit-overflow-scrolling:touch] [scroll-snap-type:y_proximity]">
         {images.map((src, index) => (
           <div
-            className="image-viewer__item"
+            className="flex items-center justify-center min-h-full py-2 [scroll-snap-align:start]"
             key={index}
             ref={(el) => {
               itemRefs.current[index] = el;
             }}
           >
-            <img className="image-viewer__img" src={src} alt={`Photo ${index + 1}`} />
+            <img
+              className="max-w-full max-h-[calc(100dvh-4rem)] object-contain"
+              src={src}
+              alt={`Photo ${index + 1}`}
+            />
           </div>
         ))}
       </div>
