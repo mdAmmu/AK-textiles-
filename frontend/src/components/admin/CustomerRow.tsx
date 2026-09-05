@@ -15,7 +15,7 @@ export default function CustomerRow({ customer, onRemove }: Props) {
         <div className="font-bold flex items-center gap-1.5">
           {customer.name}
           {customer.role === "STAFF" && (
-            <span className="text-[10px] font-bold uppercase tracking-wide text-[#0f9d6e] bg-[#e3f7ec] rounded-full py-0.5 px-1.5">
+            <span className="text-[10px] font-bold uppercase tracking-wide text-[#2563eb] bg-[#e6edff] rounded-full py-0.5 px-1.5">
               Staff
             </span>
           )}

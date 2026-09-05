@@ -36,7 +36,7 @@ export default function AdminBroadcastHome() {
       : audiences.filter((a) => a.name.toLowerCase().includes(search.trim().toLowerCase()));
 
   return (
-    <div className="relative flex flex-col h-dvh bg-[linear-gradient(180deg,#eaf7ee_0%,#f6fbf7_40%,#ffffff_75%)] dark:bg-[#10161f]">
+    <div className="relative flex flex-col h-dvh bg-[linear-gradient(180deg,#eaf0ff_0%,#f5f8ff_40%,#ffffff_75%)] dark:bg-[#10161f]">
       <AdminHomeHeader
         adminName={user?.name}
         onMenuClick={() => setShowAccount(true)}
@@ -69,7 +69,7 @@ export default function AdminBroadcastHome() {
                 : "No broadcasts yet. Create one, add recipients, and message all of them privately at once — from one place."}
             </p>
             <button
-              className="mt-1 border-none bg-[#0f9d6e] text-white font-semibold text-sm rounded-full py-2.5 px-5 cursor-pointer"
+              className="mt-1 border-none bg-[#2563eb] text-white font-semibold text-sm rounded-full py-2.5 px-5 cursor-pointer"
               onClick={() => setShowBroadcastManagement(true)}
             >
               Create Broadcast
@@ -83,8 +83,8 @@ export default function AdminBroadcastHome() {
                 to={`/admin/broadcast/${a.id}`}
                 className="flex items-center gap-3.5 py-3 px-3.5 bg-white border border-[#eef1ee] rounded-2xl no-underline text-inherit dark:bg-[#1e2530] dark:border-[#232d3a]"
               >
-                <span className="w-12 h-12 rounded-xl bg-[#e3f7ec] flex items-center justify-center shrink-0">
-                  <Radio size={22} color="#0f9d6e" />
+                <span className="w-12 h-12 rounded-xl bg-[#e6edff] flex items-center justify-center shrink-0">
+                  <Radio size={22} color="#2563eb" />
                 </span>
                 <div className="flex-1 min-w-0 flex flex-col">
                   <span className="font-semibold text-[#1a1a1a] dark:text-[#e9edef] truncate">

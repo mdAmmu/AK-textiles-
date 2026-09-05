@@ -38,7 +38,7 @@ export default function ForwardPicker({ excludeGroupId, onForward, onClose }: Pr
 
   return (
     <div className="fixed inset-0 bg-white dark:bg-[var(--chat-bg)] flex flex-col z-20">
-      <div className="h-[5px] shrink-0 bg-[linear-gradient(90deg,#0f9d6e,#4fc98a)] rounded-b-md" />
+      <div className="h-[5px] shrink-0 bg-[linear-gradient(90deg,#2563eb,#60a5fa)] rounded-b-md" />
       <div className="flex justify-between items-center pt-[1.125rem] px-[1.125rem] pb-3 font-bold text-[17px] text-[#1a1a1a] dark:text-[var(--chat-text)] shrink-0">
         <span>Forward to</span>
         <button
@@ -87,7 +87,7 @@ export default function ForwardPicker({ excludeGroupId, onForward, onClose }: Pr
               <span
                 className={`w-6 h-6 rounded-full border-2 shrink-0 flex items-center justify-center text-white ${
                   checked
-                    ? "bg-[#0f9d6e] border-[#0f9d6e] dark:bg-[var(--chat-accent)] dark:border-[var(--chat-accent)]"
+                    ? "bg-[#2563eb] border-[#2563eb] dark:bg-[var(--chat-accent)] dark:border-[var(--chat-accent)]"
                     : "border-[#dadedb] dark:border-[var(--chat-border)]"
                 }`}
               >
@@ -100,7 +100,7 @@ export default function ForwardPicker({ excludeGroupId, onForward, onClose }: Pr
 
       <div className="shrink-0 py-3.5 px-[1.125rem] pb-[1.125rem]">
         <button
-          className="w-full py-3.5 bg-[#0f9d6e] dark:bg-[var(--chat-accent)] text-white border-none rounded-full font-bold text-[15px] cursor-pointer disabled:opacity-50 disabled:cursor-default"
+          className="w-full py-3.5 bg-[#2563eb] dark:bg-[var(--chat-accent)] text-white border-none rounded-full font-bold text-[15px] cursor-pointer disabled:opacity-50 disabled:cursor-default"
           disabled={selected.size === 0}
           onClick={() => onForward(Array.from(selected))}
         >

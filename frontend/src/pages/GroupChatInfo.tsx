@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   ArrowLeft,
+  Activity,
+  BadgeInfo,
   ChevronDown,
   ChevronRight,
   Images,
@@ -10,6 +12,8 @@ import {
   Users,
   X,
 } from "lucide-react";
+import DetailsCard from "../components/common/DetailsCard";
+import StatusPill from "../components/common/StatusPill";
 import {
   assignUserGroup,
   createAndAssignCustomer,
@@ -27,10 +31,10 @@ import MultiAddMembersPanel, { type NewMemberDraft } from "../components/admin/M
 import LoadingScreen from "../components/common/LoadingScreen";
 
 const ACTION_BTN =
-  "flex-1 max-w-[90px] flex flex-col items-center gap-1 py-3 px-2 border-none rounded-2xl bg-white dark:bg-[#1e2530] text-[#0f9d6e] dark:text-[#17c98d] text-xs font-semibold cursor-pointer shadow-[0_4px_14px_rgba(15,157,110,0.14)] dark:shadow-none";
+  "flex-1 max-w-[90px] flex flex-col items-center gap-1 py-3 px-2 border-none rounded-2xl bg-white dark:bg-[#1e2530] text-[#2563eb] dark:text-[#3b82f6] text-xs font-semibold cursor-pointer shadow-[0_4px_14px_rgba(37,99,235,0.14)] dark:shadow-none";
 const ROW_BASE =
   "flex items-center gap-3.5 w-full py-[0.9375rem] px-4 border-none bg-transparent font-[inherit] text-left cursor-pointer text-[#1a1a1a] dark:text-[#e9edef]";
-const ROW_ICON = "text-[#0f9d6e] dark:text-[#17c98d] shrink-0";
+const ROW_ICON = "text-[#2563eb] dark:text-[#3b82f6] shrink-0";
 const ROW_LABEL = "flex-1 font-medium";
 const ROW_CHEVRON = "text-[#c2c6c3] dark:text-[#6b7480] shrink-0 transition-transform duration-150 ease-in-out";
 const EMPTY_TEXT = "py-4 text-[#7c827e] dark:text-[#8b96a5]";
@@ -134,7 +138,7 @@ export default function GroupChatInfo() {
 
   return (
     <div className="flex flex-col min-h-dvh bg-[#eef2f0] dark:bg-[#10161f] pb-8">
-      <div className="relative flex flex-col items-center gap-1.5 pt-11 px-4 pb-6 bg-[linear-gradient(135deg,#0f9d6e,#4fc98a)] rounded-b-3xl">
+      <div className="relative flex flex-col items-center gap-1.5 pt-11 px-4 pb-6 bg-[linear-gradient(135deg,#2563eb,#60a5fa)] rounded-b-3xl">
         <button
           className="absolute top-4 left-4 flex border-none bg-transparent text-white cursor-pointer p-1"
           onClick={() => navigate(-1)}
@@ -145,6 +149,10 @@ export default function GroupChatInfo() {
         <GroupIcon name={group.name} size={80} variant="hero" />
         <h1 className="mt-2 mb-0 text-xl font-bold text-white">{group.name}</h1>
         <span className="text-white/85 text-sm">{members.length} members</span>
+        <div className="flex items-center gap-2 mt-2">
+          <StatusPill label={members.length > 0 ? "Active" : "Inactive"} dot />
+          <StatusPill label="Group Chat" icon={Users} />
+        </div>
       </div>
 
       <div className="flex justify-center gap-2.5 mt-4 mx-4">
@@ -171,7 +179,21 @@ export default function GroupChatInfo() {
         </div>
       )}
 
-      <div className="mt-5 mx-4 bg-white dark:bg-[#1e2530] rounded-2xl overflow-hidden shadow-[0_4px_18px_rgba(15,157,110,0.06)] dark:shadow-none">
+      <DetailsCard
+        icon={BadgeInfo}
+        title="Group Details"
+        subtitle="Basic group identity and activity"
+        items={[
+          { icon: Users, label: "Group Name", value: group.name },
+          { icon: UserPlus, label: "Members", value: members.length },
+          { icon: Activity, label: "Unread", value: group.unread_count ?? 0 },
+          ...(group.description
+            ? [{ icon: BadgeInfo, label: "Description", value: group.description }]
+            : []),
+        ]}
+      />
+
+      <div className="mt-4 mx-4 bg-white dark:bg-[#1e2530] rounded-2xl overflow-hidden shadow-[0_4px_18px_rgba(37,99,235,0.06)] dark:shadow-none">
         <button
           className={`${ROW_BASE} border-b border-[#eef1ee] dark:border-[#232d3a]`}
           type="button"

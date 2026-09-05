@@ -43,7 +43,7 @@ export default function AdminHomeHeader({
       </header>
 
       <div className="flex items-center gap-2.5 mx-[1.125rem] mt-[1.125rem] mb-2 shrink-0 min-w-0">
-        <div className="flex-1 min-w-0 flex items-center gap-2.5 py-[0.8125rem] px-[1.125rem] bg-white dark:bg-[#1e2530] rounded-2xl shadow-[0_4px_18px_rgba(15,157,110,0.08)] dark:shadow-none dark:border dark:border-[#232d3a]">
+        <div className="flex-1 min-w-0 flex items-center gap-2.5 py-[0.8125rem] px-[1.125rem] bg-white dark:bg-[#1e2530] rounded-2xl shadow-[0_4px_18px_rgba(37,99,235,0.08)] dark:shadow-none dark:border dark:border-[#232d3a]">
           <span className="flex text-[#7c827e] dark:text-[#8b96a5]">
             <Search size={18} />
           </span>

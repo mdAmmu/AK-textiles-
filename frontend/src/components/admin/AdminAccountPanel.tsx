@@ -21,7 +21,7 @@ const ADD_GROUP_BTN =
   "flex items-center justify-center gap-2 w-full py-3 border-none rounded-lg bg-[var(--wa-accent)] text-white font-semibold text-[15px] cursor-pointer no-underline";
 const ROW_BASE =
   "flex items-center gap-3.5 w-full py-[0.9375rem] px-4 border-none bg-transparent font-[inherit] text-left cursor-pointer text-[#1a1a1a] dark:text-[#e9edef] border-b border-[#eef1ee] dark:border-[#232d3a] last:border-b-0";
-const ROW_ICON = "text-[#0f9d6e] dark:text-[#17c98d] shrink-0";
+const ROW_ICON = "text-[#2563eb] dark:text-[#3b82f6] shrink-0";
 const ROW_LABEL = "flex-1 font-medium";
 const ROW_CHEVRON = "text-[#c2c6c3] dark:text-[#6b7480] shrink-0";
 
@@ -72,7 +72,7 @@ export default function AdminAccountPanel({ admin, onClose }: Props) {
       )}
 
       <div className={SECTION}>
-        <div className="bg-white dark:bg-[#1e2530] rounded-2xl overflow-hidden shadow-[0_4px_18px_rgba(15,157,110,0.06)] dark:shadow-none border border-[#eef1ee] dark:border-[#232d3a]">
+        <div className="bg-white dark:bg-[#1e2530] rounded-2xl overflow-hidden shadow-[0_4px_18px_rgba(37,99,235,0.06)] dark:shadow-none border border-[#eef1ee] dark:border-[#232d3a]">
           {MENU_OPTIONS.map(({ key, label, icon: Icon, path }) => (
             <button key={key} type="button" className={ROW_BASE} onClick={() => navigate(path)}>
               <Icon size={19} className={ROW_ICON} />

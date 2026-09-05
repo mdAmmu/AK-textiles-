@@ -2,20 +2,32 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
+  BadgeCheck,
   Bell,
   ChevronRight,
   Clock,
+  IdCard,
   Lock,
   LogOut,
+  Mail,
   Moon,
+  Phone,
+  Shield,
   User as UserIcon,
 } from "lucide-react";
 import type { User } from "../../types/user";
 import { useTheme } from "../../contexts/ThemeContext";
 import { logout } from "../../services/auth";
 import Avatar from "../common/Avatar";
+import DetailsCard from "../common/DetailsCard";
 import ThemeToggle from "../common/ThemeToggle";
 import logo from "../../assets/ak-logo.png";
+
+const ROLE_LABEL: Record<User["role"], string> = {
+  ADMIN: "Admin",
+  STAFF: "Staff",
+  USER: "Customer",
+};
 
 interface Props {
   admin: User;
@@ -55,7 +67,7 @@ export default function AdminProfileScreen({ admin, onClose }: Props) {
 
   return (
     <div className="fixed inset-0 bg-[#eef2f0] dark:bg-[#10161f] flex flex-col z-10 overflow-y-auto">
-      <div className="relative shrink-0 mx-3 mt-3 pb-7 bg-[linear-gradient(135deg,#0f9d6e,#4fc98a)] rounded-t-3xl">
+      <div className="relative shrink-0 mx-3 mt-3 pb-7 bg-[linear-gradient(135deg,#2563eb,#60a5fa)] rounded-t-3xl">
         <div className="flex items-center gap-2.5 py-8 px-[1.125rem] text-white font-bold text-[17px]">
           <button
             className="flex border-none bg-transparent text-white cursor-pointer p-1"
@@ -71,7 +83,7 @@ export default function AdminProfileScreen({ admin, onClose }: Props) {
         </div>
       </div>
 
-      <div className="flex-1 mx-3 mb-3 bg-white dark:bg-[#1e2530] rounded-b-3xl shadow-[0_4px_20px_rgba(15,157,110,0.08)] dark:shadow-none">
+      <div className="flex-1 mx-3 mb-3 bg-white dark:bg-[#1e2530] rounded-b-3xl shadow-[0_4px_20px_rgba(37,99,235,0.08)] dark:shadow-none">
         <div className="flex flex-col items-center text-center pt-16 px-6">
           <h1 className="text-xl font-bold text-[#1a1a1a] dark:text-[#e9edef]">{admin.name}</h1>
           {(admin.phone || admin.email) && (
@@ -79,12 +91,29 @@ export default function AdminProfileScreen({ admin, onClose }: Props) {
               {admin.phone ?? admin.email}
             </span>
           )}
-          <p className="mt-1.5 text-[#9a9e9b] dark:text-[#6b7480] text-sm">
-            Hey there! I am using this app.
-          </p>
+          <div className="flex items-center gap-2 mt-3">
+            <span className="inline-flex items-center gap-1.5 py-1.5 px-3 rounded-full bg-[#e6edff] dark:bg-[#1e2a4a] text-[#2563eb] dark:text-[#60a5fa] text-xs font-semibold">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#22c55e]" /> Active
+            </span>
+            <span className="inline-flex items-center gap-1.5 py-1.5 px-3 rounded-full bg-[#e6edff] dark:bg-[#1e2a4a] text-[#2563eb] dark:text-[#60a5fa] text-xs font-semibold">
+              <Shield size={13} /> {ROLE_LABEL[admin.role]}
+            </span>
+          </div>
         </div>
 
-        <div className="flex flex-col mt-6 px-[1.125rem] pb-8">
+        <DetailsCard
+          icon={IdCard}
+          title="User Details"
+          subtitle="Basic identity and workspace information"
+          items={[
+            { icon: UserIcon, label: "Full Name", value: admin.name },
+            ...(admin.email ? [{ icon: Mail, label: "Email", value: admin.email }] : []),
+            ...(admin.phone ? [{ icon: Phone, label: "Phone", value: admin.phone }] : []),
+            { icon: BadgeCheck, label: "Role", value: ROLE_LABEL[admin.role] },
+          ]}
+        />
+
+        <div className="flex flex-col mt-4 px-[1.125rem] pb-8">
           <div className={`${ROW} cursor-default`}>
             <Moon size={19} className={ROW_ICON} />
             <span className={ROW_LABEL}>

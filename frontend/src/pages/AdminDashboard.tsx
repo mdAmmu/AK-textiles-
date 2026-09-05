@@ -31,7 +31,7 @@ export default function AdminDashboard() {
   }, [groups, search]);
 
   return (
-    <div className="relative flex flex-col h-dvh bg-[linear-gradient(180deg,#eaf7ee_0%,#f6fbf7_40%,#ffffff_75%)] dark:bg-[#10161f]">
+    <div className="relative flex flex-col h-dvh bg-[linear-gradient(180deg,#eaf0ff_0%,#f5f8ff_40%,#ffffff_75%)] dark:bg-[#10161f]">
       <AdminHomeHeader
         adminName={user?.name}
         onMenuClick={() => setShowAccount(true)}
@@ -65,7 +65,7 @@ export default function AdminDashboard() {
                     : "No groups yet. Create one, add staff, and manage them together — from one place."}
                 </p>
                 <button
-                  className="mt-1 border-none bg-[#0f9d6e] text-white font-semibold text-sm rounded-full py-2.5 px-5 cursor-pointer"
+                  className="mt-1 border-none bg-[#2563eb] text-white font-semibold text-sm rounded-full py-2.5 px-5 cursor-pointer"
                   onClick={() => setShowGroupManagement(true)}
                 >
                   Create Group

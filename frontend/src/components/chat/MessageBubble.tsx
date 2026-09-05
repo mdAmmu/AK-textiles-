@@ -15,7 +15,7 @@ export const DOCUMENT_DOWNLOAD_BTN =
 
 export const BUBBLE_ROW_BASE = "flex py-0.5 px-3 select-none";
 export const BUBBLE_ROW_OWN = "justify-end";
-export const BUBBLE_ROW_SELECTED = "bg-[rgba(15,157,110,0.12)]";
+export const BUBBLE_ROW_SELECTED = "bg-[rgba(37,99,235,0.12)]";
 export const BUBBLE_ROW_PENDING = "opacity-60";
 
 export const BUBBLE_BASE =
@@ -216,7 +216,7 @@ export default function MessageBubble({
   return (
     <div
       id={`msg-${message.id}`}
-      className={`${BUBBLE_ROW_BASE}${isOwn ? ` ${BUBBLE_ROW_OWN}` : ""}${selected ? ` ${BUBBLE_ROW_SELECTED}` : ""}${message._pending ? ` ${BUBBLE_ROW_PENDING}` : ""} transition-colors duration-500${highlighted ? " bg-[rgba(15,157,110,0.18)]" : ""}`}
+      className={`${BUBBLE_ROW_BASE}${isOwn ? ` ${BUBBLE_ROW_OWN}` : ""}${selected ? ` ${BUBBLE_ROW_SELECTED}` : ""}${message._pending ? ` ${BUBBLE_ROW_PENDING}` : ""} transition-colors duration-500${highlighted ? " bg-[rgba(37,99,235,0.18)]" : ""}`}
       onMouseDown={startPress}
       onMouseUp={endPress}
       onMouseLeave={cancelPress}

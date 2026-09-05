@@ -60,7 +60,7 @@ export default function BroadcastComposer() {
   }
 
   return (
-    <div className="relative flex flex-col h-dvh bg-[linear-gradient(180deg,#eaf7ee_0%,#f6fbf7_40%,#ffffff_75%)] dark:bg-[#10161f]">
+    <div className="relative flex flex-col h-dvh bg-[linear-gradient(180deg,#eaf0ff_0%,#f5f8ff_40%,#ffffff_75%)] dark:bg-[#10161f]">
       <header className="flex items-center gap-3 pt-[1.125rem] px-4 pb-2 shrink-0">
         <button
           className="flex border-none bg-transparent text-[#1a1a1a] dark:text-[#e9edef] cursor-pointer p-1.5"
@@ -99,7 +99,7 @@ export default function BroadcastComposer() {
               <Users size={18} />
               {hasAudience ? `${estimatedRecipients} recipients added` : "Add recipients"}
             </span>
-            <span className="text-[#0f9d6e] font-semibold text-sm">Edit</span>
+            <span className="text-[#2563eb] font-semibold text-sm">Edit</span>
           </button>
 
           {hasAudience && (
@@ -150,7 +150,7 @@ export default function BroadcastComposer() {
           type="button"
           onClick={() => submit()}
           disabled={submitting}
-          className="w-full py-3 rounded-xl border-none bg-[#0f9d6e] text-white font-semibold cursor-pointer disabled:opacity-60"
+          className="w-full py-3 rounded-xl border-none bg-[#2563eb] text-white font-semibold cursor-pointer disabled:opacity-60"
         >
           {submitting ? "Creating..." : "Create Broadcast"}
         </button>

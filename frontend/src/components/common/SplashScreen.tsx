@@ -1,9 +1,9 @@
 export default function SplashScreen() {
   return (
-    <div className="fixed inset-0 z-[999] flex flex-col items-center justify-center gap-[0.9rem] bg-[linear-gradient(160deg,#0b3d33_0%,#0f9d6e_55%,#17c98d_100%)] animate-[splash-fade-out_0.5s_ease_1.6s_forwards]">
+    <div className="fixed inset-0 z-[999] flex flex-col items-center justify-center gap-[0.9rem] bg-[linear-gradient(160deg,#0b3d33_0%,#2563eb_55%,#3b82f6_100%)] animate-[splash-fade-out_0.5s_ease_1.6s_forwards]">
       <div className="absolute w-[220px] h-[220px] rounded-full border-2 border-white/25 animate-[splash-ring-grow_1.6s_ease-out_forwards]" />
       <div className="w-[88px] h-[88px] rounded-[24px] bg-white flex items-center justify-center shadow-[0_12px_32px_rgba(0,0,0,0.25)] animate-[splash-pop_0.6s_cubic-bezier(0.34,1.56,0.64,1)_both]">
-        <span className="text-[2rem] font-extrabold tracking-[0.02em] bg-[linear-gradient(135deg,#0f9d6e,#075e54)] bg-clip-text text-transparent">
+        <span className="text-[2rem] font-extrabold tracking-[0.02em] bg-[linear-gradient(135deg,#2563eb,#1d4ed8)] bg-clip-text text-transparent">
           AK
         </span>
       </div>

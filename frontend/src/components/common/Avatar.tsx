@@ -40,7 +40,7 @@ export default function Avatar({ name, online, size = 40, imageUrl, className }:
         initialsFor(name)
       )}
       {online && (
-        <span className="absolute bottom-0 right-0 w-[28%] h-[28%] min-w-[8px] min-h-[8px] bg-[#25d366] border-2 border-white dark:border-[#10161f] rounded-full" />
+        <span className="absolute bottom-0 right-0 w-[28%] h-[28%] min-w-[8px] min-h-[8px] bg-[#22c55e] border-2 border-white dark:border-[#10161f] rounded-full" />
       )}
     </div>
   );

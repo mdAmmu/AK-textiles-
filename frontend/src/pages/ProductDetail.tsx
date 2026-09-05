@@ -114,7 +114,7 @@ export default function ProductDetail() {
           <Send size={16} /> Send
         </button>
         <button
-          className={`${ACTION_BTN} bg-[#e3f7ec] text-[#0f9d58]`}
+          className={`${ACTION_BTN} bg-[#e6edff] text-[#2563eb]`}
           onClick={() => navigate(`/admin/products/${product.id}/edit`)}
         >
           <Pencil size={16} /> Edit

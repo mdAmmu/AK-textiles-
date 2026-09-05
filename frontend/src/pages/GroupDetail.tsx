@@ -108,7 +108,7 @@ export default function GroupDetail() {
             <span className="font-bold text-[17px]">{group.name}</span>
             <span
               className={`text-[11px] font-semibold py-[3px] px-2 rounded-[20px] ${
-                active ? "bg-[#e3f7ec] text-[#0f9d58]" : "bg-[#eceff1] text-[var(--wa-text-secondary)]"
+                active ? "bg-[#e6edff] text-[#2563eb]" : "bg-[#eceff1] text-[var(--wa-text-secondary)]"
               }`}
             >
               {active ? "Active" : "Inactive"}

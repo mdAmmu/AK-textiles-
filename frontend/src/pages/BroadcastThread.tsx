@@ -360,8 +360,8 @@ export default function BroadcastThread() {
             className={CHAT_HEADER_IDENTITY}
             onClick={() => navigate(`/admin/broadcast/${audienceId}/info`)}
           >
-            <span className="w-9 h-9 rounded-full bg-[#e3f7ec] flex items-center justify-center shrink-0">
-              <Radio size={18} color="#0f9d6e" />
+            <span className="w-9 h-9 rounded-full bg-[#e6edff] flex items-center justify-center shrink-0">
+              <Radio size={18} color="#2563eb" />
             </span>
             <div className={CHAT_HEADER_INFO}>
               <div className={CHAT_HEADER_TITLE}>{audience.name}</div>
@@ -425,10 +425,10 @@ export default function BroadcastThread() {
       {error && <p className="text-[#e5484d] text-sm text-center py-1 m-0">{error}</p>}
 
       {replyTarget && (
-        <div className="flex items-center gap-2 py-2 px-3.5 bg-white dark:bg-[#1e2530] border-l-[3px] border-[#0f9d6e]">
-          <Reply size={16} className="text-[#0f9d6e] shrink-0" />
+        <div className="flex items-center gap-2 py-2 px-3.5 bg-white dark:bg-[#1e2530] border-l-[3px] border-[#2563eb]">
+          <Reply size={16} className="text-[#2563eb] shrink-0" />
           <div className="flex-1 min-w-0">
-            <div className="text-[#0f9d6e] text-[13px] font-semibold">Replying to</div>
+            <div className="text-[#2563eb] text-[13px] font-semibold">Replying to</div>
             <div className="text-[#7c827e] dark:text-[#8b96a5] text-[13px] truncate">
               {replyLabel(replyTarget)}
             </div>
@@ -580,8 +580,8 @@ function BroadcastBubble({ send, selected, selectionMode, onOpen, onToggleSelect
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
-      className={`max-w-[85%] text-left bg-[#dcf8c6] dark:bg-[#0b3d24] rounded-xl rounded-tr-sm py-2 px-2.5 border-none cursor-pointer overflow-hidden select-none ${
-        selected ? "outline outline-2 outline-[#0f9d6e] outline-offset-2" : ""
+      className={`max-w-[85%] text-left bg-[#dbeafe] dark:bg-[#0b3d24] rounded-xl rounded-tr-sm py-2 px-2.5 border-none cursor-pointer overflow-hidden select-none ${
+        selected ? "outline outline-2 outline-[#2563eb] outline-offset-2" : ""
       }`}
     >
       {send.message_type === "image" && send.media_url ? (
@@ -605,7 +605,7 @@ function BroadcastBubble({ send, selected, selectionMode, onOpen, onToggleSelect
         </p>
       )}
       <div className="flex items-center justify-end gap-2 mt-1 px-1">
-        <span className="text-[#4f7a5f] dark:text-[#7fbf9c] text-[11px]">
+        <span className="text-[#3b5bdb] dark:text-[#93b4f5] text-[11px]">
           {STATUS_LABEL[send.status] ?? send.status}
         </span>
       </div>
@@ -704,8 +704,8 @@ function BroadcastImageGroupBubble({
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
-      className={`max-w-[85%] text-left bg-[#dcf8c6] dark:bg-[#0b3d24] rounded-xl rounded-tr-sm border-none cursor-pointer overflow-hidden select-none ${BUBBLE_IMAGE} ${
-        selected ? "outline outline-2 outline-[#0f9d6e] outline-offset-2" : ""
+      className={`max-w-[85%] text-left bg-[#dbeafe] dark:bg-[#0b3d24] rounded-xl rounded-tr-sm border-none cursor-pointer overflow-hidden select-none ${BUBBLE_IMAGE} ${
+        selected ? "outline outline-2 outline-[#2563eb] outline-offset-2" : ""
       }`}
     >
       <div className={IMAGE_WRAP}>

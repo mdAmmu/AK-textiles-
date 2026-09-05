@@ -55,7 +55,7 @@ export default function BroadcastConfirm() {
     return (
       <div className="min-h-dvh bg-[var(--wa-panel-bg)]">
         <div className="flex flex-col items-center justify-center h-dvh text-center gap-2">
-          <CheckCircle2 size={48} color="#0f9d58" />
+          <CheckCircle2 size={48} color="#2563eb" />
           <p>Product sent successfully</p>
           <p className="text-[#667781]">{result.total_sent} customers received the product.</p>
           <button

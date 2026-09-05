@@ -8,7 +8,7 @@ import GroupIcon from "./GroupIcon";
 
 export function Chip({ label, onRemove }: { label: string; onRemove: () => void }) {
   return (
-    <span className="flex items-center gap-1.5 bg-[#e3f7ec] dark:bg-[#16332a] text-[#0f9d6e] dark:text-[#22c789] rounded-full py-1 pl-3 pr-1.5 text-[13px] font-medium">
+    <span className="flex items-center gap-1.5 bg-[#e6edff] dark:bg-[#1e2a4a] text-[#2563eb] dark:text-[#60a5fa] rounded-full py-1 pl-3 pr-1.5 text-[13px] font-medium">
       {label}
       <button
         type="button"
@@ -56,7 +56,7 @@ export default function BroadcastRecipientPicker({
     selectedUsers.size;
 
   return (
-    <div className="fixed inset-0 bg-[#f6fbf7] dark:bg-[#10161f] flex flex-col z-20">
+    <div className="fixed inset-0 bg-[#f5f8ff] dark:bg-[#10161f] flex flex-col z-20">
       <div className="flex items-center gap-3 py-[1.125rem] px-4 shrink-0 border-b border-[#eef1ee] dark:border-[#232d3a]">
         <button
           className="flex border-none bg-transparent text-[#1a1a1a] dark:text-[#e9edef] cursor-pointer"
@@ -67,7 +67,7 @@ export default function BroadcastRecipientPicker({
         </button>
         <span className="flex-1 font-bold text-lg text-[#1a1a1a] dark:text-[#e9edef]">{title}</span>
         <button
-          className="border-none bg-[#0f9d6e] text-white font-semibold cursor-pointer rounded-full py-1.5 px-4"
+          className="border-none bg-[#2563eb] text-white font-semibold cursor-pointer rounded-full py-1.5 px-4"
           onClick={onClose}
         >
           Done
@@ -100,7 +100,7 @@ export default function BroadcastRecipientPicker({
                     type="checkbox"
                     checked={selectedGroupIds.has(g.id)}
                     onChange={() => onToggleGroup(g.id)}
-                    className="w-[18px] h-[18px] accent-[#0f9d6e]"
+                    className="w-[18px] h-[18px] accent-[#2563eb]"
                   />
                   <GroupIcon name={g.name} size={36} />
                   <div className="flex-1 min-w-0 flex flex-col">
@@ -131,7 +131,7 @@ export default function BroadcastRecipientPicker({
                 type="checkbox"
                 checked={selectedUsers.has(u.id)}
                 onChange={() => onToggleUser(u)}
-                className="w-[18px] h-[18px] accent-[#0f9d6e]"
+                className="w-[18px] h-[18px] accent-[#2563eb]"
               />
               <Avatar name={u.name} size={36} />
               <div className="flex-1 min-w-0 flex flex-col">

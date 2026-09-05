@@ -67,7 +67,7 @@ export default function AdminChatsHome() {
   }
 
   return (
-    <div className="relative flex flex-col h-dvh bg-[linear-gradient(180deg,#eaf7ee_0%,#f6fbf7_40%,#ffffff_75%)] dark:bg-[#10161f]">
+    <div className="relative flex flex-col h-dvh bg-[linear-gradient(180deg,#eaf0ff_0%,#f5f8ff_40%,#ffffff_75%)] dark:bg-[#10161f]">
       <AdminHomeHeader
         adminName={user?.name}
         onMenuClick={() => setShowAccount(true)}
@@ -99,7 +99,7 @@ export default function AdminChatsHome() {
       </main>
 
       <button
-        className="absolute bottom-24 right-5 flex items-center justify-center w-14 h-14 rounded-full bg-[#0f9d6e] text-white border-none cursor-pointer shadow-[0_4px_14px_rgba(15,157,110,0.35)] z-10"
+        className="absolute bottom-24 right-5 flex items-center justify-center w-14 h-14 rounded-full bg-[#2563eb] text-white border-none cursor-pointer shadow-[0_4px_14px_rgba(37,99,235,0.35)] z-10"
         onClick={() => setShowStartChat(true)}
         aria-label="Start new chat"
       >

@@ -15,7 +15,7 @@ const RECIPIENT_STATUS_LABEL: Record<BroadcastRecipientStatus, string> = {
 
 const RECIPIENT_STATUS_COLOR: Record<BroadcastRecipientStatus, string> = {
   pending: "text-[#8b8f8c] dark:text-[#8b96a5]",
-  sent: "text-[#0f9d6e] dark:text-[#22c789]",
+  sent: "text-[#2563eb] dark:text-[#60a5fa]",
   failed: "text-[#e5484d]",
   cancelled: "text-[#8b8f8c] dark:text-[#8b96a5]",
 };
@@ -69,7 +69,7 @@ export default function BroadcastDetail() {
   }
 
   return (
-    <div className="relative flex flex-col h-dvh bg-[linear-gradient(180deg,#eaf7ee_0%,#f6fbf7_40%,#ffffff_75%)] dark:bg-[#10161f]">
+    <div className="relative flex flex-col h-dvh bg-[linear-gradient(180deg,#eaf0ff_0%,#f5f8ff_40%,#ffffff_75%)] dark:bg-[#10161f]">
       <header className="flex items-center gap-3 pt-[1.125rem] px-4 pb-2 shrink-0">
         <button
           className="flex border-none bg-transparent text-[#1a1a1a] dark:text-[#e9edef] cursor-pointer p-1.5"
@@ -84,7 +84,7 @@ export default function BroadcastDetail() {
       </header>
 
       <main className="flex-1 overflow-y-auto px-4 pb-8">
-        <div className="bg-[#dcf8c6] dark:bg-[#0b3d24] rounded-xl rounded-tl-sm py-2.5 px-3.5 whitespace-pre-wrap text-[#1a1a1a] dark:text-[#e9edef] text-[15px] mb-4">
+        <div className="bg-[#dbeafe] dark:bg-[#0b3d24] rounded-xl rounded-tl-sm py-2.5 px-3.5 whitespace-pre-wrap text-[#1a1a1a] dark:text-[#e9edef] text-[15px] mb-4">
           {broadcast.text}
         </div>
 
@@ -119,7 +119,7 @@ export default function BroadcastDetail() {
           <button
             onClick={handleRetry}
             disabled={busy}
-            className="flex items-center gap-1.5 border border-[#0f9d6e] text-[#0f9d6e] bg-transparent rounded-full py-1.5 px-3.5 text-sm font-semibold cursor-pointer mb-4 disabled:opacity-50"
+            className="flex items-center gap-1.5 border border-[#2563eb] text-[#2563eb] bg-transparent rounded-full py-1.5 px-3.5 text-sm font-semibold cursor-pointer mb-4 disabled:opacity-50"
           >
             <RotateCw size={14} /> Retry failed
           </button>
@@ -172,7 +172,7 @@ function Stat({
       >
         {value}
       </div>
-      {sub && <div className="text-[#0f9d6e] dark:text-[#22c789] text-xs font-semibold">{sub}</div>}
+      {sub && <div className="text-[#2563eb] dark:text-[#60a5fa] text-xs font-semibold">{sub}</div>}
     </div>
   );
 }

@@ -28,7 +28,7 @@ export default function GroupChatListItem({ group }: Props) {
           </span>
         )}
         {hasUnread && (
-          <span className="min-w-[20px] h-5 px-1.5 rounded-full bg-[#0f9d6e] text-white text-[11px] font-bold flex items-center justify-center">
+          <span className="min-w-[20px] h-5 px-1.5 rounded-full bg-[#2563eb] text-white text-[11px] font-bold flex items-center justify-center">
             {group.unread_count}
           </span>
         )}

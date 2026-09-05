@@ -68,8 +68,8 @@ export default function BroadcastManagementPanel({ onClose, onAudienceDeleted }:
                 key={a.id}
                 className="flex items-center gap-3 py-2.5 border-b border-[var(--wa-border)]"
               >
-                <span className="w-10 h-10 rounded-xl bg-[#e3f7ec] flex items-center justify-center shrink-0">
-                  <Radio size={18} color="#0f9d6e" />
+                <span className="w-10 h-10 rounded-xl bg-[#e6edff] flex items-center justify-center shrink-0">
+                  <Radio size={18} color="#2563eb" />
                 </span>
                 <div className="flex flex-col flex-1 min-w-0">
                   <span className="font-medium truncate">{a.name}</span>

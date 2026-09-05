@@ -6,10 +6,10 @@ import { getToken } from "../services/api";
 import { login, register } from "../services/auth";
 
 const FIELD = "flex flex-col gap-1.5";
-const FIELD_LABEL = "text-[0.82rem] font-bold text-[#0f9d6e]";
+const FIELD_LABEL = "text-[0.82rem] font-bold text-[#2563eb]";
 const INPUT_ROW =
-  "flex items-center gap-2.5 border-[1.5px] border-[var(--wa-border,#d7e4de)] rounded-xl py-[0.7rem] px-3.5 bg-[var(--wa-panel-bg,#f7f8fa)] transition-[border-color,background] duration-150 ease-in-out focus-within:border-[#0f9d6e] focus-within:bg-[var(--wa-bubble-other,#ffffff)]";
-const INPUT_ICON = "text-[#0f9d6e] shrink-0";
+  "flex items-center gap-2.5 border-[1.5px] border-[var(--wa-border,#dbe6ff)] rounded-xl py-[0.7rem] px-3.5 bg-[var(--wa-panel-bg,#f7f8fa)] transition-[border-color,background] duration-150 ease-in-out focus-within:border-[#2563eb] focus-within:bg-[var(--wa-bubble-other,#ffffff)]";
+const INPUT_ICON = "text-[#2563eb] shrink-0";
 const INPUT = "flex-1 min-w-0 border-none outline-none bg-transparent text-base text-[var(--wa-text)] placeholder:text-[var(--wa-text-secondary)]";
 
 export default function Login() {
@@ -48,8 +48,8 @@ export default function Login() {
 
   return (
     <div className="min-h-[100svh] flex flex-col items-stretch bg-[var(--wa-panel-bg)]">
-      <div className="relative flex flex-col items-center gap-[0.4rem] pt-12 px-6 pb-[4.5rem] bg-[radial-gradient(120%_100%_at_20%_0%,#17c98d_0%,#0f9d6e_45%,#0b7d59_100%)] overflow-hidden">
-        <div className="w-[76px] h-[76px] rounded-[20px] bg-white text-[#0f9d6e] flex items-center justify-center font-extrabold text-[1.7rem] tracking-[0.02em] shadow-[0_10px_24px_rgba(6,62,46,0.35)] mb-2 animate-[login-pop_0.55s_cubic-bezier(0.34,1.56,0.64,1)_both]">
+      <div className="relative flex flex-col items-center gap-[0.4rem] pt-12 px-6 pb-[4.5rem] bg-[radial-gradient(120%_100%_at_20%_0%,#3b82f6_0%,#2563eb_45%,#1d4ed8_100%)] overflow-hidden">
+        <div className="w-[76px] h-[76px] rounded-[20px] bg-white text-[#2563eb] flex items-center justify-center font-extrabold text-[1.7rem] tracking-[0.02em] shadow-[0_10px_24px_rgba(29,78,216,0.35)] mb-2 animate-[login-pop_0.55s_cubic-bezier(0.34,1.56,0.64,1)_both]">
           AK
         </div>
         <h1 className="m-0 text-white text-[1.9rem] font-extrabold animate-[login-rise_0.5s_ease_0.1s_both]">
@@ -95,7 +95,7 @@ export default function Login() {
             <div className={INPUT_ROW}>
               <Phone size={18} className={INPUT_ICON} />
               <span className="text-base text-[var(--wa-text)] font-semibold shrink-0">+91</span>
-              <span className="w-px self-stretch bg-[var(--wa-border,#d7e4de)] shrink-0" />
+              <span className="w-px self-stretch bg-[var(--wa-border,#dbe6ff)] shrink-0" />
               <input
                 className={INPUT}
                 placeholder="Enter 10-digit phone number"
@@ -136,7 +136,7 @@ export default function Login() {
                 <span
                   className={`w-5 h-5 rounded-md border-[1.5px] flex items-center justify-center text-white cursor-pointer transition-[background,border-color] duration-150 ease-in-out ${
                     rememberMe
-                      ? "bg-[#0f9d6e] border-[#0f9d6e]"
+                      ? "bg-[#2563eb] border-[#2563eb]"
                       : "border-[var(--wa-border,#c9d4cf)]"
                   }`}
                   onClick={() => setRememberMe((v) => !v)}
@@ -156,7 +156,7 @@ export default function Login() {
               </label>
               <button
                 type="button"
-                className="border-none bg-transparent p-0 text-[#0f9d6e] text-[0.88rem] font-semibold cursor-pointer"
+                className="border-none bg-transparent p-0 text-[#2563eb] text-[0.88rem] font-semibold cursor-pointer"
               >
                 Forgot password?
               </button>
@@ -166,7 +166,7 @@ export default function Login() {
           {error && <p className="text-[#e53e3e] m-0 text-[0.85rem]">{error}</p>}
 
           <button
-            className="flex items-center justify-center gap-2 py-[0.9rem] px-4 rounded-2xl border-none bg-[linear-gradient(135deg,#17c98d,#0f9d58)] text-white font-bold text-base cursor-pointer mt-1 transition-[transform,opacity] duration-100 ease-in-out active:scale-[0.98] disabled:opacity-70 disabled:cursor-default"
+            className="flex items-center justify-center gap-2 py-[0.9rem] px-4 rounded-2xl border-none bg-[linear-gradient(135deg,#3b82f6,#2563eb)] text-white font-bold text-base cursor-pointer mt-1 transition-[transform,opacity] duration-100 ease-in-out active:scale-[0.98] disabled:opacity-70 disabled:cursor-default"
             type="submit"
             disabled={submitting}
           >
@@ -185,11 +185,11 @@ export default function Login() {
           {mode === "login" ? (
             <>
               Don&apos;t have an account?{" "}
-              <span className="text-[#0f9d6e] font-bold">Sign up</span>
+              <span className="text-[#2563eb] font-bold">Sign up</span>
             </>
           ) : (
             <>
-              Already have an account? <span className="text-[#0f9d6e] font-bold">Log in</span>
+              Already have an account? <span className="text-[#2563eb] font-bold">Log in</span>
             </>
           )}
         </button>

@@ -201,13 +201,13 @@ export default function MultiAddMembersPanel({
           </div>
         )}
 
-        <div className="flex items-center gap-3 bg-[#e3f7ec] rounded-xl p-3.5 mt-2">
-          <span className="w-9 h-9 rounded-full bg-[#c4ecd7] flex items-center justify-center shrink-0">
-            <Users size={18} color="#0f9d58" />
+        <div className="flex items-center gap-3 bg-[#e6edff] rounded-xl p-3.5 mt-2">
+          <span className="w-9 h-9 rounded-full bg-[#dbe6ff] flex items-center justify-center shrink-0">
+            <Users size={18} color="#2563eb" />
           </span>
           <div>
-            <div className="font-bold text-[#0f9d58] text-sm">{hintTitle}</div>
-            <div className="text-[#2f6b4f] text-[13px]">{hintText}</div>
+            <div className="font-bold text-[#2563eb] text-sm">{hintTitle}</div>
+            <div className="text-[#1e40af] text-[13px]">{hintText}</div>
           </div>
         </div>
       </div>

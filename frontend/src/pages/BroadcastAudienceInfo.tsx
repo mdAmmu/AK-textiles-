@@ -1,19 +1,41 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, BarChart3, ChevronDown, ChevronRight, Radio, Search, UserPlus, Users, X } from "lucide-react";
+import {
+  ArrowLeft,
+  BadgeInfo,
+  BarChart3,
+  CalendarClock,
+  ChevronDown,
+  ChevronRight,
+  Radio,
+  Search,
+  UserPlus,
+  Users,
+  X,
+} from "lucide-react";
 import { fetchAudience, fetchAudienceStats, updateAudience } from "../services/broadcastMessages";
 import { createUser, fetchUsers } from "../services/users";
 import type { BroadcastAudienceDetail, BroadcastAudienceStats } from "../types/broadcastMessage";
 import type { User } from "../types/user";
 import Avatar from "../components/common/Avatar";
+import DetailsCard from "../components/common/DetailsCard";
+import StatusPill from "../components/common/StatusPill";
 import MultiAddMembersPanel, { type NewMemberDraft } from "../components/admin/MultiAddMembersPanel";
 import LoadingScreen from "../components/common/LoadingScreen";
 
+function formatDate(iso: string): string {
+  return new Date(iso).toLocaleDateString(undefined, {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+}
+
 const ACTION_BTN =
-  "flex-1 max-w-[90px] flex flex-col items-center gap-1 py-3 px-2 border-none rounded-2xl bg-white dark:bg-[#1e2530] text-[#0f9d6e] dark:text-[#17c98d] text-xs font-semibold cursor-pointer shadow-[0_4px_14px_rgba(15,157,110,0.14)] dark:shadow-none";
+  "flex-1 max-w-[90px] flex flex-col items-center gap-1 py-3 px-2 border-none rounded-2xl bg-white dark:bg-[#1e2530] text-[#2563eb] dark:text-[#3b82f6] text-xs font-semibold cursor-pointer shadow-[0_4px_14px_rgba(37,99,235,0.14)] dark:shadow-none";
 const ROW_BASE =
   "flex items-center gap-3.5 w-full py-[0.9375rem] px-4 border-none bg-transparent font-[inherit] text-left cursor-pointer text-[#1a1a1a] dark:text-[#e9edef]";
-const ROW_ICON = "text-[#0f9d6e] dark:text-[#17c98d] shrink-0";
+const ROW_ICON = "text-[#2563eb] dark:text-[#3b82f6] shrink-0";
 const ROW_LABEL = "flex-1 font-medium";
 const ROW_CHEVRON = "text-[#c2c6c3] dark:text-[#6b7480] shrink-0 transition-transform duration-150 ease-in-out";
 const EMPTY_TEXT = "py-4 text-[#7c827e] dark:text-[#8b96a5]";
@@ -121,7 +143,7 @@ export default function BroadcastAudienceInfo() {
 
   return (
     <div className="flex flex-col min-h-dvh bg-[#eef2f0] dark:bg-[#10161f] pb-8">
-      <div className="relative flex flex-col items-center gap-1.5 pt-11 px-4 pb-6 bg-[linear-gradient(135deg,#0f9d6e,#4fc98a)] rounded-b-3xl">
+      <div className="relative flex flex-col items-center gap-1.5 pt-11 px-4 pb-6 bg-[linear-gradient(135deg,#2563eb,#60a5fa)] rounded-b-3xl">
         <button
           className="absolute top-4 left-4 flex border-none bg-transparent text-white cursor-pointer p-1"
           onClick={() => navigate(-1)}
@@ -134,7 +156,23 @@ export default function BroadcastAudienceInfo() {
         </span>
         <h1 className="mt-2 mb-0 text-xl font-bold text-white">{audience.name}</h1>
         <span className="text-white/85 text-sm">{audience.member_count} recipients</span>
+        <div className="flex items-center gap-2 mt-2">
+          <StatusPill label={audience.member_count > 0 ? "Active" : "Empty"} dot />
+          <StatusPill label="Broadcast Audience" icon={Radio} />
+        </div>
       </div>
+
+      <DetailsCard
+        icon={BadgeInfo}
+        title="Audience Details"
+        subtitle="Basic audience identity and history"
+        items={[
+          { icon: Radio, label: "Audience Name", value: audience.name },
+          { icon: Users, label: "Recipients", value: audience.member_count },
+          { icon: CalendarClock, label: "Created", value: formatDate(audience.created_at) },
+          { icon: CalendarClock, label: "Last Updated", value: formatDate(audience.updated_at) },
+        ]}
+      />
 
       <div className="flex justify-center gap-2.5 mt-4 mx-4">
         <button className={ACTION_BTN} type="button" onClick={() => setShowSearch((s) => !s)}>
@@ -160,7 +198,7 @@ export default function BroadcastAudienceInfo() {
         </div>
       )}
 
-      <div className="mt-5 mx-4 bg-white dark:bg-[#1e2530] rounded-2xl overflow-hidden shadow-[0_4px_18px_rgba(15,157,110,0.06)] dark:shadow-none">
+      <div className="mt-4 mx-4 bg-white dark:bg-[#1e2530] rounded-2xl overflow-hidden shadow-[0_4px_18px_rgba(37,99,235,0.06)] dark:shadow-none">
         <button
           className={`${ROW_BASE} border-b border-[#eef1ee] dark:border-[#232d3a]`}
           type="button"
@@ -271,14 +309,14 @@ function Stat({
   accent?: boolean;
 }) {
   return (
-    <div className="bg-[#f6fbf7] dark:bg-[#10161f] border border-[#eef1ee] dark:border-[#232d3a] rounded-xl p-3">
+    <div className="bg-[#f5f8ff] dark:bg-[#10161f] border border-[#eef1ee] dark:border-[#232d3a] rounded-xl p-3">
       <div className="text-[#8b8f8c] dark:text-[#8b96a5] text-[13px]">{label}</div>
       <div
         className={`text-xl font-bold ${accent ? "text-[#e5484d]" : "text-[#1a1a1a] dark:text-[#e9edef]"}`}
       >
         {value}
       </div>
-      {sub && <div className="text-[#0f9d6e] dark:text-[#22c789] text-xs font-semibold">{sub}</div>}
+      {sub && <div className="text-[#2563eb] dark:text-[#60a5fa] text-xs font-semibold">{sub}</div>}
     </div>
   );
 }

@@ -34,7 +34,7 @@ export default function ChatListItem({ conversation }: Props) {
             {conversation.user_name}
           </span>
           <span
-            className={`text-xs shrink-0 ${hasUnread ? "text-[#0f9d6e] dark:text-[#22c789] font-semibold" : "text-[#9a9e9b] dark:text-[#6b7480]"}`}
+            className={`text-xs shrink-0 ${hasUnread ? "text-[#2563eb] dark:text-[#60a5fa] font-semibold" : "text-[#9a9e9b] dark:text-[#6b7480]"}`}
           >
             {time}
           </span>
@@ -44,7 +44,7 @@ export default function ChatListItem({ conversation }: Props) {
             {preview}
           </span>
           {hasUnread && (
-            <span className="shrink-0 bg-[#0f9d6e] text-white text-[11px] font-bold min-w-[20px] h-5 rounded-[10px] flex items-center justify-center px-1.5">
+            <span className="shrink-0 bg-[#2563eb] text-white text-[11px] font-bold min-w-[20px] h-5 rounded-[10px] flex items-center justify-center px-1.5">
               {conversation.unread_count}
             </span>
           )}

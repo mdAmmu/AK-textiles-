@@ -3,12 +3,13 @@
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
 :root {
-  --wa-header: #075e54;
-  --wa-header-dark: #054c44;
-  --wa-accent: #128c7e;
-  --wa-accent-light: #25d366;
+  --wa-header: #1d4ed8;
+  --wa-header-dark: #1e3a8a;
+  --wa-accent: #2563eb;
+  --wa-accent-light: #3b82f6;
+  --wa-gradient: linear-gradient(135deg, #1e40af 0%, #2563eb 45%, #4f46e5 100%);
   --wa-chat-bg: #e5ddd5;
-  --wa-bubble-own: #d9fdd3;
+  --wa-bubble-own: #dbeafe;
   --wa-bubble-other: #ffffff;
   --wa-text: #111b21;
   --wa-text-secondary: #667781;
@@ -21,10 +22,10 @@
      tokens above so toggling dark mode only affects chat screens, not the
      rest of the admin app which still relies on the original --wa-* values. */
   --chat-header-bg: #ffffff;
-  --chat-accent: #0f9d6e;
-  --chat-accent-light: #4fc98a;
+  --chat-accent: #2563eb;
+  --chat-accent-light: #60a5fa;
   --chat-bg: #eef1f6;
-  --chat-bubble-own: #d9fdd3;
+  --chat-bubble-own: #dbeafe;
   --chat-bubble-other: #ffffff;
   --chat-text: #1a1a1a;
   --chat-text-secondary: #7c827e;
@@ -44,10 +45,11 @@
 :root[data-theme="dark"] {
   --wa-header: #1c2430;
   --wa-header-dark: #131a24;
-  --wa-accent: #17c98d;
-  --wa-accent-light: #4fe0a8;
+  --wa-accent: #3b82f6;
+  --wa-accent-light: #60a5fa;
+  --wa-gradient: linear-gradient(135deg, #1e3a8a 0%, #2563eb 45%, #4338ca 100%);
   --wa-chat-bg: #10161f;
-  --wa-bubble-own: #0b4a3c;
+  --wa-bubble-own: #1e3a5f;
   --wa-bubble-other: #1e2530;
   --wa-text: #e9edef;
   --wa-text-secondary: #8b96a5;
@@ -58,10 +60,10 @@
   color-scheme: dark;
 
   --chat-header-bg: #1c2430;
-  --chat-accent: #17c98d;
-  --chat-accent-light: #4fe0a8;
+  --chat-accent: #3b82f6;
+  --chat-accent-light: #60a5fa;
   --chat-bg: #10161f;
-  --chat-bubble-own: #0b4a3c;
+  --chat-bubble-own: #1e3a5f;
   --chat-bubble-other: #1e2530;
   --chat-text: #e9edef;
   --chat-text-secondary: #8b96a5;
