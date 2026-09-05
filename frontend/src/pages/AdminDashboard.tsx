@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { MoreVertical } from "lucide-react";
+import { MoreVertical, Users } from "lucide-react";
 import { fetchGroups } from "../services/groups";
 import type { Group } from "../types/group";
 import { useCurrentUser } from "../hooks/useCurrentUser";
@@ -57,7 +57,20 @@ export default function AdminDashboard() {
               </button>
             </div>
             {filtered.length === 0 ? (
-              <p className="py-4 px-1">No groups yet.</p>
+              <div className="flex flex-col items-center justify-center gap-3 text-center text-[#7c827e] dark:text-[#8b96a5] mt-16">
+                <Users size={40} />
+                <p className="max-w-[240px]">
+                  {groups && groups.length > 0
+                    ? "No groups match your search."
+                    : "No groups yet. Create one, add staff, and manage them together — from one place."}
+                </p>
+                <button
+                  className="mt-1 border-none bg-[#0f9d6e] text-white font-semibold text-sm rounded-full py-2.5 px-5 cursor-pointer"
+                  onClick={() => setShowGroupManagement(true)}
+                >
+                  Create Group
+                </button>
+              </div>
             ) : (
               <div className="flex flex-col gap-2.5">
                 {filtered.map((g) => (
