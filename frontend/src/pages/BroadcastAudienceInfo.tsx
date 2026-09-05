@@ -2,9 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   ArrowLeft,
-  BadgeInfo,
   BarChart3,
-  CalendarClock,
   ChevronDown,
   ChevronRight,
   Radio,
@@ -18,18 +16,9 @@ import { createUser, fetchUsers } from "../services/users";
 import type { BroadcastAudienceDetail, BroadcastAudienceStats } from "../types/broadcastMessage";
 import type { User } from "../types/user";
 import Avatar from "../components/common/Avatar";
-import DetailsCard from "../components/common/DetailsCard";
 import StatusPill from "../components/common/StatusPill";
 import MultiAddMembersPanel, { type NewMemberDraft } from "../components/admin/MultiAddMembersPanel";
 import LoadingScreen from "../components/common/LoadingScreen";
-
-function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString(undefined, {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
-}
 
 const ACTION_BTN =
   "flex-1 max-w-[90px] flex flex-col items-center gap-1 py-3 px-2 border-none rounded-2xl bg-white dark:bg-[#1e2530] text-[#2563eb] dark:text-[#3b82f6] text-xs font-semibold cursor-pointer shadow-[0_4px_14px_rgba(37,99,235,0.14)] dark:shadow-none";
@@ -162,19 +151,7 @@ export default function BroadcastAudienceInfo() {
         </div>
       </div>
 
-      <DetailsCard
-        icon={BadgeInfo}
-        title="Audience Details"
-        subtitle="Basic audience identity and history"
-        items={[
-          { icon: Radio, label: "Audience Name", value: audience.name },
-          { icon: Users, label: "Recipients", value: audience.member_count },
-          { icon: CalendarClock, label: "Created", value: formatDate(audience.created_at) },
-          { icon: CalendarClock, label: "Last Updated", value: formatDate(audience.updated_at) },
-        ]}
-      />
-
-      <div className="flex justify-center gap-2.5 mt-4 mx-4">
+      <div className="flex justify-center gap-2.5 mt-6 mx-4">
         <button className={ACTION_BTN} type="button" onClick={() => setShowSearch((s) => !s)}>
           <Search size={18} />
           <span>Search</span>
