@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Image as ImageIcon, MoreVertical, Paperclip, Share2, Trash2, X } from "lucide-react";
+import { Camera, FileText, Image as ImageIcon, MoreVertical, Share2, Trash2, X } from "lucide-react";
 import { useCurrentUser } from "../hooks/useCurrentUser";
 import { logout } from "../services/auth";
 import { useChatSocket } from "../hooks/useChatSocket";
@@ -17,7 +17,8 @@ import type { Message } from "../types/message";
 import type { Group } from "../types/group";
 import GroupIcon from "../components/admin/GroupIcon";
 import MessageList from "../components/chat/MessageList";
-import MessageInput, { MESSAGE_INPUT_ICON_CLASS } from "../components/chat/MessageInput";
+import MessageInput from "../components/chat/MessageInput";
+import type { AttachmentOption } from "../components/chat/AttachmentSheet";
 import ForwardPreviewBar, { type StagedImage } from "../components/chat/ForwardPreviewBar";
 import LoadingScreen from "../components/common/LoadingScreen";
 import { randomUUID } from "../utils/uuid";
@@ -47,6 +48,7 @@ export default function StaffGroupChat() {
   const [stagedImages, setStagedImages] = useState<StagedImage[]>([]);
   const [draftText, setDraftText] = useState("");
   const imageInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
   const documentInputRef = useRef<HTMLInputElement>(null);
 
   const selectionMode = selectedIds.size > 0;
@@ -345,41 +347,49 @@ export default function StaffGroupChat() {
         onChange={setDraftText}
         canSubmitEmpty={stagedImages.length > 0}
         disabled={!group}
-        extraAction={
-          <>
-            <span
-              className={MESSAGE_INPUT_ICON_CLASS}
-              onClick={() => imageInputRef.current?.click()}
-              role="button"
-              aria-label="Send images"
-            >
-              <ImageIcon size={20} />
-            </span>
-            <span
-              className={MESSAGE_INPUT_ICON_CLASS}
-              onClick={() => documentInputRef.current?.click()}
-              role="button"
-              aria-label="Send a document"
-            >
-              <Paperclip size={20} />
-            </span>
-            <input
-              ref={imageInputRef}
-              type="file"
-              accept="image/*"
-              multiple
-              hidden
-              onChange={handlePickImages}
-            />
-            <input
-              ref={documentInputRef}
-              type="file"
-              accept=".pdf,.doc,.docx,.xls,.xlsx,application/pdf,application/msword"
-              hidden
-              onChange={handlePickDocument}
-            />
-          </>
-        }
+        attachmentOptions={[
+          {
+            key: "document",
+            label: "Document",
+            icon: <FileText size={24} />,
+            onClick: () => documentInputRef.current?.click(),
+          },
+          {
+            key: "camera",
+            label: "Camera",
+            icon: <Camera size={24} />,
+            onClick: () => cameraInputRef.current?.click(),
+          },
+          {
+            key: "gallery",
+            label: "Gallery",
+            icon: <ImageIcon size={24} />,
+            onClick: () => imageInputRef.current?.click(),
+          },
+        ] satisfies AttachmentOption[]}
+      />
+      <input
+        ref={imageInputRef}
+        type="file"
+        accept="image/*"
+        multiple
+        hidden
+        onChange={handlePickImages}
+      />
+      <input
+        ref={cameraInputRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
+        hidden
+        onChange={handlePickImages}
+      />
+      <input
+        ref={documentInputRef}
+        type="file"
+        accept=".pdf,.doc,.docx,.xls,.xlsx,application/pdf,application/msword"
+        hidden
+        onChange={handlePickDocument}
       />
       {shareToast && (
         <div className="fixed left-1/2 bottom-[4.5rem] -translate-x-1/2 z-30 pointer-events-none bg-[#111] text-white text-[13px] font-medium py-2 px-4 rounded-full shadow-[0_4px_14px_rgba(0,0,0,0.25)]">

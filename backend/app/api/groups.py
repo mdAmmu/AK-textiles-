@@ -55,7 +55,7 @@ def get_my_group(db: Session = Depends(get_db), user: User = Depends(get_current
         return None
     count = (
         db.query(func.count(User.id))
-        .filter(User.group_id == group.id, User.role == UserRole.USER)
+        .filter(User.group_id == group.id, User.role.in_([UserRole.USER, UserRole.STAFF]))
         .scalar()
     )
     return GroupOut(id=str(group.id), name=group.name, description=group.description, customer_count=count)
@@ -152,7 +152,7 @@ async def delete_my_group_messages(
 def list_groups(db: Session = Depends(get_db), admin: User = Depends(require_admin)):
     counts = dict(
         db.query(User.group_id, func.count(User.id))
-        .filter(User.group_id.isnot(None), User.role == UserRole.USER)
+        .filter(User.group_id.isnot(None), User.role.in_([UserRole.USER, UserRole.STAFF]))
         .group_by(User.group_id)
         .all()
     )
@@ -380,6 +380,28 @@ async def admin_send_group_image_message(
     return messages
 
 
+@router.post("/{group_id}/messages/document", response_model=MessageOut)
+async def admin_send_group_document_message(
+    group_id: str,
+    file: UploadFile,
+    db: Session = Depends(get_db),
+    admin: User = Depends(require_admin),
+):
+    group = _get_group_or_404(db, group_id)
+    original_name = file.filename or "document"
+
+    content = await file.read()
+    if len(content) > MAX_DOCUMENT_BYTES:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="File is too large (max 20MB)")
+
+    extension = original_name.rsplit(".", 1)[-1] if "." in original_name else "bin"
+    storage_name = f"{group.id}/{uuid.uuid4()}.{extension}"
+    url = upload_chat_file(storage_name, content, file.content_type or "application/octet-stream")
+
+    message = await send_group_document_message(db, group, admin.id, url, original_name)
+    return serialize_message(message)
+
+
 @router.post("/{group_id}/messages/delete", response_model=list[str])
 async def admin_delete_group_messages(
     group_id: str,
@@ -426,7 +448,11 @@ def assign_user_group(
     db: Session = Depends(get_db),
     _admin: User = Depends(require_admin),
 ):
-    user = db.query(User).filter(User.id == user_id, User.role == UserRole.USER).first()
+    user = (
+        db.query(User)
+        .filter(User.id == user_id, User.role.in_([UserRole.USER, UserRole.STAFF]))
+        .first()
+    )
     if user is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
 
@@ -440,7 +466,9 @@ def assign_user_group(
     user.group_joined_at = func.now() if body.group_id is not None else None
     db.commit()
     db.refresh(user)
-    return GroupUserOut(id=str(user.id), name=user.name, phone=user.phone, email=user.email)
+    return GroupUserOut(
+        id=str(user.id), name=user.name, phone=user.phone, email=user.email, role=user.role.value
+    )
 
 
 def _get_group_or_404(db: Session, group_id: str) -> Group:

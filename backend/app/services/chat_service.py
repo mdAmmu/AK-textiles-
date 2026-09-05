@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 
 from app.models.conversation import Conversation
 from app.models.group import Group
+from app.models.group_read import GroupRead
 from app.models.message import Message, MessageType
 from app.models.product import Product
 from app.models.user import User, UserRole
@@ -265,6 +266,7 @@ async def delete_group(db: Session, group: Group) -> list[str]:
     member_ids = [str(m.id) for m in members]
 
     db.query(Message).filter(Message.group_id == group.id).delete(synchronize_session=False)
+    db.query(GroupRead).filter(GroupRead.group_id == group.id).delete(synchronize_session=False)
     db.query(User).filter(User.group_id == group.id).update(
         {User.group_id: None}, synchronize_session=False
     )

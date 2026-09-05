@@ -2,9 +2,11 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, BarChart3, ChevronDown, ChevronRight, Radio, Search, UserPlus, Users, X } from "lucide-react";
 import { fetchAudience, fetchAudienceStats, updateAudience } from "../services/broadcastMessages";
+import { createUser, fetchUsers } from "../services/users";
 import type { BroadcastAudienceDetail, BroadcastAudienceStats } from "../types/broadcastMessage";
+import type { User } from "../types/user";
 import Avatar from "../components/common/Avatar";
-import AddAudienceMemberPanel from "../components/admin/AddAudienceMemberPanel";
+import MultiAddMembersPanel, { type NewMemberDraft } from "../components/admin/MultiAddMembersPanel";
 import LoadingScreen from "../components/common/LoadingScreen";
 
 const ACTION_BTN =
@@ -25,6 +27,9 @@ export default function BroadcastAudienceInfo() {
   const [search, setSearch] = useState("");
   const [showMembers, setShowMembers] = useState(false);
   const [showAddPanel, setShowAddPanel] = useState(false);
+  const [selectedMembers, setSelectedMembers] = useState<Map<string, User>>(new Map());
+  const [newMembers, setNewMembers] = useState<NewMemberDraft[]>([]);
+  const [committing, setCommitting] = useState(false);
   const [showStats, setShowStats] = useState(false);
   const [stats, setStats] = useState<BroadcastAudienceStats | null>(null);
 
@@ -51,12 +56,54 @@ export default function BroadcastAudienceInfo() {
     });
   }
 
-  async function handleAdd(userId: string) {
-    if (!audienceId || !audience) return;
-    await updateAudience(audienceId, undefined, [...audience.member_ids, userId]);
-    const refreshed = await fetchAudience(audienceId);
-    setAudience(refreshed);
+  function handleToggleSelectMember(user: User) {
+    setSelectedMembers((prev) => {
+      const next = new Map(prev);
+      if (next.has(user.id)) next.delete(user.id);
+      else next.set(user.id, user);
+      return next;
+    });
+  }
+
+  function handleAddNewMember(member: NewMemberDraft) {
+    setNewMembers((prev) => [...prev, member]);
+  }
+
+  function handleRemoveNewMember(key: string) {
+    setNewMembers((prev) => prev.filter((m) => m.key !== key));
+  }
+
+  function closeAddPanel() {
     setShowAddPanel(false);
+    setSelectedMembers(new Map());
+    setNewMembers([]);
+  }
+
+  async function handleDoneAddingMembers() {
+    if (!audienceId || !audience || committing) {
+      closeAddPanel();
+      return;
+    }
+    if (selectedMembers.size === 0 && newMembers.length === 0) {
+      closeAddPanel();
+      return;
+    }
+    setCommitting(true);
+    try {
+      const created = await Promise.all(
+        newMembers.map((m) => createUser(m.name, m.phone, m.password, m.role)),
+      );
+      await updateAudience(audienceId, undefined, [
+        ...audience.member_ids,
+        ...selectedMembers.keys(),
+        ...created.map((u) => u.id),
+      ]);
+      const refreshed = await fetchAudience(audienceId);
+      setAudience(refreshed);
+      closeAddPanel();
+    } finally {
+      setCommitting(false);
+    }
   }
 
   async function handleRemove(userId: string) {
@@ -184,10 +231,28 @@ export default function BroadcastAudienceInfo() {
       </div>
 
       {showAddPanel && (
-        <AddAudienceMemberPanel
+        <MultiAddMembersPanel
+          title="Add Recipients"
+          onClose={closeAddPanel}
+          doneLabel={committing ? "Adding..." : "Done"}
+          fetchCandidates={(term) => fetchUsers(term || undefined, true)}
           excludeIds={audience.member_ids}
-          onAdd={handleAdd}
-          onClose={() => setShowAddPanel(false)}
+          selected={selectedMembers}
+          onToggleSelect={handleToggleSelectMember}
+          newMemberRoleMode="fixed"
+          fixedNewMemberRole="USER"
+          newMembers={newMembers}
+          onAddNewMember={handleAddNewMember}
+          onRemoveNewMember={handleRemoveNewMember}
+          onDone={handleDoneAddingMembers}
+          candidateSectionLabel="All Customers"
+          notFoundLabel="Not in your customers yet"
+          hintTitle="Can't find a customer?"
+          getExistingLabel={(u) =>
+            u.audience_names && u.audience_names.length > 0
+              ? `Already in ${u.audience_names.join(", ")}`
+              : null
+          }
         />
       )}
     </div>

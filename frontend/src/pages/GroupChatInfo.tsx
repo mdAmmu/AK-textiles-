@@ -8,6 +8,7 @@ import {
   Search,
   UserPlus,
   Users,
+  X,
 } from "lucide-react";
 import {
   assignUserGroup,
@@ -22,7 +23,7 @@ import type { Message } from "../types/message";
 import type { User } from "../types/user";
 import GroupIcon from "../components/admin/GroupIcon";
 import Avatar from "../components/common/Avatar";
-import AddCustomerPanel from "../components/admin/AddCustomerPanel";
+import MultiAddMembersPanel, { type NewMemberDraft } from "../components/admin/MultiAddMembersPanel";
 import LoadingScreen from "../components/common/LoadingScreen";
 
 const ACTION_BTN =
@@ -44,7 +45,9 @@ export default function GroupChatInfo() {
   const [search, setSearch] = useState("");
   const [showMembers, setShowMembers] = useState(false);
   const [showAddPanel, setShowAddPanel] = useState(false);
-  const [candidates, setCandidates] = useState<User[]>([]);
+  const [selectedMembers, setSelectedMembers] = useState<Map<string, User>>(new Map());
+  const [newMembers, setNewMembers] = useState<NewMemberDraft[]>([]);
+  const [committing, setCommitting] = useState(false);
   const [showMedia, setShowMedia] = useState(false);
   const [media, setMedia] = useState<Message[] | null>(null);
 
@@ -61,25 +64,53 @@ export default function GroupChatInfo() {
     return members.filter((m) => m.name.toLowerCase().includes(term));
   }, [members, search]);
 
-  async function handleAddSearch(term: string) {
-    const results = await fetchUnassignedUsers(term || undefined);
-    setCandidates(results);
+  function handleToggleSelectMember(user: User) {
+    setSelectedMembers((prev) => {
+      const next = new Map(prev);
+      if (next.has(user.id)) next.delete(user.id);
+      else next.set(user.id, user);
+      return next;
+    });
   }
 
-  async function handleAdd(userId: string) {
-    if (!groupId) return;
-    const added = await assignUserGroup(userId, groupId);
-    setMembers((prev) => [...(prev ?? []), added]);
-    setGroup((prev) => (prev ? { ...prev, customer_count: prev.customer_count + 1 } : prev));
-    setShowAddPanel(false);
+  function handleAddNewMember(member: NewMemberDraft) {
+    setNewMembers((prev) => [...prev, member]);
   }
 
-  async function handleAddNew(phone: string, name: string, password: string) {
-    if (!groupId) return;
-    const added = await createAndAssignCustomer(groupId, name, phone, password);
-    setMembers((prev) => [...(prev ?? []), added]);
-    setGroup((prev) => (prev ? { ...prev, customer_count: prev.customer_count + 1 } : prev));
+  function handleRemoveNewMember(key: string) {
+    setNewMembers((prev) => prev.filter((m) => m.key !== key));
+  }
+
+  function closeAddPanel() {
     setShowAddPanel(false);
+    setSelectedMembers(new Map());
+    setNewMembers([]);
+  }
+
+  async function handleDoneAddingMembers() {
+    if (!groupId || committing) return;
+    setCommitting(true);
+    try {
+      const added = await Promise.all([
+        ...Array.from(selectedMembers.keys()).map((userId) => assignUserGroup(userId, groupId)),
+        ...newMembers.map((m) =>
+          createAndAssignCustomer(groupId, m.name, m.phone, m.password, m.role),
+        ),
+      ]);
+      setMembers((prev) => [...(prev ?? []), ...added]);
+      setGroup((prev) =>
+        prev ? { ...prev, customer_count: prev.customer_count + added.length } : prev,
+      );
+      closeAddPanel();
+    } finally {
+      setCommitting(false);
+    }
+  }
+
+  async function handleRemoveMember(userId: string) {
+    await assignUserGroup(userId, null);
+    setMembers((prev) => prev?.filter((m) => m.id !== userId) ?? null);
+    setGroup((prev) => (prev ? { ...prev, customer_count: prev.customer_count - 1 } : prev));
   }
 
   function handleToggleMedia() {
@@ -121,14 +152,7 @@ export default function GroupChatInfo() {
           <Search size={18} />
           <span>Search</span>
         </button>
-        <button
-          className={ACTION_BTN}
-          type="button"
-          onClick={() => {
-            setShowAddPanel(true);
-            handleAddSearch("");
-          }}
-        >
+        <button className={ACTION_BTN} type="button" onClick={() => setShowAddPanel(true)}>
           <UserPlus size={18} />
           <span>Add Member</span>
         </button>
@@ -198,14 +222,21 @@ export default function GroupChatInfo() {
                 className="flex items-center gap-3 py-3 border-b border-[#f3f5f4] dark:border-[#232d3a] last:border-b-0"
               >
                 <Avatar name={m.name} size={40} />
-                <div className="flex-1">
-                  <div className="font-medium">{m.name}</div>
+                <div className="flex-1 min-w-0">
+                  <div className="font-medium truncate">{m.name}</div>
                   {(m.email || m.phone) && (
-                    <div className="text-[#7c827e] dark:text-[#8b96a5] text-[13px] mt-0.5">
+                    <div className="text-[#7c827e] dark:text-[#8b96a5] text-[13px] mt-0.5 truncate">
                       {m.email ?? m.phone}
                     </div>
                   )}
                 </div>
+                <button
+                  className="flex border-none bg-transparent text-[#d92d20] cursor-pointer p-1.5 shrink-0"
+                  onClick={() => handleRemoveMember(m.id)}
+                  aria-label={`Remove ${m.name}`}
+                >
+                  <X size={16} />
+                </button>
               </div>
             ))}
           </div>
@@ -213,12 +244,24 @@ export default function GroupChatInfo() {
       </div>
 
       {showAddPanel && (
-        <AddCustomerPanel
-          candidates={candidates}
-          onSearch={handleAddSearch}
-          onAdd={handleAdd}
-          onAddNew={handleAddNew}
-          onClose={() => setShowAddPanel(false)}
+        <MultiAddMembersPanel
+          title="Add Members"
+          onClose={closeAddPanel}
+          doneLabel={committing ? "Adding..." : "Done"}
+          fetchCandidates={(term) => fetchUnassignedUsers(term || undefined, "STAFF")}
+          excludeIds={[]}
+          selected={selectedMembers}
+          onToggleSelect={handleToggleSelectMember}
+          newMemberRoleMode="fixed"
+          fixedNewMemberRole="STAFF"
+          newMembers={newMembers}
+          onAddNewMember={handleAddNewMember}
+          onRemoveNewMember={handleRemoveNewMember}
+          onDone={handleDoneAddingMembers}
+          candidateSectionLabel="All Staff"
+          notFoundLabel="Not in your staff yet"
+          hintTitle="Can't find a staff member?"
+          getExistingLabel={(u) => (u.group_name ? `Already in ${u.group_name}` : null)}
         />
       )}
     </div>

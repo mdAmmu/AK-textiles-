@@ -72,6 +72,11 @@ export async function fetchConversations(): Promise<ConversationSummary[]> {
   return data;
 }
 
+export async function startConversation(userId: string): Promise<ConversationSummary> {
+  const { data } = await api.post<ConversationSummary>("/chats/start", { user_id: userId });
+  return data;
+}
+
 export async function fetchConversationMessages(
   conversationId: string,
 ): Promise<ConversationDetail> {

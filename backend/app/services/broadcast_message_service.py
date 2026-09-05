@@ -75,6 +75,13 @@ def update_audience(
 
 
 def delete_audience(db: Session, audience: BroadcastAudience) -> None:
+    # Broadcast.audience_id has no ON DELETE cascade — it's kept only so
+    # "Duplicate" can pre-fill the composer, so it's safe to clear before
+    # removing the audience (otherwise any audience with send history hits
+    # a foreign-key violation on delete).
+    db.query(Broadcast).filter(Broadcast.audience_id == audience.id).update(
+        {Broadcast.audience_id: None}, synchronize_session=False
+    )
     db.delete(audience)
     db.commit()
 

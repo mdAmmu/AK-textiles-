@@ -1,6 +1,6 @@
 import { useRef, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Image as ImageIcon, MoreVertical, Paperclip, Reply, Trash2, X } from "lucide-react";
+import { Camera, FileText, Image as ImageIcon, MoreVertical, Reply, Trash2, X } from "lucide-react";
 import { useCurrentUser } from "../hooks/useCurrentUser";
 import { useChatSocket } from "../hooks/useChatSocket";
 import {
@@ -14,7 +14,8 @@ import {
 import type { Message } from "../types/message";
 import GroupIcon from "../components/admin/GroupIcon";
 import MessageList from "../components/chat/MessageList";
-import MessageInput, { MESSAGE_INPUT_ICON_CLASS } from "../components/chat/MessageInput";
+import MessageInput from "../components/chat/MessageInput";
+import type { AttachmentOption } from "../components/chat/AttachmentSheet";
 import ForwardPreviewBar, { type StagedImage } from "../components/chat/ForwardPreviewBar";
 import ReplyPreviewBar from "../components/chat/ReplyPreviewBar";
 import LoadingScreen from "../components/common/LoadingScreen";
@@ -44,6 +45,7 @@ export default function CustomerChat() {
   const [stagedImages, setStagedImages] = useState<StagedImage[]>([]);
   const [draftText, setDraftText] = useState("");
   const imageInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
   const documentInputRef = useRef<HTMLInputElement>(null);
 
   const selectionMode = selectedIds.size > 0;
@@ -335,41 +337,49 @@ export default function CustomerChat() {
         value={draftText}
         onChange={setDraftText}
         canSubmitEmpty={stagedImages.length > 0}
-        extraAction={
-          <>
-            <span
-              className={MESSAGE_INPUT_ICON_CLASS}
-              onClick={() => imageInputRef.current?.click()}
-              role="button"
-              aria-label="Send images"
-            >
-              <ImageIcon size={20} />
-            </span>
-            <span
-              className={MESSAGE_INPUT_ICON_CLASS}
-              onClick={() => documentInputRef.current?.click()}
-              role="button"
-              aria-label="Send a document"
-            >
-              <Paperclip size={20} />
-            </span>
-            <input
-              ref={imageInputRef}
-              type="file"
-              accept="image/*"
-              multiple
-              hidden
-              onChange={handlePickImages}
-            />
-            <input
-              ref={documentInputRef}
-              type="file"
-              accept=".pdf,.doc,.docx,.xls,.xlsx,application/pdf,application/msword"
-              hidden
-              onChange={handlePickDocument}
-            />
-          </>
-        }
+        attachmentOptions={[
+          {
+            key: "document",
+            label: "Document",
+            icon: <FileText size={24} />,
+            onClick: () => documentInputRef.current?.click(),
+          },
+          {
+            key: "camera",
+            label: "Camera",
+            icon: <Camera size={24} />,
+            onClick: () => cameraInputRef.current?.click(),
+          },
+          {
+            key: "gallery",
+            label: "Gallery",
+            icon: <ImageIcon size={24} />,
+            onClick: () => imageInputRef.current?.click(),
+          },
+        ] satisfies AttachmentOption[]}
+      />
+      <input
+        ref={imageInputRef}
+        type="file"
+        accept="image/*"
+        multiple
+        hidden
+        onChange={handlePickImages}
+      />
+      <input
+        ref={cameraInputRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
+        hidden
+        onChange={handlePickImages}
+      />
+      <input
+        ref={documentInputRef}
+        type="file"
+        accept=".pdf,.doc,.docx,.xls,.xlsx,application/pdf,application/msword"
+        hidden
+        onChange={handlePickDocument}
       />
     </div>
   );

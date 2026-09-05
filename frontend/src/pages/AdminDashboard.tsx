@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { MoreVertical } from "lucide-react";
 import { fetchGroups } from "../services/groups";
 import type { Group } from "../types/group";
 import { useCurrentUser } from "../hooks/useCurrentUser";
@@ -6,6 +7,7 @@ import AdminHomeHeader from "../components/admin/AdminHomeHeader";
 import GroupChatListItem from "../components/admin/GroupChatListItem";
 import AdminAccountPanel from "../components/admin/AdminAccountPanel";
 import AdminProfileScreen from "../components/admin/AdminProfileScreen";
+import GroupManagementPanel from "../components/admin/GroupManagementPanel";
 import LoadingScreen from "../components/common/LoadingScreen";
 import BottomNav from "../components/admin/BottomNav";
 
@@ -15,6 +17,7 @@ export default function AdminDashboard() {
   const [search, setSearch] = useState("");
   const [showAccount, setShowAccount] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
+  const [showGroupManagement, setShowGroupManagement] = useState(false);
 
   useEffect(() => {
     fetchGroups().then(setGroups);
@@ -43,8 +46,15 @@ export default function AdminDashboard() {
           <LoadingScreen />
         ) : (
           <>
-            <div className="py-2 px-1 pb-2.5 text-sm font-bold text-[#1a1a1a] dark:text-[#e9edef]">
-              Your Groups
+            <div className="flex items-center justify-between py-2 px-1 pb-2.5">
+              <span className="text-sm font-bold text-[#1a1a1a] dark:text-[#e9edef]">Your Groups</span>
+              <button
+                className="flex border-none bg-transparent text-[#1a1a1a] dark:text-[#e9edef] cursor-pointer p-1"
+                aria-label="Manage groups"
+                onClick={() => setShowGroupManagement(true)}
+              >
+                <MoreVertical size={18} />
+              </button>
             </div>
             {filtered.length === 0 ? (
               <p className="py-4 px-1">No groups yet.</p>
@@ -69,9 +79,12 @@ export default function AdminDashboard() {
       )}
 
       {showAccount && user && (
-        <AdminAccountPanel
-          admin={user}
-          onClose={() => setShowAccount(false)}
+        <AdminAccountPanel admin={user} onClose={() => setShowAccount(false)} />
+      )}
+
+      {showGroupManagement && (
+        <GroupManagementPanel
+          onClose={() => setShowGroupManagement(false)}
           onGroupCreated={(group) => setGroups((prev) => [group, ...(prev ?? [])])}
           onGroupDeleted={(groupId) =>
             setGroups((prev) => prev?.filter((g) => g.id !== groupId) ?? prev)

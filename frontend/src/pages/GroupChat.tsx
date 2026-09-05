@@ -1,6 +1,15 @@
 import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, Camera, Forward, Pencil, Trash2, X } from "lucide-react";
+import {
+  ArrowLeft,
+  Camera,
+  FileText,
+  Forward,
+  Image as ImageIcon,
+  Pencil,
+  Trash2,
+  X,
+} from "lucide-react";
 import {
   deleteGroupMessages,
   editGroupMessage,
@@ -8,6 +17,7 @@ import {
   fetchGroups,
   forwardGroupMessages,
   markGroupRead,
+  sendGroupDocumentMessage,
   sendGroupImageMessage,
   sendGroupMessage,
   sendGroupProductMessage,
@@ -18,10 +28,8 @@ import { useCurrentUser } from "../hooks/useCurrentUser";
 import { useChatSocket } from "../hooks/useChatSocket";
 import GroupIcon from "../components/admin/GroupIcon";
 import MessageList from "../components/chat/MessageList";
-import MessageInput, {
-  MESSAGE_INPUT_ICON_CLASS,
-  type MessageInputHandle,
-} from "../components/chat/MessageInput";
+import MessageInput, { type MessageInputHandle } from "../components/chat/MessageInput";
+import type { AttachmentOption } from "../components/chat/AttachmentSheet";
 import GroupProductComposer from "../components/chat/GroupProductComposer";
 import ForwardPicker from "../components/chat/ForwardPicker";
 import ForwardPreviewBar, { type StagedImage } from "../components/chat/ForwardPreviewBar";
@@ -63,7 +71,9 @@ export default function GroupChat() {
   const [forwardSourceGroupId, setForwardSourceGroupId] = useState<string | null>(null);
   const [draftText, setDraftText] = useState("");
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
+  const documentInputRef = useRef<HTMLInputElement>(null);
   const messageInputRef = useRef<MessageInputHandle>(null);
 
   const selectionMode = selectedIds.size > 0;
@@ -269,7 +279,15 @@ export default function GroupChat() {
     setShowPicker(false);
   }
 
-  function handleCameraCapture(e: React.ChangeEvent<HTMLInputElement>) {
+  async function handleDocumentPick(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file || !groupId) return;
+    const message = await sendGroupDocumentMessage(groupId, file);
+    setMessages((prev) => [...(prev ?? []), message]);
+  }
+
+  function handlePickImages(e: React.ChangeEvent<HTMLInputElement>) {
     const files = e.target.files ? Array.from(e.target.files) : [];
     e.target.value = "";
     if (files.length === 0) return;
@@ -433,26 +451,52 @@ export default function GroupChat() {
         value={draftText}
         onChange={setDraftText}
         canSubmitEmpty={stagedImages.length > 0}
-        extraAction={
-          <>
-            <span
-              className={MESSAGE_INPUT_ICON_CLASS}
-              onClick={() => cameraInputRef.current?.click()}
-              role="button"
-              aria-label="Take a photo"
-            >
-              <Camera size={20} />
-            </span>
-            <input
-              ref={cameraInputRef}
-              type="file"
-              accept="image/*"
-              multiple
-              hidden
-              onChange={handleCameraCapture}
-            />
-          </>
-        }
+        attachmentOptions={[
+          {
+            key: "document",
+            label: "Document",
+            icon: <FileText size={24} />,
+            onClick: () => documentInputRef.current?.click(),
+          },
+          {
+            key: "camera",
+            label: "Camera",
+            icon: <Camera size={24} />,
+            onClick: () => cameraInputRef.current?.click(),
+          },
+          {
+            key: "gallery",
+            label: "Gallery",
+            icon: <ImageIcon size={24} />,
+            onClick: () => imageInputRef.current?.click(),
+          },
+          // Product picker removed from the attachment sheet for now — a
+          // better version is planned later. setShowPicker/
+          // GroupProductComposer stay wired so it's a one-line add-back.
+        ] satisfies AttachmentOption[]}
+      />
+      <input
+        ref={imageInputRef}
+        type="file"
+        accept="image/*"
+        multiple
+        hidden
+        onChange={handlePickImages}
+      />
+      <input
+        ref={cameraInputRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
+        hidden
+        onChange={handlePickImages}
+      />
+      <input
+        ref={documentInputRef}
+        type="file"
+        accept=".pdf,.doc,.docx,.xls,.xlsx,application/pdf,application/msword"
+        hidden
+        onChange={handleDocumentPick}
       />
 
       {showPicker && groupId && (

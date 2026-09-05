@@ -1,6 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Image as ImageIcon, Package, Paperclip, Reply, Forward, Trash2, X } from "lucide-react";
+import {
+  Camera,
+  FileText,
+  Image as ImageIcon,
+  Reply,
+  Forward,
+  Trash2,
+  X,
+} from "lucide-react";
 import {
   deleteConversationMessages,
   fetchConversationMessages,
@@ -16,7 +24,8 @@ import { useChatSocket } from "../hooks/useChatSocket";
 import type { Message } from "../types/message";
 import ChatHeader from "../components/chat/ChatHeader";
 import MessageList from "../components/chat/MessageList";
-import MessageInput, { MESSAGE_INPUT_ICON_CLASS } from "../components/chat/MessageInput";
+import MessageInput from "../components/chat/MessageInput";
+import type { AttachmentOption } from "../components/chat/AttachmentSheet";
 import ProductPicker from "../components/chat/ProductPicker";
 import ForwardPicker from "../components/chat/ForwardPicker";
 import ForwardPreviewBar, { type StagedImage } from "../components/chat/ForwardPreviewBar";
@@ -45,6 +54,7 @@ export default function AdminChat() {
   const [stagedImages, setStagedImages] = useState<StagedImage[]>([]);
   const [draftText, setDraftText] = useState("");
   const imageInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
   const documentInputRef = useRef<HTMLInputElement>(null);
 
   const selectionMode = selectedIds.size > 0;
@@ -243,6 +253,30 @@ export default function AdminChat() {
     setSelectedIds(new Set());
   }
 
+  const attachmentOptions: AttachmentOption[] = [
+    {
+      key: "document",
+      label: "Document",
+      icon: <FileText size={24} />,
+      onClick: () => documentInputRef.current?.click(),
+    },
+    {
+      key: "camera",
+      label: "Camera",
+      icon: <Camera size={24} />,
+      onClick: () => cameraInputRef.current?.click(),
+    },
+    {
+      key: "gallery",
+      label: "Gallery",
+      icon: <ImageIcon size={24} />,
+      onClick: () => imageInputRef.current?.click(),
+    },
+    // Product picker removed from the attachment sheet for now — a better
+    // version is planned later. setShowPicker/ProductPicker stay wired so
+    // it's a one-line add-back when that lands.
+  ];
+
   if (messages === null || !user) return <LoadingScreen />;
 
   return (
@@ -303,49 +337,30 @@ export default function AdminChat() {
         value={draftText}
         onChange={setDraftText}
         canSubmitEmpty={stagedImages.length > 0}
-        extraAction={
-          <>
-            <span
-              className={MESSAGE_INPUT_ICON_CLASS}
-              onClick={() => setShowPicker(true)}
-              role="button"
-              aria-label="Send a product"
-            >
-              <Package size={20} />
-            </span>
-            <span
-              className={MESSAGE_INPUT_ICON_CLASS}
-              onClick={() => imageInputRef.current?.click()}
-              role="button"
-              aria-label="Send images"
-            >
-              <ImageIcon size={20} />
-            </span>
-            <span
-              className={MESSAGE_INPUT_ICON_CLASS}
-              onClick={() => documentInputRef.current?.click()}
-              role="button"
-              aria-label="Send a document"
-            >
-              <Paperclip size={20} />
-            </span>
-            <input
-              ref={imageInputRef}
-              type="file"
-              accept="image/*"
-              multiple
-              hidden
-              onChange={handlePickImages}
-            />
-            <input
-              ref={documentInputRef}
-              type="file"
-              accept=".pdf,.doc,.docx,.xls,.xlsx,application/pdf,application/msword"
-              hidden
-              onChange={handleDocumentPick}
-            />
-          </>
-        }
+        attachmentOptions={attachmentOptions}
+      />
+      <input
+        ref={imageInputRef}
+        type="file"
+        accept="image/*"
+        multiple
+        hidden
+        onChange={handlePickImages}
+      />
+      <input
+        ref={cameraInputRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
+        hidden
+        onChange={handlePickImages}
+      />
+      <input
+        ref={documentInputRef}
+        type="file"
+        accept=".pdf,.doc,.docx,.xls,.xlsx,application/pdf,application/msword"
+        hidden
+        onChange={handleDocumentPick}
       />
 
       {showPicker && (

@@ -1,22 +1,27 @@
 import { useEffect, useMemo, useState } from "react";
-import { MessageCircle } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { MessageCircle, MessageSquarePlus } from "lucide-react";
 import BottomNav from "../components/admin/BottomNav";
 import AdminHomeHeader from "../components/admin/AdminHomeHeader";
 import AdminAccountPanel from "../components/admin/AdminAccountPanel";
 import AdminProfileScreen from "../components/admin/AdminProfileScreen";
+import StartChatPanel from "../components/admin/StartChatPanel";
 import LoadingScreen from "../components/common/LoadingScreen";
 import ChatListItem from "../components/admin/ChatListItem";
-import { fetchConversations } from "../services/chat";
+import { fetchConversations, startConversation } from "../services/chat";
 import type { ConversationSummary } from "../services/chat";
+import type { User } from "../types/user";
 import { useCurrentUser } from "../hooks/useCurrentUser";
 import { useChatSocket } from "../hooks/useChatSocket";
 
 export default function AdminChatsHome() {
   const { user } = useCurrentUser();
+  const navigate = useNavigate();
   const [conversations, setConversations] = useState<ConversationSummary[] | null>(null);
   const [search, setSearch] = useState("");
   const [showAccount, setShowAccount] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
+  const [showStartChat, setShowStartChat] = useState(false);
 
   useEffect(() => {
     fetchConversations().then(setConversations);
@@ -55,6 +60,12 @@ export default function AdminChatsHome() {
     return conversations.filter((c) => c.user_name.toLowerCase().includes(term));
   }, [conversations, search]);
 
+  async function handleStartChat(customer: User) {
+    const conversation = await startConversation(customer.id);
+    setShowStartChat(false);
+    navigate(`/admin/chats/${conversation.id}`);
+  }
+
   return (
     <div className="relative flex flex-col h-dvh bg-[linear-gradient(180deg,#eaf7ee_0%,#f6fbf7_40%,#ffffff_75%)] dark:bg-[#10161f]">
       <AdminHomeHeader
@@ -87,16 +98,27 @@ export default function AdminChatsHome() {
         )}
       </main>
 
+      <button
+        className="absolute bottom-24 right-5 flex items-center justify-center w-14 h-14 rounded-full bg-[#0f9d6e] text-white border-none cursor-pointer shadow-[0_4px_14px_rgba(15,157,110,0.35)] z-10"
+        onClick={() => setShowStartChat(true)}
+        aria-label="Start new chat"
+      >
+        <MessageSquarePlus size={26} />
+      </button>
+
       <BottomNav />
 
       {showProfile && user && <AdminProfileScreen admin={user} onClose={() => setShowProfile(false)} />}
 
       {showAccount && user && (
-        <AdminAccountPanel
-          admin={user}
-          onClose={() => setShowAccount(false)}
-          onGroupCreated={() => {}}
-          onGroupDeleted={() => {}}
+        <AdminAccountPanel admin={user} onClose={() => setShowAccount(false)} />
+      )}
+
+      {showStartChat && (
+        <StartChatPanel
+          excludeIds={conversations?.map((c) => c.user_id) ?? []}
+          onChat={handleStartChat}
+          onClose={() => setShowStartChat(false)}
         />
       )}
     </div>

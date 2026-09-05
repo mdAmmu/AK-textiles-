@@ -2,6 +2,7 @@ import uuid
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, Form, HTTPException, UploadFile, status
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user, require_admin
@@ -12,7 +13,7 @@ from app.models.conversation import Conversation
 from app.models.group import Group
 from app.models.message import Message
 from app.models.product import Product
-from app.models.user import User
+from app.models.user import User, UserRole
 from app.schemas.conversation import ConversationDetail, ConversationSummary
 from app.schemas.message import (
     DeleteMessagesRequest,
@@ -123,6 +124,33 @@ async def mark_my_conversation_read(
 
 
 # ---------- Admin side: list all conversations, chat with any customer ----------
+
+
+class StartConversationRequest(BaseModel):
+    user_id: str
+
+
+@router.post("/start", response_model=ConversationSummary)
+def start_conversation(
+    body: StartConversationRequest,
+    db: Session = Depends(get_db),
+    _admin: User = Depends(require_admin),
+):
+    """Admin-initiated chat with a customer who hasn't messaged first —
+    get_or_create_conversation() is otherwise only reached from the
+    customer's own /chats/me routes."""
+    customer = (
+        db.query(User).filter(User.id == body.user_id, User.role == UserRole.USER).first()
+    )
+    if customer is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Customer not found")
+
+    conversation = get_or_create_conversation(db, customer)
+    return ConversationSummary(
+        id=str(conversation.id),
+        user_id=str(customer.id),
+        user_name=customer.name,
+    )
 
 
 @router.get("", response_model=list[ConversationSummary])

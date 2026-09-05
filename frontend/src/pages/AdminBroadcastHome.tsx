@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Plus, Radio } from "lucide-react";
+import { MoreVertical, Radio } from "lucide-react";
 import BottomNav from "../components/admin/BottomNav";
 import AdminHomeHeader from "../components/admin/AdminHomeHeader";
 import AdminAccountPanel from "../components/admin/AdminAccountPanel";
 import AdminProfileScreen from "../components/admin/AdminProfileScreen";
+import BroadcastManagementPanel from "../components/admin/BroadcastManagementPanel";
 import LoadingScreen from "../components/common/LoadingScreen";
 import { fetchAudiences } from "../services/broadcastMessages";
 import type { BroadcastAudience } from "../types/broadcastMessage";
@@ -17,6 +18,7 @@ export default function AdminBroadcastHome() {
   const [search, setSearch] = useState("");
   const [showAccount, setShowAccount] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
+  const [showBroadcastManagement, setShowBroadcastManagement] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -42,18 +44,20 @@ export default function AdminBroadcastHome() {
         searchValue={search}
         onSearchChange={setSearch}
         searchPlaceholder="Search broadcasts..."
-        trailing={
-          <Link
-            to="/admin/broadcast/new"
-            className="flex items-center gap-1.5 bg-[#0f9d6e] text-white no-underline font-semibold text-sm rounded-full py-2.5 px-4 shrink-0"
-            aria-label="New broadcast"
-          >
-            <Plus size={16} /> New
-          </Link>
-        }
       />
 
       <main className="flex-1 overflow-y-auto pt-3.5 px-5 pb-24">
+        <div className="flex items-center justify-between mb-2.5">
+          <span className="text-sm font-bold text-[#1a1a1a] dark:text-[#e9edef]">Broadcast</span>
+          <button
+            className="flex border-none bg-transparent text-[#1a1a1a] dark:text-[#e9edef] cursor-pointer p-1"
+            aria-label="Manage broadcasts"
+            onClick={() => setShowBroadcastManagement(true)}
+          >
+            <MoreVertical size={18} />
+          </button>
+        </div>
+
         {filtered === null ? (
           <LoadingScreen />
         ) : filtered.length === 0 ? (
@@ -64,12 +68,12 @@ export default function AdminBroadcastHome() {
                 ? "No broadcasts match your search."
                 : "No broadcasts yet. Create one, add recipients, and message all of them privately at once — from one place."}
             </p>
-            <Link
-              to="/admin/broadcast/new"
-              className="mt-1 bg-[#0f9d6e] text-white no-underline font-semibold text-sm rounded-full py-2.5 px-5"
+            <button
+              className="mt-1 border-none bg-[#0f9d6e] text-white font-semibold text-sm rounded-full py-2.5 px-5 cursor-pointer"
+              onClick={() => setShowBroadcastManagement(true)}
             >
               Create Broadcast
-            </Link>
+            </button>
           </div>
         ) : (
           <div className="flex flex-col gap-2.5">
@@ -104,11 +108,15 @@ export default function AdminBroadcastHome() {
       {showProfile && user && <AdminProfileScreen admin={user} onClose={() => setShowProfile(false)} />}
 
       {showAccount && user && (
-        <AdminAccountPanel
-          admin={user}
-          onClose={() => setShowAccount(false)}
-          onGroupCreated={() => {}}
-          onGroupDeleted={() => {}}
+        <AdminAccountPanel admin={user} onClose={() => setShowAccount(false)} />
+      )}
+
+      {showBroadcastManagement && (
+        <BroadcastManagementPanel
+          onClose={() => setShowBroadcastManagement(false)}
+          onAudienceDeleted={(audienceId) =>
+            setAudiences((prev) => prev?.filter((a) => a.id !== audienceId) ?? prev)
+          }
         />
       )}
     </div>

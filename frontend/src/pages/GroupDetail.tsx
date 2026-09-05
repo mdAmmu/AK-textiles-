@@ -12,7 +12,7 @@ import type { Group, GroupUser } from "../types/group";
 import type { User } from "../types/user";
 import GroupIcon from "../components/admin/GroupIcon";
 import CustomerRow from "../components/admin/CustomerRow";
-import AddCustomerPanel from "../components/admin/AddCustomerPanel";
+import MultiAddMembersPanel, { type NewMemberDraft } from "../components/admin/MultiAddMembersPanel";
 import LoadingScreen from "../components/common/LoadingScreen";
 
 const HEADER_BTN = "flex border-none bg-transparent text-white cursor-pointer p-1";
@@ -24,7 +24,9 @@ export default function GroupDetail() {
   const [group, setGroup] = useState<Group | null>(null);
   const [customers, setCustomers] = useState<GroupUser[] | null>(null);
   const [showAddPanel, setShowAddPanel] = useState(false);
-  const [candidates, setCandidates] = useState<User[]>([]);
+  const [selectedMembers, setSelectedMembers] = useState<Map<string, User>>(new Map());
+  const [newMembers, setNewMembers] = useState<NewMemberDraft[]>([]);
+  const [committing, setCommitting] = useState(false);
 
   useEffect(() => {
     if (!groupId) return;
@@ -38,25 +40,43 @@ export default function GroupDetail() {
     setGroup((prev) => (prev ? { ...prev, customer_count: prev.customer_count - 1 } : prev));
   }
 
-  async function handleSearch(term: string) {
-    const results = await fetchUnassignedUsers(term || undefined);
-    setCandidates(results);
+  function handleToggleSelectMember(user: User) {
+    setSelectedMembers((prev) => {
+      const next = new Map(prev);
+      if (next.has(user.id)) next.delete(user.id);
+      else next.set(user.id, user);
+      return next;
+    });
   }
 
-  async function handleAdd(userId: string) {
-    if (!groupId) return;
-    const added = await assignUserGroup(userId, groupId);
-    setCustomers((prev) => [...(prev ?? []), added]);
-    setGroup((prev) => (prev ? { ...prev, customer_count: prev.customer_count + 1 } : prev));
-    setShowAddPanel(false);
+  function handleAddNewMember(member: NewMemberDraft) {
+    setNewMembers((prev) => [...prev, member]);
   }
 
-  async function handleAddNew(phone: string, name: string, password: string, role: "USER" | "STAFF") {
-    if (!groupId) return;
-    const added = await createAndAssignCustomer(groupId, name, phone, password, role);
-    setCustomers((prev) => [...(prev ?? []), added]);
-    setGroup((prev) => (prev ? { ...prev, customer_count: prev.customer_count + 1 } : prev));
-    setShowAddPanel(false);
+  function handleRemoveNewMember(key: string) {
+    setNewMembers((prev) => prev.filter((m) => m.key !== key));
+  }
+
+  async function handleDoneAddingMembers() {
+    if (!groupId || committing) return;
+    setCommitting(true);
+    try {
+      const added = await Promise.all([
+        ...Array.from(selectedMembers.keys()).map((userId) => assignUserGroup(userId, groupId)),
+        ...newMembers.map((m) =>
+          createAndAssignCustomer(groupId, m.name, m.phone, m.password, m.role),
+        ),
+      ]);
+      setCustomers((prev) => [...(prev ?? []), ...added]);
+      setGroup((prev) =>
+        prev ? { ...prev, customer_count: prev.customer_count + added.length } : prev,
+      );
+      setSelectedMembers(new Map());
+      setNewMembers([]);
+      setShowAddPanel(false);
+    } finally {
+      setCommitting(false);
+    }
   }
 
   if (customers === null || group === null) return <LoadingScreen />;
@@ -71,7 +91,7 @@ export default function GroupDetail() {
         </button>
         <div className="flex-1 flex flex-col">
           <h1 className="m-0 text-xl text-white">{group.name}</h1>
-          <span className="text-xs text-white/85">{group.customer_count} Customers</span>
+          <span className="text-xs text-white/85">{group.customer_count} Members</span>
         </div>
         <button className={HEADER_BTN} aria-label="Edit">
           <Pencil size={18} />
@@ -95,7 +115,7 @@ export default function GroupDetail() {
             </span>
           </div>
           <div className="flex items-center gap-1.5 text-[var(--wa-text-secondary)] text-[13px] mt-1">
-            <UserIcon size={14} /> {group.customer_count} Customers
+            <UserIcon size={14} /> {group.customer_count} Members
           </div>
         </div>
       </div>
@@ -104,18 +124,15 @@ export default function GroupDetail() {
         <span className="font-bold">Members</span>
         <button
           className="flex items-center gap-1 border-none bg-transparent text-[var(--wa-accent)] font-semibold text-sm cursor-pointer"
-          onClick={() => {
-            setShowAddPanel(true);
-            handleSearch("");
-          }}
+          onClick={() => setShowAddPanel(true)}
         >
-          <UserPlus size={16} /> Add Customer
+          <UserPlus size={16} /> Add Staff
         </button>
       </div>
 
       <div className="flex-1 px-3.5">
         {customers.length === 0 && (
-          <p className="p-4 text-[var(--wa-text-secondary)]">No customers yet.</p>
+          <p className="p-4 text-[var(--wa-text-secondary)]">No staff yet.</p>
         )}
         {customers.map((c) => (
           <CustomerRow key={c.id} customer={c} onRemove={handleRemove} />
@@ -124,21 +141,34 @@ export default function GroupDetail() {
 
       <button
         className="flex items-center justify-center gap-2 m-3.5 p-3.5 bg-[var(--wa-header)] text-white border-none rounded-[10px] font-semibold cursor-pointer"
-        onClick={() => {
-          setShowAddPanel(true);
-          handleSearch("");
-        }}
+        onClick={() => setShowAddPanel(true)}
       >
-        <UserPlus size={18} /> Add Customer
+        <UserPlus size={18} /> Add Staff
       </button>
 
       {showAddPanel && (
-        <AddCustomerPanel
-          candidates={candidates}
-          onSearch={handleSearch}
-          onAdd={handleAdd}
-          onAddNew={handleAddNew}
-          onClose={() => setShowAddPanel(false)}
+        <MultiAddMembersPanel
+          title="Add Staff"
+          onClose={() => {
+            setShowAddPanel(false);
+            setSelectedMembers(new Map());
+            setNewMembers([]);
+          }}
+          doneLabel={committing ? "Adding..." : "Done"}
+          fetchCandidates={(term) => fetchUnassignedUsers(term || undefined, "STAFF")}
+          excludeIds={[]}
+          selected={selectedMembers}
+          onToggleSelect={handleToggleSelectMember}
+          newMemberRoleMode="fixed"
+          fixedNewMemberRole="STAFF"
+          newMembers={newMembers}
+          onAddNewMember={handleAddNewMember}
+          onRemoveNewMember={handleRemoveNewMember}
+          onDone={handleDoneAddingMembers}
+          candidateSectionLabel="All Staff"
+          notFoundLabel="Not in your staff yet"
+          hintTitle="Can't find a staff member?"
+          getExistingLabel={(u) => (u.group_name ? `Already in ${u.group_name}` : null)}
         />
       )}
     </div>

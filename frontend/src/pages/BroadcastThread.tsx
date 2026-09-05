@@ -2,10 +2,10 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   ArrowLeft,
+  Camera,
   FileText,
   Forward,
   Image as ImageIcon,
-  Paperclip,
   Radio,
   Reply,
   Trash2,
@@ -21,7 +21,8 @@ import {
 } from "../services/broadcastMessages";
 import type { BroadcastAudienceDetail, BroadcastMessage } from "../types/broadcastMessage";
 import LoadingScreen from "../components/common/LoadingScreen";
-import MessageInput, { MESSAGE_INPUT_ICON_CLASS } from "../components/chat/MessageInput";
+import MessageInput from "../components/chat/MessageInput";
+import type { AttachmentOption } from "../components/chat/AttachmentSheet";
 import ForwardPicker from "../components/chat/ForwardPicker";
 import ForwardPreviewBar, { type StagedImage } from "../components/chat/ForwardPreviewBar";
 import { MAX_GRID_TILES, TILE_GRID_BASE, TILE_GRID_COUNT } from "../components/chat/ImageGroupBubble";
@@ -105,6 +106,7 @@ export default function BroadcastThread() {
   const { audienceId } = useParams<{ audienceId: string }>();
   const navigate = useNavigate();
   const imageInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
   const documentInputRef = useRef<HTMLInputElement>(null);
 
   const [audience, setAudience] = useState<BroadcastAudienceDetail | null>(null);
@@ -449,41 +451,49 @@ export default function BroadcastThread() {
         value={draftText}
         onChange={setDraftText}
         canSubmitEmpty={stagedImages.length > 0}
-        extraAction={
-          <>
-            <span
-              className={MESSAGE_INPUT_ICON_CLASS}
-              onClick={() => imageInputRef.current?.click()}
-              role="button"
-              aria-label="Send images"
-            >
-              <ImageIcon size={20} />
-            </span>
-            <span
-              className={MESSAGE_INPUT_ICON_CLASS}
-              onClick={() => documentInputRef.current?.click()}
-              role="button"
-              aria-label="Send a document"
-            >
-              <Paperclip size={20} />
-            </span>
-            <input
-              ref={imageInputRef}
-              type="file"
-              accept="image/*"
-              multiple
-              hidden
-              onChange={handlePickImages}
-            />
-            <input
-              ref={documentInputRef}
-              type="file"
-              accept=".pdf,.doc,.docx,.xls,.xlsx,application/pdf,application/msword"
-              hidden
-              onChange={handlePickDocument}
-            />
-          </>
-        }
+        attachmentOptions={[
+          {
+            key: "document",
+            label: "Document",
+            icon: <FileText size={24} />,
+            onClick: () => documentInputRef.current?.click(),
+          },
+          {
+            key: "camera",
+            label: "Camera",
+            icon: <Camera size={24} />,
+            onClick: () => cameraInputRef.current?.click(),
+          },
+          {
+            key: "gallery",
+            label: "Gallery",
+            icon: <ImageIcon size={24} />,
+            onClick: () => imageInputRef.current?.click(),
+          },
+        ] satisfies AttachmentOption[]}
+      />
+      <input
+        ref={imageInputRef}
+        type="file"
+        accept="image/*"
+        multiple
+        hidden
+        onChange={handlePickImages}
+      />
+      <input
+        ref={cameraInputRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
+        hidden
+        onChange={handlePickImages}
+      />
+      <input
+        ref={documentInputRef}
+        type="file"
+        accept=".pdf,.doc,.docx,.xls,.xlsx,application/pdf,application/msword"
+        hidden
+        onChange={handlePickDocument}
       />
 
       {showForward && <ForwardPicker onForward={handleForward} onClose={() => setShowForward(false)} />}
