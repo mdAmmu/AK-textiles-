@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import type { FormEvent, KeyboardEvent } from "react";
 import { Navigate } from "react-router-dom";
-import { Eye, EyeOff, MessageCircle } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import { getToken } from "../services/api";
 import { login } from "../services/auth";
 
@@ -70,7 +70,7 @@ export default function Login() {
   }
 
   return (
-    <div className="relative min-h-[100svh] bg-white overflow-hidden flex flex-col items-center px-6 pt-12 pb-16">
+    <div className="relative min-h-dvh w-full bg-white overflow-x-hidden flex flex-col items-center justify-center px-5 sm:px-6 py-8 sm:py-12">
       <svg
         className="pointer-events-none absolute -top-16 -right-20 w-72 h-72 text-[#ede9fe]"
         viewBox="0 0 200 200"
@@ -91,9 +91,9 @@ export default function Login() {
         <circle cx="100" cy="100" r="76" stroke="currentColor" strokeWidth="1" />
       </svg>
 
-      <div className="relative z-[1] flex flex-col items-center gap-1 mb-2">
-        <img src="/ak-logo.png" alt="A.K Textiles" className="w-16 h-16 object-contain mb-1" />
-        <h1 className="m-0 text-[1.7rem] font-bold text-[#1f1147] tracking-tight">A.K Textiles</h1>
+      <div className="relative z-1 flex flex-col items-center gap-1">
+        <img src="/ak-logo.png" alt="A.K Textiles" className="w-14 h-14 sm:w-16 sm:h-16 object-contain mb-1" />
+        <h1 className="m-0 text-[1.5rem] sm:text-[1.7rem] font-bold text-[#1f1147] tracking-tight">A.K Textiles</h1>
         <div className="flex items-center gap-2 mt-1">
           <span className="w-8 h-px bg-[#c4b5fd]" />
           <span className="w-1.5 h-1.5 rotate-45 bg-[#7c3aed]" />
@@ -101,13 +101,13 @@ export default function Login() {
         </div>
       </div>
 
-      <h2 className="relative z-[1] m-0 mt-5 text-xl font-bold text-[#111827]">Welcome back</h2>
-      <p className="relative z-[1] m-0 mt-1 text-[0.92rem] text-[#6b7280]">
+      <h2 className="relative z-1 m-0 mt-4 text-lg sm:text-xl font-bold text-[#111827]">Welcome back</h2>
+      <p className="relative z-1 m-0 mt-1 text-[0.88rem] sm:text-[0.92rem] text-[#6b7280] text-center">
         Sign in to your distribution account
       </p>
 
       <form
-        className="relative z-[1] w-full max-w-[380px] mt-7 bg-white rounded-2xl border border-[#eef0f3] shadow-[0_18px_40px_rgba(31,17,71,0.08)] p-6 flex flex-col gap-5"
+        className="relative z-1 w-full max-w-95 mt-6 bg-white rounded-2xl border border-[#eef0f3] shadow-[0_18px_40px_rgba(31,17,71,0.08)] p-5 sm:p-6 flex flex-col gap-5"
         onSubmit={handleSubmit}
       >
         <div className="flex flex-col gap-1">
@@ -187,10 +187,6 @@ export default function Login() {
           <span className="text-[#7c3aed] font-semibold">Contact your distributor administrator.</span>
         </p>
       </form>
-
-      <div className="fixed bottom-5 left-5 w-11 h-11 rounded-full bg-[#1f1147] text-white flex items-center justify-center shadow-[0_8px_20px_rgba(31,17,71,0.35)]">
-        <MessageCircle size={20} />
-      </div>
     </div>
   );
 }
