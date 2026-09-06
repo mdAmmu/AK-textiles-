@@ -1,4 +1,4 @@
-import { Suspense, lazy, useEffect, useState } from "react";
+import { Suspense, lazy, useState } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import SplashScreen from "./components/common/SplashScreen";
 import Login from "./pages/Login";
@@ -35,14 +35,9 @@ const InstallAppBanner = lazy(() => import("./components/common/InstallAppBanner
 function App() {
   const [showSplash, setShowSplash] = useState(true);
 
-  useEffect(() => {
-    const timer = setTimeout(() => setShowSplash(false), 2100);
-    return () => clearTimeout(timer);
-  }, []);
-
   return (
     <ThemeProvider>
-      {showSplash && <SplashScreen />}
+      {showSplash && <SplashScreen onDone={() => setShowSplash(false)} />}
       <BrowserRouter>
         <Suspense fallback={null}>
           <InstallAppBanner />

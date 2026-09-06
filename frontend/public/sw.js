@@ -1,7 +1,14 @@
-const CACHE_NAME = "ak-textiles-shell-v1"; // bump this string on every deploy that
+const CACHE_NAME = "ak-textiles-shell-v3"; // bump this string on every deploy that
 // changes what should be cached, so the activate handler below evicts the old cache
 
-const SHELL_ASSETS = ["/login", "/manifest.webmanifest", "/icon-192x192.png", "/icon-512x512.png"];
+const SHELL_ASSETS = [
+  "/login",
+  "/manifest.webmanifest",
+  "/icon-192x192.png",
+  "/icon-512x512.png",
+  "/splash-1.png",
+  "/splash-2.png",
+];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(SHELL_ASSETS)));
