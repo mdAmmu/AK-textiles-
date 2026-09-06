@@ -10,7 +10,7 @@ import MessageInfoScreen, {
 import LoadingScreen from "../components/common/LoadingScreen";
 
 export default function BroadcastMessageInfo() {
-  const { audienceId, broadcastId } = useParams<{ audienceId: string; broadcastId: string }>();
+  const { broadcastId } = useParams<{ audienceId: string; broadcastId: string }>();
   const navigate = useNavigate();
 
   const [broadcast, setBroadcast] = useState<BroadcastMessageDetail | null>(null);
