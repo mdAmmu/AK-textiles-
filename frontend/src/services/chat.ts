@@ -6,6 +6,10 @@ export interface ConversationDetail {
   user_id: string;
   admin_id: string;
   user_name: string;
+  user_phone?: string | null;
+  user_created_at?: string | null;
+  user_online?: boolean;
+  user_last_seen?: string | null;
   messages: Message[];
 }
 

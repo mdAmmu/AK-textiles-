@@ -14,6 +14,7 @@ from app.models.group import Group
 from app.models.message import Message
 from app.models.product import Product
 from app.models.user import User, UserRole
+from app.websocket.manager import manager
 from app.schemas.conversation import ConversationDetail, ConversationSummary
 from app.schemas.message import (
     DeleteMessagesRequest,
@@ -339,5 +340,9 @@ def _to_conversation_detail(db: Session, conversation: Conversation) -> Conversa
         user_id=str(conversation.user_id),
         admin_id=str(conversation.admin_id),
         user_name=customer.name if customer else "Unknown",
+        user_phone=customer.phone if customer else None,
+        user_created_at=customer.created_at if customer else None,
+        user_online=manager.is_online(str(conversation.user_id)),
+        user_last_seen=customer.last_seen_at if customer else None,
         messages=[serialize_message(m) for m in conversation.messages],
     )

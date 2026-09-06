@@ -11,6 +11,7 @@ from app.core.security import hash_password
 from app.core.supabase_client import upload_chat_file, upload_chat_image
 from app.models.group import Group
 from app.models.group_read import GroupRead
+from app.models.group_message_read import GroupMessageRead
 from app.models.message import Message
 from app.models.product import Product
 from app.models.user import User, UserRole
@@ -25,7 +26,10 @@ from app.schemas.message import (
     DeleteMessagesRequest,
     EditMessageRequest,
     ForwardMessagesRequest,
+    MessageNotReader,
     MessageOut,
+    MessageReadInfo,
+    MessageReader,
     SendMessageRequest,
     SendProductMessageRequest,
 )
@@ -82,7 +86,7 @@ async def send_my_group_message(
     if user.group_id is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="You're not in a group")
     group = _get_group_or_404(db, str(user.group_id))
-    message = await send_group_text_message(db, group, user.id, body.text)
+    message = await send_group_text_message(db, group, user.id, body.text, body.reply_to_id)
     return serialize_message(message)
 
 
@@ -221,6 +225,98 @@ def mark_group_read(
     db.commit()
 
 
+def _mark_group_messages_read(db: Session, group_id, user_id) -> None:
+    """Per-message read receipts (for the "Message info" read-by screen) -
+    separate from GroupRead above, which only tracks the admin's unread badge."""
+    message_ids = [
+        row.id
+        for row in db.query(Message.id)
+        .filter(Message.group_id == group_id, Message.sender_id != user_id)
+        .all()
+    ]
+    if not message_ids:
+        return
+    already_read = {
+        row.message_id
+        for row in db.query(GroupMessageRead.message_id).filter(
+            GroupMessageRead.user_id == user_id,
+            GroupMessageRead.message_id.in_(message_ids),
+        )
+    }
+    unread_ids = [mid for mid in message_ids if mid not in already_read]
+    if not unread_ids:
+        return
+    db.bulk_save_objects(
+        [GroupMessageRead(message_id=mid, user_id=user_id) for mid in unread_ids]
+    )
+    db.commit()
+
+
+@router.post("/mine/messages/read", status_code=status.HTTP_204_NO_CONTENT)
+def mark_my_group_messages_read(
+    db: Session = Depends(get_db), user: User = Depends(get_current_user)
+):
+    if user.group_id is None:
+        return
+    _mark_group_messages_read(db, user.group_id, user.id)
+
+
+@router.post("/{group_id}/messages/read", status_code=status.HTTP_204_NO_CONTENT)
+def mark_group_messages_read(
+    group_id: str, db: Session = Depends(get_db), user: User = Depends(get_current_user)
+):
+    _get_group_or_404(db, group_id)
+    _mark_group_messages_read(db, group_id, user.id)
+
+
+@router.get("/{group_id}/messages/{message_id}/reads", response_model=MessageReadInfo)
+def get_group_message_reads(
+    group_id: str,
+    message_id: str,
+    db: Session = Depends(get_db),
+    _admin: User = Depends(require_admin),
+):
+    _get_group_or_404(db, group_id)
+    message = (
+        db.query(Message).filter(Message.id == message_id, Message.group_id == group_id).first()
+    )
+    if message is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Message not found")
+
+    members = (
+        db.query(User.id, User.name)
+        .filter(
+            User.group_id == group_id,
+            User.role.in_([UserRole.USER, UserRole.STAFF]),
+            User.id != message.sender_id,
+        )
+        .all()
+    )
+    member_ids = {row.id for row in members}
+    member_names = {row.id: row.name for row in members}
+
+    read_rows = (
+        db.query(GroupMessageRead)
+        .filter(
+            GroupMessageRead.message_id == message_id,
+            GroupMessageRead.user_id.in_(member_ids),
+        )
+        .order_by(GroupMessageRead.read_at.desc())
+        .all()
+    )
+    read_by = [
+        MessageReader(user_id=str(r.user_id), name=member_names[r.user_id], read_at=r.read_at)
+        for r in read_rows
+    ]
+    read_ids = {r.user_id for r in read_rows}
+    not_read_by = [
+        MessageNotReader(user_id=str(uid), name=member_names[uid])
+        for uid in member_ids
+        if uid not in read_ids
+    ]
+    return MessageReadInfo(read_by=read_by, not_read_by=not_read_by, remaining=len(not_read_by))
+
+
 @router.post("", response_model=GroupOut)
 def create_group(
     body: CreateGroupRequest, db: Session = Depends(get_db), _admin: User = Depends(require_admin)
@@ -318,7 +414,7 @@ async def admin_send_group_message(
     admin: User = Depends(require_admin),
 ):
     group = _get_group_or_404(db, group_id)
-    message = await send_group_text_message(db, group, admin.id, body.text)
+    message = await send_group_text_message(db, group, admin.id, body.text, body.reply_to_id)
     return serialize_message(message)
 
 

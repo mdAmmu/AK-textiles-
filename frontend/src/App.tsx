@@ -12,11 +12,14 @@ import BroadcastComposer from "./pages/BroadcastComposer";
 import BroadcastThread from "./pages/BroadcastThread";
 import BroadcastDetail from "./pages/BroadcastDetail";
 import BroadcastAudienceInfo from "./pages/BroadcastAudienceInfo";
+import BroadcastMessageInfo from "./pages/BroadcastMessageInfo";
 import AdminChat from "./pages/AdminChat";
+import CustomerChatInfo from "./pages/CustomerChatInfo";
 import Groups from "./pages/Groups";
 import GroupDetail from "./pages/GroupDetail";
 import GroupChat from "./pages/GroupChat";
 import GroupChatInfo from "./pages/GroupChatInfo";
+import GroupMessageInfo from "./pages/GroupMessageInfo";
 import Products from "./pages/Products";
 import CreateProduct from "./pages/CreateProduct";
 import EditProduct from "./pages/EditProduct";
@@ -113,6 +116,14 @@ function App() {
           }
         />
         <Route
+          path="/admin/broadcast/:audienceId/message/:broadcastId/info"
+          element={
+            <ProtectedRoute role="ADMIN">
+              <BroadcastMessageInfo />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/admin/broadcast/:audienceId/info"
           element={
             <ProtectedRoute role="ADMIN">
@@ -125,6 +136,14 @@ function App() {
           element={
             <ProtectedRoute role="ADMIN">
               <AdminChat />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/chats/:conversationId/info"
+          element={
+            <ProtectedRoute role="ADMIN">
+              <CustomerChatInfo />
             </ProtectedRoute>
           }
         />
@@ -157,6 +176,14 @@ function App() {
           element={
             <ProtectedRoute role="ADMIN">
               <GroupChatInfo />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/groups/:groupId/chat/message/:messageId/info"
+          element={
+            <ProtectedRoute role="ADMIN">
+              <GroupMessageInfo />
             </ProtectedRoute>
           }
         />

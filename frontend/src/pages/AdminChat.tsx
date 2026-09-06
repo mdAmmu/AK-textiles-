@@ -32,6 +32,7 @@ import ForwardPreviewBar, { type StagedImage } from "../components/chat/ForwardP
 import ReplyPreviewBar from "../components/chat/ReplyPreviewBar";
 import LoadingScreen from "../components/common/LoadingScreen";
 import { randomUUID } from "../utils/uuid";
+import { formatLastSeen } from "../utils/formatLastSeen";
 import { CHAT_PAGE } from "./chatShellStyles";
 
 const SELECTION_HEADER =
@@ -46,7 +47,10 @@ export default function AdminChat() {
   const { user } = useCurrentUser();
 
   const [messages, setMessages] = useState<Message[] | null>(null);
+  const [customerId, setCustomerId] = useState<string | null>(null);
   const [customerName, setCustomerName] = useState("Customer");
+  const [customerOnline, setCustomerOnline] = useState(false);
+  const [customerLastSeen, setCustomerLastSeen] = useState<string | null>(null);
   const [showPicker, setShowPicker] = useState(false);
   const [showForward, setShowForward] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -63,7 +67,10 @@ export default function AdminChat() {
     if (conversationId) {
       fetchConversationMessages(conversationId).then((c) => {
         setMessages(c.messages);
+        setCustomerId(c.user_id);
         setCustomerName(c.user_name);
+        setCustomerOnline(c.user_online ?? false);
+        setCustomerLastSeen(c.user_last_seen ?? null);
         markConversationRead(conversationId);
       });
     }
@@ -86,6 +93,12 @@ export default function AdminChat() {
           event.message_ids.includes(m.id) ? { ...m, read_at: new Date().toISOString() } : m,
         ) ?? prev,
       );
+      return;
+    }
+    if (event.type === "presence") {
+      if (event.user_id !== customerId) return;
+      setCustomerOnline(event.online);
+      setCustomerLastSeen(event.last_seen_at);
       return;
     }
     if (event.type === "conversation_messages_deleted") {
@@ -305,7 +318,12 @@ export default function AdminChat() {
           </button>
         </header>
       ) : (
-        <ChatHeader title={customerName} subtitle="Online" onBack={() => navigate("/admin")} />
+        <ChatHeader
+          title={customerName}
+          subtitle={customerOnline ? "Online" : formatLastSeen(customerLastSeen)}
+          onBack={() => navigate("/admin")}
+          onTitleClick={() => navigate(`/admin/chats/${conversationId}/info`)}
+        />
       )}
 
       <MessageList

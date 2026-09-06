@@ -40,6 +40,13 @@ export interface ConversationMessagesDeletedEvent {
   message_ids: string[];
 }
 
+export interface PresenceEvent {
+  type: "presence";
+  user_id: string;
+  online: boolean;
+  last_seen_at: string | null;
+}
+
 export type ChatSocketEvent =
   | NewMessageEvent
   | MessagesReadEvent
@@ -47,7 +54,8 @@ export type ChatSocketEvent =
   | GroupMessagesDeletedEvent
   | GroupMessageEditedEvent
   | GroupDeletedEvent
-  | ConversationMessagesDeletedEvent;
+  | ConversationMessagesDeletedEvent
+  | PresenceEvent;
 
 export async function openChatSocket(
   onMessage: (event: ChatSocketEvent) => void,

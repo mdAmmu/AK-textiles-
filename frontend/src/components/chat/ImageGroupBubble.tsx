@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { Check, CheckCheck } from "lucide-react";
+import { CheckCheck, Clock } from "lucide-react";
 import type { Message } from "../../types/message";
 import ImageViewerModal from "./ImageViewerModal";
 import {
@@ -11,6 +11,7 @@ import {
   BUBBLE_ROW_SELECTED,
   BUBBLE_SELECTED,
   BUBBLE_TICK_IN_IMAGE,
+  BUBBLE_TICK_READ,
   IMAGE_TIME,
   IMAGE_WRAP,
 } from "./MessageBubble";
@@ -59,8 +60,8 @@ export default function ImageGroupBubble({
     minute: "2-digit",
   });
   const tick = isOwn && (
-    <span className={BUBBLE_TICK_IN_IMAGE}>
-      {last.read_at ? <CheckCheck size={14} /> : <Check size={14} />}
+    <span className={`${BUBBLE_TICK_IN_IMAGE}${last.read_at ? ` ${BUBBLE_TICK_READ}` : ""}`}>
+      {last._pending ? <Clock size={12} /> : <CheckCheck size={14} />}
     </span>
   );
 

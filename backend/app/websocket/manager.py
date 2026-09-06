@@ -18,6 +18,9 @@ class ConnectionManager:
         if not connections:
             self.active.pop(user_id, None)
 
+    def is_online(self, user_id: str) -> bool:
+        return bool(self.active.get(user_id))
+
     async def send_to_user(self, user_id: str, data: dict) -> None:
         for websocket in list(self.active.get(user_id, [])):
             await websocket.send_json(data)

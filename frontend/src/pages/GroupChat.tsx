@@ -6,16 +6,20 @@ import {
   FileText,
   Forward,
   Image as ImageIcon,
+  MoreVertical,
   Pencil,
+  Reply,
   Trash2,
   X,
 } from "lucide-react";
+import SelectionMenu from "../components/chat/SelectionMenu";
 import {
   deleteGroupMessages,
   editGroupMessage,
   fetchGroupMessages,
   fetchGroups,
   forwardGroupMessages,
+  markGroupMessagesRead,
   markGroupRead,
   sendGroupDocumentMessage,
   sendGroupImageMessage,
@@ -34,6 +38,7 @@ import GroupProductComposer from "../components/chat/GroupProductComposer";
 import ForwardPicker from "../components/chat/ForwardPicker";
 import ForwardPreviewBar, { type StagedImage } from "../components/chat/ForwardPreviewBar";
 import EditingMessageBar from "../components/chat/EditingMessageBar";
+import ReplyPreviewBar from "../components/chat/ReplyPreviewBar";
 import LoadingScreen from "../components/common/LoadingScreen";
 import { randomUUID } from "../utils/uuid";
 import {
@@ -71,6 +76,8 @@ export default function GroupChat() {
   const [forwardSourceGroupId, setForwardSourceGroupId] = useState<string | null>(null);
   const [draftText, setDraftText] = useState("");
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
+  const [replyTarget, setReplyTarget] = useState<Message | null>(null);
+  const [showSelectionMenu, setShowSelectionMenu] = useState(false);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const documentInputRef = useRef<HTMLInputElement>(null);
@@ -83,6 +90,7 @@ export default function GroupChat() {
     fetchGroups().then((all) => setGroup(all.find((g) => g.id === groupId) ?? null));
     fetchGroupMessages(groupId).then(setMessages);
     markGroupRead(groupId);
+    markGroupMessagesRead(groupId);
   }, [groupId]);
 
   useEffect(() => {
@@ -109,6 +117,7 @@ export default function GroupChat() {
         if (!prev || prev.some((m) => m.id === event.message.id)) return prev;
         return [...prev, event.message];
       });
+      markGroupMessagesRead(groupId);
     }
     if (event.type === "group_messages_deleted") {
       if (event.group_id !== groupId) return;
@@ -138,6 +147,13 @@ export default function GroupChat() {
       return;
     }
     if (!text.trim() || !user) return;
+
+    if (replyTarget) {
+      const message = await sendGroupMessage(groupId, text, replyTarget.id);
+      setMessages((prev) => [...(prev ?? []), message]);
+      setReplyTarget(null);
+      return;
+    }
 
     const tempId = `temp-${randomUUID()}`;
     setMessages((prev) => [
@@ -342,6 +358,36 @@ export default function GroupChat() {
       return !!target && target.message_type === "TEXT" && !target.is_deleted;
     })();
 
+  function handleReplySelected() {
+    if (selectedIds.size !== 1 || !messages) return;
+    const [id] = Array.from(selectedIds);
+    const target = messages.find((m) => m.id === id);
+    if (!target || target.is_deleted) return;
+    setReplyTarget(target);
+    setSelectedIds(new Set());
+  }
+
+  function handleInfoSelected() {
+    if (selectedIds.size !== 1 || !messages || !groupId) return;
+    const [id] = Array.from(selectedIds);
+    const target = messages.find((m) => m.id === id);
+    if (!target) return;
+    setSelectedIds(new Set());
+    navigate(`/admin/groups/${groupId}/chat/message/${id}/info`, { state: { message: target } });
+  }
+
+  function handleCopySelected() {
+    if (selectedIds.size !== 1 || !messages) return;
+    const [id] = Array.from(selectedIds);
+    const target = messages.find((m) => m.id === id);
+    if (!target || target.message_type !== "TEXT" || !target.text) return;
+    navigator.clipboard?.writeText(target.text);
+    setSelectedIds(new Set());
+  }
+
+  const selectedSingle =
+    selectedIds.size === 1 ? messages?.find((m) => m.id === Array.from(selectedIds)[0]) : undefined;
+
   async function handleForward(targetGroupIds: string[]) {
     if (!groupId || selectedIds.size === 0 || !messages) return;
 
@@ -392,6 +438,11 @@ export default function GroupChat() {
           </button>
           <span className={CHAT_HEADER_SELECTION_COUNT}>{selectedIds.size}</span>
           <div className={CHAT_HEADER_SELECTION_SPACER} />
+          {selectedIds.size === 1 && (
+            <button className={CHAT_HEADER_ICON_BTN} onClick={handleReplySelected} aria-label="Reply">
+              <Reply size={20} />
+            </button>
+          )}
           <button
             className={CHAT_HEADER_ICON_BTN}
             onClick={() => setShowForward(true)}
@@ -407,6 +458,22 @@ export default function GroupChat() {
           <button className={CHAT_HEADER_ICON_BTN} onClick={handleDelete} aria-label="Delete">
             <Trash2 size={20} />
           </button>
+          {selectedIds.size === 1 && (
+            <button
+              className={CHAT_HEADER_ICON_BTN}
+              onClick={() => setShowSelectionMenu((s) => !s)}
+              aria-label="More options"
+            >
+              <MoreVertical size={20} />
+            </button>
+          )}
+          {showSelectionMenu && (
+            <SelectionMenu
+              onClose={() => setShowSelectionMenu(false)}
+              onInfo={handleInfoSelected}
+              onCopy={selectedSingle?.message_type === "TEXT" ? handleCopySelected : undefined}
+            />
+          )}
         </header>
       ) : (
         <header className={CHAT_HEADER_BASE}>
@@ -442,6 +509,20 @@ export default function GroupChat() {
       </div>
 
       {editingMessageId && <EditingMessageBar onCancel={handleCancelEdit} />}
+
+      {replyTarget && (
+        <ReplyPreviewBar
+          preview={{
+            id: replyTarget.id,
+            sender_id: replyTarget.sender_id,
+            message_type: replyTarget.message_type,
+            text: replyTarget.text,
+            file_name: replyTarget.file_name,
+          }}
+          isOwn={replyTarget.sender_id === user.id}
+          onCancel={() => setReplyTarget(null)}
+        />
+      )}
 
       <ForwardPreviewBar images={stagedImages} onRemove={handleRemoveStagedImage} />
 

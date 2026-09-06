@@ -6,11 +6,13 @@ import {
   FileText,
   Forward,
   Image as ImageIcon,
+  MoreVertical,
   Radio,
   Reply,
   Trash2,
   X,
 } from "lucide-react";
+import SelectionMenu from "../components/chat/SelectionMenu";
 import {
   createBroadcast,
   deleteBroadcast,
@@ -117,6 +119,7 @@ export default function BroadcastThread() {
   const [replyTarget, setReplyTarget] = useState<BroadcastMessage | null>(null);
   const [stagedImages, setStagedImages] = useState<StagedImage[]>([]);
   const [draftText, setDraftText] = useState("");
+  const [showSelectionMenu, setShowSelectionMenu] = useState(false);
 
   const selectionMode = selectedIds.size > 0;
 
@@ -324,6 +327,21 @@ export default function BroadcastThread() {
     setSelectedIds(new Set());
   }
 
+  const selectedSingle =
+    selectedIds.size === 1 ? sends?.find((s) => s.id === Array.from(selectedIds)[0]) : undefined;
+
+  function handleInfoSelected() {
+    if (!selectedSingle || !audienceId || selectedSingle.id.startsWith("temp-")) return;
+    setSelectedIds(new Set());
+    navigate(`/admin/broadcast/${audienceId}/message/${selectedSingle.id}/info`);
+  }
+
+  function handleCopySelected() {
+    if (!selectedSingle || selectedSingle.message_type !== "text" || !selectedSingle.text) return;
+    navigator.clipboard?.writeText(selectedSingle.text);
+    setSelectedIds(new Set());
+  }
+
   if (!audience || !sends) return <LoadingScreen />;
 
   return (
@@ -350,6 +368,22 @@ export default function BroadcastThread() {
           <button className={CHAT_HEADER_ICON_BTN} onClick={handleDeleteSelected} aria-label="Delete">
             <Trash2 size={20} />
           </button>
+          {selectedIds.size === 1 && (
+            <button
+              className={CHAT_HEADER_ICON_BTN}
+              onClick={() => setShowSelectionMenu((s) => !s)}
+              aria-label="More options"
+            >
+              <MoreVertical size={20} />
+            </button>
+          )}
+          {showSelectionMenu && (
+            <SelectionMenu
+              onClose={() => setShowSelectionMenu(false)}
+              onInfo={handleInfoSelected}
+              onCopy={selectedSingle?.message_type === "text" ? handleCopySelected : undefined}
+            />
+          )}
         </header>
       ) : (
         <header className={CHAT_HEADER_BASE}>
@@ -381,7 +415,7 @@ export default function BroadcastThread() {
             </p>
           </div>
         ) : (
-          <div className="flex-1 overflow-y-auto py-3 flex flex-col gap-1">
+          <div className="flex-1 overflow-y-auto pt-10 pb-3 flex flex-col gap-1">
             {groupSends(sends).map((item) => {
               if (item.kind === "group") {
                 const last = item.sends[item.sends.length - 1];

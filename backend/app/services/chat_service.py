@@ -140,12 +140,15 @@ async def send_document_message(
     return message
 
 
-async def send_group_text_message(db: Session, group: Group, sender_id, text: str) -> Message:
+async def send_group_text_message(
+    db: Session, group: Group, sender_id, text: str, reply_to_id=None
+) -> Message:
     message = Message(
         group_id=group.id,
         sender_id=sender_id,
         message_type=MessageType.TEXT,
         text=text,
+        reply_to_id=reply_to_id,
     )
     db.add(message)
     db.commit()

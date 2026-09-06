@@ -32,6 +32,11 @@ class User(Base):
     # NULL means no cutoff — existing members from before this feature keep
     # seeing full history.
     group_joined_at = Column(DateTime(timezone=True), nullable=True)
+    # Updated when the user's last WebSocket connection drops. NULL means
+    # they've never connected (or are online right now) - presence status
+    # is derived from the live connection manager, this is only the
+    # fallback "last seen" timestamp shown while they're offline.
+    last_seen_at = Column(DateTime(timezone=True), nullable=True)
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())

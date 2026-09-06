@@ -1,5 +1,5 @@
 import { useRef } from "react";
-import { Check, CheckCheck, Clock, Download, FileText } from "lucide-react";
+import { CheckCheck, Clock, Download, FileText } from "lucide-react";
 import type { Message } from "../../types/message";
 import { downloadImage } from "../../utils/shareImage";
 import ProductMessage from "./ProductMessage";
@@ -105,17 +105,11 @@ export default function MessageBubble({
     <span
       className={
         isImage
-          ? BUBBLE_TICK_IN_IMAGE
+          ? `${BUBBLE_TICK_IN_IMAGE}${message.read_at ? ` ${BUBBLE_TICK_READ}` : ""}`
           : `${BUBBLE_TICK}${message.read_at ? ` ${BUBBLE_TICK_READ}` : ""}`
       }
     >
-      {message._pending ? (
-        <Clock size={12} />
-      ) : message.read_at ? (
-        <CheckCheck size={14} />
-      ) : (
-        <Check size={14} />
-      )}
+      {message._pending ? <Clock size={12} /> : <CheckCheck size={14} />}
     </span>
   );
 

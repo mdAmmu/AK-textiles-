@@ -20,4 +20,8 @@ class ConversationDetail(BaseModel):
     user_id: str
     admin_id: str
     user_name: str
+    user_phone: str | None = None
+    user_created_at: datetime | None = None
+    user_online: bool = False
+    user_last_seen: datetime | None = None
     messages: list[MessageOut]

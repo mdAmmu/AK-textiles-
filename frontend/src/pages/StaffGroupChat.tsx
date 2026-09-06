@@ -8,6 +8,7 @@ import {
   deleteMyGroupMessages,
   fetchMyGroup,
   fetchMyGroupMessages,
+  markMyGroupMessagesRead,
   sendMyGroupDocumentMessage,
   sendMyGroupImageMessage,
   sendMyGroupMessage,
@@ -56,6 +57,7 @@ export default function StaffGroupChat() {
   useEffect(() => {
     fetchMyGroup().then(setGroup);
     fetchMyGroupMessages().then(setMessages);
+    markMyGroupMessagesRead();
   }, []);
 
   useChatSocket((event) => {
@@ -65,6 +67,7 @@ export default function StaffGroupChat() {
         if (!prev || prev.some((m) => m.id === event.message.id)) return prev;
         return [...prev, event.message];
       });
+      markMyGroupMessagesRead();
     }
     if (event.type === "group_messages_deleted") {
       if (group && event.group_id !== group.id) return;

@@ -8,7 +8,7 @@ export const CHAT_HEADER_BASE =
   "fixed top-0 left-0 right-0 flex items-center gap-2 py-4 px-4 bg-[var(--chat-header-bg)] text-[var(--chat-text)] border-b border-[var(--chat-border)] shrink-0 z-10";
 
 export const CHAT_HEADER_ICON_BTN =
-  "flex border-none bg-transparent text-[var(--chat-accent)] cursor-pointer p-1 leading-none last:ml-3";
+  "flex border-none bg-transparent text-[var(--chat-accent)] cursor-pointer p-1 leading-none";
 
 export const CHAT_HEADER_IDENTITY =
   "flex-1 min-w-0 flex items-center gap-2.5 border-none bg-transparent text-[var(--chat-text)] cursor-pointer py-1 text-left";

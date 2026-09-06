@@ -21,6 +21,41 @@ export async function markGroupRead(groupId: string): Promise<void> {
   await api.post(`/groups/${groupId}/read`);
 }
 
+export async function markGroupMessagesRead(groupId: string): Promise<void> {
+  await api.post(`/groups/${groupId}/messages/read`);
+}
+
+export async function markMyGroupMessagesRead(): Promise<void> {
+  await api.post("/groups/mine/messages/read");
+}
+
+export interface GroupMessageReader {
+  user_id: string;
+  name: string;
+  read_at: string;
+}
+
+export interface GroupMessageNotReader {
+  user_id: string;
+  name: string;
+}
+
+export interface GroupMessageReadInfo {
+  read_by: GroupMessageReader[];
+  not_read_by: GroupMessageNotReader[];
+  remaining: number;
+}
+
+export async function fetchGroupMessageReads(
+  groupId: string,
+  messageId: string,
+): Promise<GroupMessageReadInfo> {
+  const { data } = await api.get<GroupMessageReadInfo>(
+    `/groups/${groupId}/messages/${messageId}/reads`,
+  );
+  return data;
+}
+
 export async function fetchMyGroup(): Promise<Group | null> {
   const { data } = await api.get<Group | null>("/groups/mine");
   return data;
@@ -77,8 +112,15 @@ export async function fetchGroupMessages(groupId: string): Promise<Message[]> {
   return data;
 }
 
-export async function sendGroupMessage(groupId: string, text: string): Promise<Message> {
-  const { data } = await api.post<Message>(`/groups/${groupId}/messages`, { text });
+export async function sendGroupMessage(
+  groupId: string,
+  text: string,
+  replyToId?: string,
+): Promise<Message> {
+  const { data } = await api.post<Message>(`/groups/${groupId}/messages`, {
+    text,
+    reply_to_id: replyToId,
+  });
   return data;
 }
 

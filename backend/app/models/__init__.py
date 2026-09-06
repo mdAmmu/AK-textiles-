@@ -1,6 +1,7 @@
 from app.models.user import User, UserRole
 from app.models.group import Group
 from app.models.group_read import GroupRead
+from app.models.group_message_read import GroupMessageRead
 from app.models.product import Product
 from app.models.conversation import Conversation
 from app.models.message import Message, MessageType
@@ -19,6 +20,7 @@ __all__ = [
     "UserRole",
     "Group",
     "GroupRead",
+    "GroupMessageRead",
     "Product",
     "Conversation",
     "Message",

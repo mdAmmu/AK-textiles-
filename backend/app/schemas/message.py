@@ -59,3 +59,20 @@ class ForwardMessagesRequest(BaseModel):
 class ForwardToGroupsRequest(BaseModel):
     message_ids: list[str]
     group_ids: list[str]
+
+
+class MessageReader(BaseModel):
+    user_id: str
+    name: str
+    read_at: datetime
+
+
+class MessageNotReader(BaseModel):
+    user_id: str
+    name: str
+
+
+class MessageReadInfo(BaseModel):
+    read_by: list[MessageReader]
+    not_read_by: list[MessageNotReader]
+    remaining: int
