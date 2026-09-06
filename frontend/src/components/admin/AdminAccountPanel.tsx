@@ -54,7 +54,7 @@ export default function AdminAccountPanel({ admin, onClose }: Props) {
       </div>
 
       <div className="flex flex-col items-center gap-2 pt-2 px-4 pb-5 text-center">
-        <Avatar name={admin.name} size={96} />
+        <Avatar name={admin.name} size={96} imageUrl="/ak-logo.png" />
         <h1 className="mt-1 mb-0 text-[1.375rem]">{admin.name}</h1>
         {(admin.phone || admin.email) && (
           <span className="text-[var(--wa-text-secondary)] text-sm">

@@ -1,9 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-<<<<<<< HEAD
-import { Menu, Search } from "lucide-react";
-=======
 import { MoreVertical, Users } from "lucide-react";
->>>>>>> ccd7184f1889bee3b6a69ae543e2ebc2b5af1e81
 import { fetchGroups } from "../services/groups";
 import type { Group } from "../types/group";
 import { useCurrentUser } from "../hooks/useCurrentUser";

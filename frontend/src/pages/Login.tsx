@@ -1,41 +1,64 @@
-import { useState } from "react";
-import type { FormEvent } from "react";
+import { useRef, useState } from "react";
+import type { FormEvent, KeyboardEvent } from "react";
 import { Navigate } from "react-router-dom";
-import { Phone, Lock, Eye, EyeOff, ArrowRight, Check } from "lucide-react";
+import { Eye, EyeOff, MessageCircle } from "lucide-react";
 import { getToken } from "../services/api";
-import { login, register } from "../services/auth";
+import { login } from "../services/auth";
 
-const FIELD = "flex flex-col gap-1.5";
-const FIELD_LABEL = "text-[0.82rem] font-bold text-[#2563eb]";
-const INPUT_ROW =
-  "flex items-center gap-2.5 border-[1.5px] border-[var(--wa-border,#dbe6ff)] rounded-xl py-[0.7rem] px-3.5 bg-[var(--wa-panel-bg,#f7f8fa)] transition-[border-color,background] duration-150 ease-in-out focus-within:border-[#2563eb] focus-within:bg-[var(--wa-bubble-other,#ffffff)]";
-const INPUT_ICON = "text-[#2563eb] shrink-0";
-const INPUT = "flex-1 min-w-0 border-none outline-none bg-transparent text-base text-[var(--wa-text)] placeholder:text-[var(--wa-text-secondary)]";
+const PHONE_LENGTH = 10;
 
 export default function Login() {
-  const [mode, setMode] = useState<"login" | "register">("login");
-  const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
+  const [digits, setDigits] = useState<string[]>(Array(PHONE_LENGTH).fill(""));
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [loggedIn, setLoggedIn] = useState(!!getToken());
+  const boxRefs = useRef<Array<HTMLInputElement | null>>([]);
 
   if (loggedIn) return <Navigate to="/redirect" replace />;
+
+  function setDigit(index: number, value: string) {
+    const clean = value.replace(/\D/g, "").slice(-1);
+    setDigits((prev) => {
+      const next = [...prev];
+      next[index] = clean;
+      return next;
+    });
+    if (clean && index < PHONE_LENGTH - 1) {
+      boxRefs.current[index + 1]?.focus();
+    }
+  }
+
+  function handleKeyDown(index: number, e: KeyboardEvent<HTMLInputElement>) {
+    if (e.key === "Backspace" && !digits[index] && index > 0) {
+      boxRefs.current[index - 1]?.focus();
+    }
+  }
+
+  function handlePaste(e: React.ClipboardEvent<HTMLInputElement>) {
+    const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, PHONE_LENGTH);
+    if (!pasted) return;
+    e.preventDefault();
+    const next = Array(PHONE_LENGTH).fill("");
+    for (let i = 0; i < pasted.length; i++) next[i] = pasted[i];
+    setDigits(next);
+    boxRefs.current[Math.min(pasted.length, PHONE_LENGTH - 1)]?.focus();
+  }
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     if (submitting) return;
+    const phone = digits.join("");
+    if (phone.length < PHONE_LENGTH) {
+      setError("Please enter your full 10-digit mobile number.");
+      return;
+    }
     setError(null);
     setSubmitting(true);
     try {
-      if (mode === "login") {
-        await login(phone.trim(), password);
-      } else {
-        await register(name.trim(), phone.trim(), password);
-      }
+      await login(phone, password);
       setLoggedIn(true);
     } catch (err: unknown) {
       const detail =
@@ -47,152 +70,126 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-[100svh] flex flex-col items-stretch bg-[var(--wa-panel-bg)]">
-      <div className="relative flex flex-col items-center gap-[0.4rem] pt-12 px-6 pb-[4.5rem] bg-[radial-gradient(120%_100%_at_20%_0%,#3b82f6_0%,#2563eb_45%,#1d4ed8_100%)] overflow-hidden">
-        <div className="w-[76px] h-[76px] rounded-[20px] bg-white text-[#2563eb] flex items-center justify-center font-extrabold text-[1.7rem] tracking-[0.02em] shadow-[0_10px_24px_rgba(29,78,216,0.35)] mb-2 animate-[login-pop_0.55s_cubic-bezier(0.34,1.56,0.64,1)_both]">
-          AK
+    <div className="relative min-h-[100svh] bg-white overflow-hidden flex flex-col items-center px-6 pt-12 pb-16">
+      <svg
+        className="pointer-events-none absolute -top-16 -right-20 w-72 h-72 text-[#ede9fe]"
+        viewBox="0 0 200 200"
+        fill="none"
+        aria-hidden="true"
+      >
+        <circle cx="100" cy="100" r="98" stroke="currentColor" strokeWidth="1" />
+        <circle cx="100" cy="100" r="76" stroke="currentColor" strokeWidth="1" />
+        <circle cx="100" cy="100" r="54" stroke="currentColor" strokeWidth="1" />
+      </svg>
+      <svg
+        className="pointer-events-none absolute -bottom-24 -left-20 w-80 h-80 text-[#ede9fe]"
+        viewBox="0 0 200 200"
+        fill="none"
+        aria-hidden="true"
+      >
+        <circle cx="100" cy="100" r="98" stroke="currentColor" strokeWidth="1" />
+        <circle cx="100" cy="100" r="76" stroke="currentColor" strokeWidth="1" />
+      </svg>
+
+      <div className="relative z-[1] flex flex-col items-center gap-1 mb-2">
+        <img src="/ak-logo.png" alt="A.K Textiles" className="w-16 h-16 object-contain mb-1" />
+        <h1 className="m-0 text-[1.7rem] font-bold text-[#1f1147] tracking-tight">A.K Textiles</h1>
+        <div className="flex items-center gap-2 mt-1">
+          <span className="w-8 h-px bg-[#c4b5fd]" />
+          <span className="w-1.5 h-1.5 rotate-45 bg-[#7c3aed]" />
+          <span className="w-8 h-px bg-[#c4b5fd]" />
         </div>
-        <h1 className="m-0 text-white text-[1.9rem] font-extrabold animate-[login-rise_0.5s_ease_0.1s_both]">
-          AK Textiles
-        </h1>
-        <p className="m-0 text-white/92 text-[0.95rem] animate-[login-rise_0.5s_ease_0.2s_both]">
-          Quality Fabrics. Trusted by Generations.
-        </p>
       </div>
 
-      <div className="relative z-[1] flex-1 -mt-10 bg-[var(--wa-bubble-other,#ffffff)] rounded-t-[28px] pt-8 px-6 pb-10 animate-[login-rise_0.5s_ease_0.15s_both]">
-        <h2 className="m-0 mb-1 text-2xl font-extrabold text-[var(--wa-text)] flex items-center gap-1.5">
-          {mode === "login" ? (
-            <>
-              Welcome back! <span aria-hidden="true">👋</span>
-            </>
-          ) : (
-            "Create your account"
-          )}
-        </h2>
-        <p className="m-0 mb-6 text-[var(--wa-text-secondary)] text-[0.92rem]">
-          {mode === "login" ? "Login to continue to your account" : "Sign up to get started"}
-        </p>
+      <h2 className="relative z-[1] m-0 mt-5 text-xl font-bold text-[#111827]">Welcome back</h2>
+      <p className="relative z-[1] m-0 mt-1 text-[0.92rem] text-[#6b7280]">
+        Sign in to your distribution account
+      </p>
 
-        <form className="flex flex-col gap-[1.1rem] max-w-[400px]" onSubmit={handleSubmit}>
-          {mode === "register" && (
-            <label className={FIELD}>
-              <span className={FIELD_LABEL}>Name</span>
-              <div className={INPUT_ROW}>
-                <input
-                  className={INPUT}
-                  placeholder="Your full name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  required
-                />
-              </div>
-            </label>
-          )}
-
-          <label className={FIELD}>
-            <span className={FIELD_LABEL}>Phone number</span>
-            <div className={INPUT_ROW}>
-              <Phone size={18} className={INPUT_ICON} />
-              <span className="text-base text-[var(--wa-text)] font-semibold shrink-0">+91</span>
-              <span className="w-px self-stretch bg-[var(--wa-border,#dbe6ff)] shrink-0" />
+      <form
+        className="relative z-[1] w-full max-w-[380px] mt-7 bg-white rounded-2xl border border-[#eef0f3] shadow-[0_18px_40px_rgba(31,17,71,0.08)] p-6 flex flex-col gap-5"
+        onSubmit={handleSubmit}
+      >
+        <div className="flex flex-col gap-1">
+          <span className="text-[0.92rem] font-semibold text-[#111827]">Enter your mobile number</span>
+          <span className="text-[0.8rem] text-[#9ca3af]">We&apos;ll send you a one time password</span>
+          <div className="flex flex-nowrap gap-1 mt-2">
+            {digits.map((d, i) => (
               <input
-                className={INPUT}
-                placeholder="Enter 10-digit phone number"
-                type="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                required
+                key={i}
+                ref={(el) => {
+                  boxRefs.current[i] = el;
+                }}
+                className="w-full min-w-0 h-10 text-center rounded-lg border border-[#e5e7eb] text-[0.95rem] font-semibold text-[#111827] focus:outline-none focus:border-[#7c3aed] focus:ring-2 focus:ring-[#ddd6fe] transition-colors"
+                inputMode="numeric"
+                maxLength={1}
+                value={d}
+                onChange={(e) => setDigit(i, e.target.value)}
+                onKeyDown={(e) => handleKeyDown(i, e)}
+                onPaste={handlePaste}
               />
-            </div>
+            ))}
+          </div>
+        </div>
+
+        <label className="flex flex-col gap-1.5">
+          <span className="text-[0.92rem] font-semibold text-[#111827]">Enter your password</span>
+          <div className="flex items-center gap-2 border border-[#e5e7eb] rounded-xl py-[0.7rem] px-3.5 bg-[#f9fafb] focus-within:border-[#7c3aed] focus-within:bg-white transition-colors">
+            <input
+              className="flex-1 min-w-0 border-none outline-none bg-transparent text-base text-[#111827] placeholder:text-[#9ca3af]"
+              placeholder="Enter your password"
+              type={showPassword ? "text" : "password"}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+            <button
+              type="button"
+              className="border-none bg-transparent p-0 text-[#9ca3af] cursor-pointer flex items-center shrink-0"
+              onClick={() => setShowPassword((v) => !v)}
+              aria-label={showPassword ? "Hide password" : "Show password"}
+            >
+              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+            </button>
+          </div>
+        </label>
+
+        <div className="flex items-center justify-between -mt-1">
+          <label className="flex items-center gap-2 text-[0.86rem] text-[#374151] cursor-pointer select-none">
+            <input
+              type="checkbox"
+              className="w-4 h-4 rounded accent-[#7c3aed] cursor-pointer"
+              checked={rememberMe}
+              onChange={() => setRememberMe((v) => !v)}
+            />
+            Remember me
           </label>
-
-          <label className={FIELD}>
-            <span className={FIELD_LABEL}>Password</span>
-            <div className={INPUT_ROW}>
-              <Lock size={18} className={INPUT_ICON} />
-              <input
-                className={INPUT}
-                placeholder="Enter your password"
-                type={showPassword ? "text" : "password"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-              <button
-                type="button"
-                className="border-none bg-transparent p-0 text-[var(--wa-text-secondary)] cursor-pointer flex items-center shrink-0"
-                onClick={() => setShowPassword((v) => !v)}
-                aria-label={showPassword ? "Hide password" : "Show password"}
-              >
-                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-              </button>
-            </div>
-          </label>
-
-          {mode === "login" && (
-            <div className="flex items-center justify-between -mt-1">
-              <label className="flex items-center gap-2 text-[0.88rem] text-[var(--wa-text)] cursor-pointer select-none">
-                <span
-                  className={`w-5 h-5 rounded-md border-[1.5px] flex items-center justify-center text-white cursor-pointer transition-[background,border-color] duration-150 ease-in-out ${
-                    rememberMe
-                      ? "bg-[#2563eb] border-[#2563eb]"
-                      : "border-[var(--wa-border,#c9d4cf)]"
-                  }`}
-                  onClick={() => setRememberMe((v) => !v)}
-                  role="checkbox"
-                  aria-checked={rememberMe}
-                  tabIndex={0}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      e.preventDefault();
-                      setRememberMe((v) => !v);
-                    }
-                  }}
-                >
-                  {rememberMe && <Check size={13} strokeWidth={3} />}
-                </span>
-                Remember me
-              </label>
-              <button
-                type="button"
-                className="border-none bg-transparent p-0 text-[#2563eb] text-[0.88rem] font-semibold cursor-pointer"
-              >
-                Forgot password?
-              </button>
-            </div>
-          )}
-
-          {error && <p className="text-[#e53e3e] m-0 text-[0.85rem]">{error}</p>}
-
           <button
-            className="flex items-center justify-center gap-2 py-[0.9rem] px-4 rounded-2xl border-none bg-[linear-gradient(135deg,#3b82f6,#2563eb)] text-white font-bold text-base cursor-pointer mt-1 transition-[transform,opacity] duration-100 ease-in-out active:scale-[0.98] disabled:opacity-70 disabled:cursor-default"
-            type="submit"
-            disabled={submitting}
+            type="button"
+            className="border-none bg-transparent p-0 text-[#7c3aed] text-[0.86rem] font-semibold cursor-pointer"
           >
-            <span>{submitting ? "Please wait..." : mode === "login" ? "Log In" : "Sign Up"}</span>
-            {!submitting && <ArrowRight size={18} />}
+            Forgot password?
           </button>
-        </form>
+        </div>
+
+        {error && <p className="text-[#e53e3e] m-0 text-[0.85rem]">{error}</p>}
 
         <button
-          className="block mt-[1.4rem] mx-auto bg-transparent border-none text-[var(--wa-text)] text-[0.9rem] cursor-pointer text-center"
-          onClick={() => {
-            setMode((m) => (m === "login" ? "register" : "login"));
-            setError(null);
-          }}
+          className="py-[0.85rem] px-4 rounded-xl border-none bg-[linear-gradient(135deg,#8b5cf6,#6d28d9)] text-white font-bold text-base cursor-pointer transition-[transform,opacity] duration-100 ease-in-out active:scale-[0.98] disabled:opacity-70 disabled:cursor-default"
+          type="submit"
+          disabled={submitting}
         >
-          {mode === "login" ? (
-            <>
-              Don&apos;t have an account?{" "}
-              <span className="text-[#2563eb] font-bold">Sign up</span>
-            </>
-          ) : (
-            <>
-              Already have an account? <span className="text-[#2563eb] font-bold">Log in</span>
-            </>
-          )}
+          {submitting ? "Please wait..." : "Sign in securely"}
         </button>
+
+        <p className="m-0 text-center text-[0.85rem] text-[#9ca3af]">
+          Don&apos;t have access yet?{" "}
+          <span className="text-[#7c3aed] font-semibold">Contact your distributor administrator.</span>
+        </p>
+      </form>
+
+      <div className="fixed bottom-5 left-5 w-11 h-11 rounded-full bg-[#1f1147] text-white flex items-center justify-center shadow-[0_8px_20px_rgba(31,17,71,0.35)]">
+        <MessageCircle size={20} />
       </div>
     </div>
   );
