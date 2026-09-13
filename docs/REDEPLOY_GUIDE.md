@@ -22,11 +22,42 @@ service, and checks `/health`.
 Builds the frontend on your machine, copies it to the server, and puts
 it in place for Nginx to serve.
 
-Both scripts default to server IP `13.126.206.134` and user `ubuntu`. If
-the server ever changes, override with an environment variable:
+## Redeploy both at once
+
 ```bash
-SERVER_IP=1.2.3.4 ./deploy/deploy-backend.sh /path/to/ak-textiles-key.pem
+./deploy/deploy-both.sh /path/to/ak-textiles-key.pem
 ```
+
+Runs the backend deploy, then the frontend deploy, one after the other.
+
+---
+
+## Changing settings (branch, server IP, etc.)
+
+All the settings the scripts use — server IP, SSH user, which branch to
+deploy on each side, where the frontend files live on the server — are
+in **`deploy/deploy.conf`**. Edit that file, not the scripts, to change
+behavior.
+
+For example, to deploy the backend from `develop` while keeping the
+frontend on `master`, open `deploy/deploy.conf` and set:
+```
+BACKEND_BRANCH=develop
+FRONTEND_BRANCH=master
+```
+Then just run the scripts as usual.
+
+You can also override any setting for a single run without editing the
+file, using an environment variable:
+```bash
+BACKEND_BRANCH=develop ./deploy/deploy-backend.sh /path/to/ak-textiles-key.pem
+SERVER_IP=1.2.3.4 ./deploy/deploy-both.sh /path/to/ak-textiles-key.pem
+```
+
+Note: deploying a frontend branch other than the one you currently have
+checked out locally requires a clean working tree (no uncommitted
+changes) — the script switches branches temporarily to build, then
+switches you back afterward.
 
 ---
 
