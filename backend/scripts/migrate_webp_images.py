@@ -13,7 +13,7 @@ import httpx
 
 from app.core.database import SessionLocal
 from app.core.image_utils import normalize_image
-from app.core.supabase_client import upload_product_image
+from app.core.s3_client import upload_product_image
 from app.models.product import Product
 
 IMAGE_SLOTS = ["image_1", "image_2", "image_3", "image_4"]

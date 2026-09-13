@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from app.api.deps import get_current_user, require_admin
 from app.core.database import get_db
 from app.core.image_utils import normalize_image
-from app.core.supabase_client import upload_chat_file, upload_chat_image
+from app.core.s3_client import upload_chat_file, upload_chat_image
 from app.models.conversation import Conversation
 from app.models.group import Group
 from app.models.message import Message

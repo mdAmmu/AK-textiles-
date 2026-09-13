@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, UploadFile
 
 from app.api.deps import require_admin
 from app.core.config import settings
-from app.core.supabase_client import upload_product_image
+from app.core.s3_client import upload_product_image
 from app.models.user import User
 from app.schemas.whatsapp import WhatsAppMessageRequest
 from app.services.whatsapp_service import ALLOWED_CAROUSEL_CARD_COUNTS, CAROUSEL_TEMPLATE_NAMES, whatsapp_service

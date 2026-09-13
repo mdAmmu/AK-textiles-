@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from app.api.deps import require_admin
 from app.core.database import get_db
 from app.core.image_utils import normalize_image
-from app.core.supabase_client import upload_product_image
+from app.core.s3_client import upload_product_image
 from app.models.product import Product
 from app.models.user import User
 from app.schemas.broadcast import BroadcastPreview, BroadcastRequest, BroadcastResult
