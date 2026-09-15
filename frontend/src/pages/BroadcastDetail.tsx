@@ -84,7 +84,7 @@ export default function BroadcastDetail() {
       </header>
 
       <main className="flex-1 overflow-y-auto px-4 pb-8">
-        <div className="bg-[#dbeafe] dark:bg-[#0b3d24] rounded-xl rounded-tl-sm py-2.5 px-3.5 whitespace-pre-wrap text-[#1a1a1a] dark:text-[#e9edef] text-[15px] mb-4">
+        <div className="bg-[var(--chat-bubble-own)] text-[var(--chat-bubble-own-text)] rounded-xl rounded-tl-sm py-2.5 px-3.5 whitespace-pre-wrap text-[15px] mb-4">
           {broadcast.text}
         </div>
 

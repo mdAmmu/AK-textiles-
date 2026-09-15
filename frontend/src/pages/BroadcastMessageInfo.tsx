@@ -40,7 +40,7 @@ export default function BroadcastMessageInfo() {
       readBy={readBy}
       notReadBy={notReadBy}
       bubble={
-        <div className="bg-[#dbeafe] dark:bg-[#0b3d24] rounded-xl rounded-tr-sm py-2 px-2.5">
+        <div className="bg-[var(--chat-bubble-own)] text-[var(--chat-bubble-own-text)] rounded-xl rounded-tr-sm py-2 px-2.5">
           {broadcast.message_type === "image" && broadcast.media_url ? (
             <img
               src={broadcast.media_url}
@@ -49,19 +49,19 @@ export default function BroadcastMessageInfo() {
             />
           ) : broadcast.message_type === "document" ? (
             <div className="flex items-center gap-2.5 py-1.5 px-1 min-w-[180px]">
-              <FileText size={18} className="text-[#1a1a1a] dark:text-[#e9edef] shrink-0" />
-              <span className="text-[#1a1a1a] dark:text-[#e9edef] text-sm truncate">
+              <FileText size={18} className="text-[var(--chat-bubble-own-text)] shrink-0" />
+              <span className="text-[var(--chat-bubble-own-text)] text-sm truncate">
                 {broadcast.file_name ?? "Document"}
               </span>
             </div>
           ) : (
-            <p className="whitespace-pre-wrap text-[#1a1a1a] dark:text-[#e9edef] text-[15px] m-0 px-1">
+            <p className="whitespace-pre-wrap text-[var(--chat-bubble-own-text)] text-[15px] m-0 px-1">
               {broadcast.text}
             </p>
           )}
-          <div className="flex items-center justify-end gap-1 text-[11px] text-[#3b5bdb] dark:text-[#93b4f5] mt-1 px-1">
+          <div className="flex items-center justify-end gap-1 text-[11px] text-[var(--chat-bubble-own-text-secondary)] mt-1 px-1">
             {time}
-            <CheckCheck size={14} className={readBy.length > 0 ? "text-[var(--chat-tick-read)]" : undefined} />
+            <CheckCheck size={14} className={readBy.length > 0 ? "text-[var(--chat-bubble-own-tick-read)]" : undefined} />
           </div>
         </div>
       }

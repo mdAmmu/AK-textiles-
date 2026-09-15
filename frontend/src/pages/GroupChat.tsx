@@ -40,6 +40,12 @@ import ForwardPreviewBar, { type StagedImage } from "../components/chat/ForwardP
 import EditingMessageBar from "../components/chat/EditingMessageBar";
 import ReplyPreviewBar from "../components/chat/ReplyPreviewBar";
 import LoadingScreen from "../components/common/LoadingScreen";
+import AdminGroupListPane from "../components/admin/AdminGroupListPane";
+import AdminAccountPanel from "../components/admin/AdminAccountPanel";
+import AdminProfileScreen from "../components/admin/AdminProfileScreen";
+import GroupManagementPanel from "../components/admin/GroupManagementPanel";
+import GroupChatInfo from "./GroupChatInfo";
+import { useAdminGroups } from "../hooks/useAdminGroups";
 import { randomUUID } from "../utils/uuid";
 import {
   CHAT_BODY,
@@ -66,7 +72,11 @@ export default function GroupChat() {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useCurrentUser();
+  const { groups, setGroups } = useAdminGroups();
 
+  const [showAccount, setShowAccount] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
+  const [showGroupManagement, setShowGroupManagement] = useState(false);
   const [group, setGroup] = useState<Group | null>(null);
   const [messages, setMessages] = useState<Message[] | null>(null);
   const [showPicker, setShowPicker] = useState(false);
@@ -426,7 +436,19 @@ export default function GroupChat() {
   if (group === null || messages === null || !user) return <LoadingScreen />;
 
   return (
-    <div className={CHAT_PAGE}>
+    <div className="relative flex h-dvh bg-white dark:bg-[#10161f] md:pl-[76px]">
+      <div className="hidden md:flex md:flex-col w-[380px] shrink-0 border-r border-[#eef1ee] dark:border-[#232d3a]">
+        <AdminGroupListPane
+          adminName={user.name}
+          groups={groups}
+          activeGroupId={groupId}
+          onMenuClick={() => setShowAccount(true)}
+          onProfileClick={() => setShowProfile(true)}
+          onManageClick={() => setShowGroupManagement(true)}
+        />
+      </div>
+
+      <div className={`${CHAT_PAGE} flex-1 min-w-0 h-full`}>
       {selectionMode ? (
         <header className={CHAT_HEADER_BASE}>
           <button
@@ -594,6 +616,23 @@ export default function GroupChat() {
           excludeGroupId={groupId}
           onForward={handleForward}
           onClose={() => setShowForward(false)}
+        />
+      )}
+      </div>
+
+      <div className="hidden xl:flex xl:flex-col w-[360px] shrink-0 border-l border-[#eef1ee] dark:border-[#232d3a]">
+        <GroupChatInfo embedded />
+      </div>
+
+      {showProfile && <AdminProfileScreen admin={user} onClose={() => setShowProfile(false)} />}
+
+      {showAccount && <AdminAccountPanel admin={user} onClose={() => setShowAccount(false)} />}
+
+      {showGroupManagement && (
+        <GroupManagementPanel
+          onClose={() => setShowGroupManagement(false)}
+          onGroupCreated={(g) => setGroups((prev) => [g, ...(prev ?? [])])}
+          onGroupDeleted={(gid) => setGroups((prev) => prev?.filter((g) => g.id !== gid) ?? prev)}
         />
       )}
     </div>

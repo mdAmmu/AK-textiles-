@@ -24,8 +24,12 @@
   --chat-header-bg: #ffffff;
   --chat-accent: #2563eb;
   --chat-accent-light: #60a5fa;
-  --chat-bg: #eef1f6;
-  --chat-bubble-own: #dbeafe;
+  --chat-bg: #eef1fb;
+  --chat-bubble-own: #d9fdd3;
+  --chat-bubble-own-text: #111b21;
+  --chat-bubble-own-text-secondary: rgba(17, 27, 33, 0.6);
+  --chat-bubble-own-tick-read: #53bdeb;
+  --chat-send-bg: #25d366;
   --chat-bubble-other: #ffffff;
   --chat-text: #1a1a1a;
   --chat-text-secondary: #7c827e;
@@ -34,6 +38,7 @@
   --chat-panel-bg: #f5f6f5;
   --chat-date-chip-bg: #ffffff;
   --chat-date-chip-text: #6b7069;
+  --chat-wallpaper: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Cg fill='none' stroke='%23000000' stroke-width='1.2' opacity='0.05'%3E%3Ccircle cx='15' cy='15' r='3'/%3E%3Ccircle cx='21' cy='15' r='3'/%3E%3Ccircle cx='18' cy='10' r='3'/%3E%3Ccircle cx='18' cy='20' r='3'/%3E%3Cpath d='M55 18 Q65 8 76 18 Q65 28 55 18Z'/%3E%3Cpath d='M18 62 Q18 52 28 52 Q28 62 18 62Z'/%3E%3Ccircle cx='78' cy='68' r='2.2'/%3E%3Ccircle cx='84' cy='62' r='2.2'/%3E%3Cpath d='M44 82 L50 76 L56 82 L50 88Z'/%3E%3Cpath d='M85 30 Q90 25 95 30 Q90 35 85 30Z'/%3E%3C/g%3E%3C/svg%3E");
 
   --sans: system-ui, "Segoe UI", Roboto, sans-serif;
 
@@ -63,7 +68,11 @@
   --chat-accent: #3b82f6;
   --chat-accent-light: #60a5fa;
   --chat-bg: #10161f;
-  --chat-bubble-own: #1e3a5f;
+  --chat-bubble-own: #005c4b;
+  --chat-bubble-own-text: #e9edef;
+  --chat-bubble-own-text-secondary: rgba(233, 237, 239, 0.72);
+  --chat-bubble-own-tick-read: #53bdeb;
+  --chat-send-bg: #00a884;
   --chat-bubble-other: #1e2530;
   --chat-text: #e9edef;
   --chat-text-secondary: #8b96a5;
@@ -72,6 +81,7 @@
   --chat-panel-bg: #131a24;
   --chat-date-chip-bg: #1e2530;
   --chat-date-chip-text: #a8b3c1;
+  --chat-wallpaper: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Cg fill='none' stroke='%23ffffff' stroke-width='1.2' opacity='0.06'%3E%3Ccircle cx='15' cy='15' r='3'/%3E%3Ccircle cx='21' cy='15' r='3'/%3E%3Ccircle cx='18' cy='10' r='3'/%3E%3Ccircle cx='18' cy='20' r='3'/%3E%3Cpath d='M55 18 Q65 8 76 18 Q65 28 55 18Z'/%3E%3Cpath d='M18 62 Q18 52 28 52 Q28 62 18 62Z'/%3E%3Ccircle cx='78' cy='68' r='2.2'/%3E%3Ccircle cx='84' cy='62' r='2.2'/%3E%3Cpath d='M44 82 L50 76 L56 82 L50 88Z'/%3E%3Cpath d='M85 30 Q90 25 95 30 Q90 35 85 30Z'/%3E%3C/g%3E%3C/svg%3E");
 }
 
 * {

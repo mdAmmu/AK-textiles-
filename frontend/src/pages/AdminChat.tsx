@@ -21,6 +21,7 @@ import {
 } from "../services/chat";
 import { useCurrentUser } from "../hooks/useCurrentUser";
 import { useChatSocket } from "../hooks/useChatSocket";
+import { useAdminConversations } from "../hooks/useAdminConversations";
 import type { Message } from "../types/message";
 import ChatHeader from "../components/chat/ChatHeader";
 import MessageList from "../components/chat/MessageList";
@@ -31,6 +32,12 @@ import ForwardPicker from "../components/chat/ForwardPicker";
 import ForwardPreviewBar, { type StagedImage } from "../components/chat/ForwardPreviewBar";
 import ReplyPreviewBar from "../components/chat/ReplyPreviewBar";
 import LoadingScreen from "../components/common/LoadingScreen";
+import AdminChatListPane from "../components/admin/AdminChatListPane";
+import AdminAccountPanel from "../components/admin/AdminAccountPanel";
+import AdminProfileScreen from "../components/admin/AdminProfileScreen";
+import StartChatPanel from "../components/admin/StartChatPanel";
+import CustomerChatInfo from "./CustomerChatInfo";
+import type { User } from "../types/user";
 import { randomUUID } from "../utils/uuid";
 import { formatLastSeen } from "../utils/formatLastSeen";
 import { CHAT_PAGE } from "./chatShellStyles";
@@ -45,7 +52,11 @@ export default function AdminChat() {
   const { conversationId } = useParams<{ conversationId: string }>();
   const navigate = useNavigate();
   const { user } = useCurrentUser();
+  const { conversations, startChat } = useAdminConversations();
 
+  const [showAccount, setShowAccount] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
+  const [showStartChat, setShowStartChat] = useState(false);
   const [messages, setMessages] = useState<Message[] | null>(null);
   const [customerId, setCustomerId] = useState<string | null>(null);
   const [customerName, setCustomerName] = useState("Customer");
@@ -290,10 +301,28 @@ export default function AdminChat() {
     // it's a one-line add-back when that lands.
   ];
 
+  async function handleStartChat(customer: User) {
+    const conversation = await startChat(customer);
+    setShowStartChat(false);
+    navigate(`/admin/chats/${conversation.id}`);
+  }
+
   if (messages === null || !user) return <LoadingScreen />;
 
   return (
-    <div className={CHAT_PAGE}>
+    <div className="relative flex h-dvh bg-white dark:bg-[#10161f] md:pl-[76px]">
+      <div className="hidden md:flex md:flex-col w-[380px] shrink-0 border-r border-[#eef1ee] dark:border-[#232d3a]">
+        <AdminChatListPane
+          adminName={user.name}
+          conversations={conversations}
+          activeConversationId={conversationId}
+          onMenuClick={() => setShowAccount(true)}
+          onProfileClick={() => setShowProfile(true)}
+          onStartChat={() => setShowStartChat(true)}
+        />
+      </div>
+
+      <div className={`${CHAT_PAGE} flex-1 min-w-0 h-full`}>
       {selectionMode ? (
         <header className={SELECTION_HEADER}>
           <button
@@ -321,7 +350,7 @@ export default function AdminChat() {
         <ChatHeader
           title={customerName}
           subtitle={customerOnline ? "Online" : formatLastSeen(customerLastSeen)}
-          onBack={() => navigate("/admin")}
+          onBack={() => navigate("/admin/chats")}
           onTitleClick={() => navigate(`/admin/chats/${conversationId}/info`)}
         />
       )}
@@ -386,6 +415,23 @@ export default function AdminChat() {
       )}
 
       {showForward && <ForwardPicker onForward={handleForward} onClose={() => setShowForward(false)} />}
+      </div>
+
+      <div className="hidden xl:flex xl:flex-col w-[360px] shrink-0 border-l border-[#eef1ee] dark:border-[#232d3a]">
+        <CustomerChatInfo embedded />
+      </div>
+
+      {showProfile && <AdminProfileScreen admin={user} onClose={() => setShowProfile(false)} />}
+
+      {showAccount && <AdminAccountPanel admin={user} onClose={() => setShowAccount(false)} />}
+
+      {showStartChat && (
+        <StartChatPanel
+          excludeIds={conversations?.map((c) => c.user_id) ?? []}
+          onChat={handleStartChat}
+          onClose={() => setShowStartChat(false)}
+        />
+      )}
     </div>
   );
 }

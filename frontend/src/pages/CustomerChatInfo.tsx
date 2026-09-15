@@ -20,7 +20,12 @@ function formatJoinedDate(iso?: string | null): string | null {
   return new Date(iso).toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" });
 }
 
-export default function CustomerChatInfo() {
+interface Props {
+  /** Rendered inline as the desktop info column rather than as a full page. */
+  embedded?: boolean;
+}
+
+export default function CustomerChatInfo({ embedded = false }: Props) {
   const { conversationId } = useParams<{ conversationId: string }>();
   const navigate = useNavigate();
 
@@ -52,15 +57,21 @@ export default function CustomerChatInfo() {
   const joined = formatJoinedDate(conversation.user_created_at);
 
   return (
-    <div className="flex flex-col min-h-dvh bg-[#eef2f0] dark:bg-[#10161f] pb-8">
-      <div className="relative flex flex-col items-center gap-1.5 pt-11 px-4 pb-6 bg-[linear-gradient(135deg,#2563eb,#60a5fa)] rounded-b-3xl">
-        <button
-          className="absolute top-4 left-4 flex border-none bg-transparent text-white cursor-pointer p-1"
-          onClick={() => navigate(-1)}
-          aria-label="Back"
-        >
-          <ArrowLeft size={20} />
-        </button>
+    <div
+      className={`flex flex-col ${embedded ? "h-full overflow-y-auto" : "min-h-dvh"} bg-[#eef2f0] dark:bg-[#10161f] pb-8`}
+    >
+      <div
+        className={`relative flex flex-col items-center gap-1.5 px-4 pb-6 bg-[linear-gradient(135deg,#2563eb,#60a5fa)] ${embedded ? "pt-6" : "pt-11 rounded-b-3xl"}`}
+      >
+        {!embedded && (
+          <button
+            className="absolute top-4 left-4 flex border-none bg-transparent text-white cursor-pointer p-1"
+            onClick={() => navigate(-1)}
+            aria-label="Back"
+          >
+            <ArrowLeft size={20} />
+          </button>
+        )}
         <Avatar name={conversation.user_name} size={80} className="ring-4 ring-white/25" />
         <h1 className="mt-2 mb-0 text-xl font-bold text-white">{conversation.user_name}</h1>
         {conversation.user_phone && <span className="text-white/85 text-sm">{conversation.user_phone}</span>}

@@ -39,7 +39,12 @@ const ROW_LABEL = "flex-1 font-medium";
 const ROW_CHEVRON = "text-[#c2c6c3] dark:text-[#6b7480] shrink-0 transition-transform duration-150 ease-in-out";
 const EMPTY_TEXT = "py-4 text-[#7c827e] dark:text-[#8b96a5]";
 
-export default function GroupChatInfo() {
+interface Props {
+  /** Rendered inline as the desktop info column rather than as a full page. */
+  embedded?: boolean;
+}
+
+export default function GroupChatInfo({ embedded = false }: Props) {
   const { groupId } = useParams<{ groupId: string }>();
   const navigate = useNavigate();
 
@@ -137,15 +142,21 @@ export default function GroupChatInfo() {
   if (group === null || members === null) return <LoadingScreen />;
 
   return (
-    <div className="flex flex-col min-h-dvh bg-[#eef2f0] dark:bg-[#10161f] pb-8">
-      <div className="relative flex flex-col items-center gap-1.5 pt-11 px-4 pb-6 bg-[linear-gradient(135deg,#2563eb,#60a5fa)] rounded-b-3xl">
-        <button
-          className="absolute top-4 left-4 flex border-none bg-transparent text-white cursor-pointer p-1"
-          onClick={() => navigate(-1)}
-          aria-label="Back"
-        >
-          <ArrowLeft size={20} />
-        </button>
+    <div
+      className={`flex flex-col ${embedded ? "h-full overflow-y-auto" : "min-h-dvh"} bg-[#eef2f0] dark:bg-[#10161f] pb-8`}
+    >
+      <div
+        className={`relative flex flex-col items-center gap-1.5 px-4 pb-6 bg-[linear-gradient(135deg,#2563eb,#60a5fa)] ${embedded ? "pt-6" : "pt-11 rounded-b-3xl"}`}
+      >
+        {!embedded && (
+          <button
+            className="absolute top-4 left-4 flex border-none bg-transparent text-white cursor-pointer p-1"
+            onClick={() => navigate(-1)}
+            aria-label="Back"
+          >
+            <ArrowLeft size={20} />
+          </button>
+        )}
         <GroupIcon name={group.name} size={80} variant="hero" />
         <h1 className="mt-2 mb-0 text-xl font-bold text-white">{group.name}</h1>
         <span className="text-white/85 text-sm">{members.length} members</span>

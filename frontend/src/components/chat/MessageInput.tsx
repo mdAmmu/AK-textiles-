@@ -93,7 +93,7 @@ function MessageInput(
         )}
       </div>
       <button
-        className="flex items-center justify-center border-none bg-[var(--chat-accent)] text-white w-[42px] h-[42px] rounded-full cursor-pointer shrink-0 disabled:opacity-50 disabled:cursor-default"
+        className="flex items-center justify-center border-none bg-[var(--chat-send-bg)] text-white w-[42px] h-[42px] rounded-full cursor-pointer shrink-0 disabled:opacity-50 disabled:cursor-default"
         type="submit"
         disabled={disabled || sending}
       >

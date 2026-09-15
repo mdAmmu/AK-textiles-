@@ -35,6 +35,13 @@ import {
   IMAGE_TIME,
   IMAGE_WRAP,
 } from "../components/chat/MessageBubble";
+import AdminAudienceListPane from "../components/admin/AdminAudienceListPane";
+import AdminAccountPanel from "../components/admin/AdminAccountPanel";
+import AdminProfileScreen from "../components/admin/AdminProfileScreen";
+import BroadcastManagementPanel from "../components/admin/BroadcastManagementPanel";
+import BroadcastAudienceInfo from "./BroadcastAudienceInfo";
+import { useAdminAudiences } from "../hooks/useAdminAudiences";
+import { useCurrentUser } from "../hooks/useCurrentUser";
 import { randomUUID } from "../utils/uuid";
 import {
   CHAT_BODY,
@@ -107,10 +114,15 @@ function groupSends(sends: BroadcastMessage[]): BroadcastListItem[] {
 export default function BroadcastThread() {
   const { audienceId } = useParams<{ audienceId: string }>();
   const navigate = useNavigate();
+  const { user } = useCurrentUser();
+  const { audiences, setAudiences } = useAdminAudiences();
   const imageInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const documentInputRef = useRef<HTMLInputElement>(null);
 
+  const [showAccount, setShowAccount] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
+  const [showAudienceManagement, setShowAudienceManagement] = useState(false);
   const [audience, setAudience] = useState<BroadcastAudienceDetail | null>(null);
   const [sends, setSends] = useState<BroadcastMessage[] | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -342,10 +354,22 @@ export default function BroadcastThread() {
     setSelectedIds(new Set());
   }
 
-  if (!audience || !sends) return <LoadingScreen />;
+  if (!audience || !sends || !user) return <LoadingScreen />;
 
   return (
-    <div className={CHAT_PAGE}>
+    <div className="relative flex h-dvh bg-white dark:bg-[#10161f] md:pl-[76px]">
+      <div className="hidden md:flex md:flex-col w-[380px] shrink-0 border-r border-[#eef1ee] dark:border-[#232d3a]">
+        <AdminAudienceListPane
+          adminName={user.name}
+          audiences={audiences}
+          activeAudienceId={audienceId}
+          onMenuClick={() => setShowAccount(true)}
+          onProfileClick={() => setShowProfile(true)}
+          onManageClick={() => setShowAudienceManagement(true)}
+        />
+      </div>
+
+      <div className={`${CHAT_PAGE} flex-1 min-w-0 h-full`}>
       {selectionMode ? (
         <header className={CHAT_HEADER_BASE}>
           <button
@@ -531,6 +555,22 @@ export default function BroadcastThread() {
       />
 
       {showForward && <ForwardPicker onForward={handleForward} onClose={() => setShowForward(false)} />}
+      </div>
+
+      <div className="hidden xl:flex xl:flex-col w-[360px] shrink-0 border-l border-[#eef1ee] dark:border-[#232d3a]">
+        <BroadcastAudienceInfo embedded />
+      </div>
+
+      {showProfile && <AdminProfileScreen admin={user} onClose={() => setShowProfile(false)} />}
+
+      {showAccount && <AdminAccountPanel admin={user} onClose={() => setShowAccount(false)} />}
+
+      {showAudienceManagement && (
+        <BroadcastManagementPanel
+          onClose={() => setShowAudienceManagement(false)}
+          onAudienceDeleted={(id) => setAudiences((prev) => prev?.filter((a) => a.id !== id) ?? prev)}
+        />
+      )}
     </div>
   );
 }
@@ -614,8 +654,8 @@ function BroadcastBubble({ send, selected, selectionMode, onOpen, onToggleSelect
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
-      className={`max-w-[85%] text-left bg-[#dbeafe] dark:bg-[#0b3d24] rounded-xl rounded-tr-sm py-2 px-2.5 border-none cursor-pointer overflow-hidden select-none ${
-        selected ? "outline outline-2 outline-[#2563eb] outline-offset-2" : ""
+      className={`max-w-[85%] text-left bg-[var(--chat-bubble-own)] text-[var(--chat-bubble-own-text)] rounded-xl rounded-tr-sm py-2 px-2.5 border-none cursor-pointer overflow-hidden select-none ${
+        selected ? "outline outline-2 outline-[var(--chat-accent)] outline-offset-2" : ""
       }`}
     >
       {send.message_type === "image" && send.media_url ? (
@@ -626,20 +666,20 @@ function BroadcastBubble({ send, selected, selectionMode, onOpen, onToggleSelect
         />
       ) : send.message_type === "document" ? (
         <div className="flex items-center gap-2.5 py-1.5 px-1">
-          <span className="flex items-center justify-center w-9 h-9 rounded-lg bg-white/60 dark:bg-black/20 shrink-0">
-            <FileText size={18} className="text-[#1a1a1a] dark:text-[#e9edef]" />
+          <span className="flex items-center justify-center w-9 h-9 rounded-lg bg-white/20 shrink-0">
+            <FileText size={18} className="text-[var(--chat-bubble-own-text)]" />
           </span>
-          <span className="text-[#1a1a1a] dark:text-[#e9edef] text-sm truncate">
+          <span className="text-[var(--chat-bubble-own-text)] text-sm truncate">
             {send.file_name ?? "Document"}
           </span>
         </div>
       ) : (
-        <p className="whitespace-pre-wrap text-[#1a1a1a] dark:text-[#e9edef] text-[15px] m-0 px-1">
+        <p className="whitespace-pre-wrap text-[var(--chat-bubble-own-text)] text-[15px] m-0 px-1">
           {send.text}
         </p>
       )}
       <div className="flex items-center justify-end gap-2 mt-1 px-1">
-        <span className="text-[#3b5bdb] dark:text-[#93b4f5] text-[11px]">
+        <span className="text-[var(--chat-bubble-own-text-secondary)] text-[11px]">
           {STATUS_LABEL[send.status] ?? send.status}
         </span>
       </div>
@@ -738,8 +778,8 @@ function BroadcastImageGroupBubble({
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
-      className={`max-w-[85%] text-left bg-[#dbeafe] dark:bg-[#0b3d24] rounded-xl rounded-tr-sm border-none cursor-pointer overflow-hidden select-none ${BUBBLE_IMAGE} ${
-        selected ? "outline outline-2 outline-[#2563eb] outline-offset-2" : ""
+      className={`max-w-[85%] text-left bg-[var(--chat-bubble-own)] rounded-xl rounded-tr-sm border-none cursor-pointer overflow-hidden select-none ${BUBBLE_IMAGE} ${
+        selected ? "outline outline-2 outline-[var(--chat-accent)] outline-offset-2" : ""
       }`}
     >
       <div className={IMAGE_WRAP}>

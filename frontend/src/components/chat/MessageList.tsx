@@ -6,7 +6,7 @@ import DeletedMessageBubble from "./DeletedMessageBubble";
 import EmptyMessages from "./EmptyMessages";
 
 const LIST_BASE =
-  "flex-1 overflow-y-auto py-3 flex flex-col gap-1 bg-[var(--chat-bg)] [background-image:radial-gradient(rgba(0,0,0,0.04)_1px,transparent_1px)] [background-size:18px_18px]";
+  "flex-1 overflow-y-auto py-3 flex flex-col gap-1 bg-[var(--chat-bg)] [background-image:var(--chat-wallpaper)] [background-size:100px_100px]";
 
 interface Props {
   messages: Message[];

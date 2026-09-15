@@ -20,7 +20,7 @@ export const BUBBLE_ROW_PENDING = "opacity-60";
 
 export const BUBBLE_BASE =
   "max-w-[75%] bg-[var(--chat-bubble-other)] text-[var(--chat-text)] rounded-lg py-1.5 px-2 shadow-[0_1px_0.5px_rgba(0,0,0,0.13)] relative";
-export const BUBBLE_OWN = "bg-[var(--chat-bubble-own)]";
+export const BUBBLE_OWN = "bg-[var(--chat-bubble-own)] text-[var(--chat-bubble-own-text)]";
 export const BUBBLE_SELECTED = "outline outline-2 outline-[var(--chat-accent)] outline-offset-2";
 export const BUBBLE_IMAGE = "px-[3px] py-[3px] overflow-hidden";
 export const IMAGE_WRAP = "relative leading-none";
@@ -220,6 +220,14 @@ export default function MessageBubble({
     >
       <div
         className={`${BUBBLE_BASE}${isOwn ? ` ${BUBBLE_OWN}` : ""}${isImage ? ` ${BUBBLE_IMAGE}` : ""}${selected ? ` ${BUBBLE_SELECTED}` : ""}`}
+        style={
+          isOwn
+            ? ({
+                "--chat-text-secondary": "var(--chat-bubble-own-text-secondary)",
+                "--chat-tick-read": "var(--chat-bubble-own-tick-read)",
+              } as React.CSSProperties)
+            : undefined
+        }
       >
         {isImage ? (
           <div className={IMAGE_WRAP}>

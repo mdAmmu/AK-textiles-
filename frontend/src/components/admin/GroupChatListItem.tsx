@@ -5,14 +5,17 @@ import GroupIcon from "./GroupIcon";
 
 interface Props {
   group: Group;
+  active?: boolean;
 }
 
-export default function GroupChatListItem({ group }: Props) {
+export default function GroupChatListItem({ group, active }: Props) {
   const hasUnread = !!group.unread_count && group.unread_count > 0;
   return (
     <Link
       to={`/admin/groups/${group.id}/chat`}
-      className="flex items-center gap-3.5 py-3 px-3.5 bg-white border border-[#eef1ee] rounded-2xl no-underline text-inherit dark:bg-[#1e2530] dark:border-[#232d3a]"
+      className={`flex items-center gap-3.5 py-3 px-3.5 no-underline text-inherit border-b border-[#f1f2ef] dark:border-[#20293380] ${
+        active ? "bg-[#eaf0ff] dark:bg-[#1c2a45]" : "bg-transparent"
+      }`}
     >
       <GroupIcon name={group.name} size={48} />
       <div className="flex-1 min-w-0 flex flex-col">
